@@ -1,17 +1,18 @@
 package main
 
 import (
-	_http "2023_2_Holi/auth/delivery/http"
-	"2023_2_Holi/auth/repository/postgresql"
-	"2023_2_Holi/auth/usecase"
-	"net/http"
-
 	"database/sql"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
+
+	_http "2023_2_Holi/auth/delivery/http"
+	"2023_2_Holi/auth/repository/postgresql"
+	"2023_2_Holi/auth/usecase"
+	_ "github.com/lib/pq"
 )
 
 func fromEnv() string {
