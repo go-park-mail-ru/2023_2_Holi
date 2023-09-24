@@ -1,53 +1,95 @@
 package http
 
 import (
-	"2023_2_Holi/domain"
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"time"
+
+	"github.com/gorilla/mux"
+
+	"2023_2_Holi/domain"
 )
 
-type UserHandler struct {
-	UserUsecase domain.UserUsecase
+type AuthHandler struct {
+	AuthUsecase domain.AuthUsecase
 }
 
-func NewAuthHandler(u domain.UserUsecase) {
-	handler := &UserHandler{
-		UserUsecase: u,
+func NewAuthHandler(u domain.AuthUsecase, router *mux.Router) {
+	handler := &AuthHandler{
+		AuthUsecase: u,
 	}
 
-	http.HandleFunc("/auth/login", handler.Login)
-	http.HandleFunc("/auth/register", handler.Register)
-	http.HandleFunc("/auth/logout", handler.Logout)
+	router.HandleFunc("api/v1/auth/login", handler.Login).Methods("POST")
+	router.HandleFunc("api/v1/auth/register", handler.Register).Methods("POST")
+	router.HandleFunc("api/v1/auth/logout", handler.Logout).Methods("POST")
 }
 
-func (a *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var user domain.User
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-	defer r.Body.Close()
+	defer closeAndAlert(r.Body)
 
-	session, err := a.UserUsecase.Login(user)
+	session, err := a.AuthUsecase.Login(user)
 	if err != nil {
 		http.Error(w, err.Error(), getStatusCode(err))
+		return
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    session.SessionData,
+		Name:    "session_token",
 		Value:   session.Token,
 		Expires: session.ExpiresAt,
 	})
 }
 
-func (a *UserHandler) Register(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("session_token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
 
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	sessionToken := c.Value
+
+	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:    "session_token",
+		Value:   "",
+		Expires: time.Now(),
+	})
 }
 
-func (a *UserHandler) Logout(w http.ResponseWriter, r *http.Request) {
+func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	var user domain.User
 
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+	defer closeAndAlert(r.Body)
+
+	if err = a.AuthUsecase.Register(user); err != nil {
+		http.Error(w, err.Error(), getStatusCode(err))
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func getStatusCode(err error) int {
@@ -64,5 +106,12 @@ func getStatusCode(err error) int {
 		return http.StatusUnauthorized
 	default:
 		return http.StatusInternalServerError
+	}
+}
+
+func closeAndAlert(body io.ReadCloser) {
+	err := body.Close()
+	if err != nil {
+		fmt.Println("Error: ", err)
 	}
 }

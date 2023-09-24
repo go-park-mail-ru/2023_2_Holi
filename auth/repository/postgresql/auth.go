@@ -1,24 +1,31 @@
 package postgresql
 
 import (
-	"2023_2_Holi/domain"
 	"database/sql"
+	"fmt"
+
+	"2023_2_Holi/domain"
 )
 
-type userPostgresqlRepository struct {
+type authPostgresqlRepository struct {
 	db *sql.DB
 }
 
-func NewUserPostgresqlRepository(conn *sql.DB) domain.UserRepository {
-	return &userPostgresqlRepository{conn}
+func NewAuthPostgresqlRepository(conn *sql.DB) domain.AuthRepository {
+	return &authPostgresqlRepository{conn}
 }
 
-func (r *userPostgresqlRepository) GetByName(name string) (domain.User, error) {
+func (r *authPostgresqlRepository) GetByName(name string) (domain.User, error) {
 	result, err := r.db.Query(`SELECT name, password FROM "user" WHERE name = $1`, name)
 	if err != nil {
 		return domain.User{}, err
 	}
-	defer result.Close()
+	defer func(result *sql.Rows) {
+		err := result.Close()
+		if err != nil {
+			fmt.Println("Error: ", err)
+		}
+	}(result)
 
 	var user domain.User
 	for result.Next() {
@@ -33,4 +40,48 @@ func (r *userPostgresqlRepository) GetByName(name string) (domain.User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *authPostgresqlRepository) AddUser(user domain.User) error {
+	if user.Name == "" || user.Password == "" {
+		return domain.ErrBadRequest
+	}
+
+	_, err := r.db.Exec(
+		`INSERT INTO "user" (password, name, email, date_joined, image_path) 
+		VALUES ($1, $2, $3, $4, $5)`,
+		user.Password,
+		user.Name,
+		user.Email,
+		user.DateJoined,
+		user.ImagePath)
+
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+type sessionPostgresqlRepository struct {
+	db *sql.DB
+}
+
+func NewSessionPostgresqlRepository(conn *sql.DB) domain.SessionRepository {
+	return &sessionPostgresqlRepository{conn}
+}
+
+func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
+	_, err := s.db.Exec(`INSERT INTO "session" VALUES ($1, $2, $3)`, session.Token, session.UserID, session.ExpiresAt)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *sessionPostgresqlRepository) DeleteByToken(token string) error {
+	_, err := s.db.Exec(`DELETE FROM "session" WHERE token = $1`, token)
+	if err != nil {
+		return err
+	}
+	return nil
 }

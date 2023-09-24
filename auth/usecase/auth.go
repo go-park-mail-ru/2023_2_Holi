@@ -8,18 +8,20 @@ import (
 	"2023_2_Holi/domain"
 )
 
-type userUsecase struct {
-	userRepo domain.UserRepository
+type authUsecase struct {
+	authRepo    domain.AuthRepository
+	sessionRepo domain.SessionRepository
 }
 
-func NewUserUsecase(ur domain.UserRepository) domain.UserUsecase {
-	return &userUsecase{
-		userRepo: ur,
+func NewAuthUsecase(ur domain.AuthRepository, sr domain.SessionRepository) domain.AuthUsecase {
+	return &authUsecase{
+		authRepo:    ur,
+		sessionRepo: sr,
 	}
 }
 
-func (u *userUsecase) Login(user domain.User) (domain.Session, error) {
-	expectedUser, err := u.userRepo.GetByName(user.Name)
+func (u *authUsecase) Login(user domain.User) (domain.Session, error) {
+	expectedUser, err := u.authRepo.GetByName(user.Name)
 	if err != nil {
 		return domain.Session{}, err
 	}
@@ -28,9 +30,31 @@ func (u *userUsecase) Login(user domain.User) (domain.Session, error) {
 		return domain.Session{}, domain.ErrUnauthorized
 	}
 
-	return domain.Session{
-		Token:       uuid.NewString(),
-		SessionData: user.Name,
-		ExpiresAt:   time.Now().Add(120 * time.Second),
-	}, nil
+	session := domain.Session{
+		Token:     uuid.NewString(),
+		ExpiresAt: time.Now().Add(120 * time.Second),
+		UserID:    user.ID,
+	}
+	if err = u.sessionRepo.Add(session); err != nil {
+		return domain.Session{}, nil
+	}
+
+	return session, nil
+}
+
+func (u *authUsecase) Logout(token string) error {
+	if err := u.sessionRepo.DeleteByToken(token); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (u *authUsecase) Register(user domain.User) error {
+	user.DateJoined = time.Now()
+	if err := u.authRepo.AddUser(user); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
@@ -42,10 +43,14 @@ func main() {
 	}
 	defer db.Close()
 
-	_http.NewAuthHandler(usecase.NewUserUsecase(postgresql.NewUserPostgresqlRepository(db)))
+	router := mux.NewRouter()
+	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
+	authRepository := postgresql.NewAuthPostgresqlRepository(db)
+	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
+	_http.NewAuthHandler(authUsecase, router)
 
 	fmt.Println("starting server at :8080")
-	err = http.ListenAndServe(":8080", nil)
+	err = http.ListenAndServe(":8080", router)
 	if err != nil {
 		log.Fatal(err)
 	}
