@@ -12,11 +12,16 @@ import (
 	"2023_2_Holi/domain"
 )
 
+type Result struct {
+	Body interface{} `json:"body,omitempty"`
+	Err  string      `json:"err,omitempty"`
+}
+
 type AuthHandler struct {
 	AuthUsecase domain.AuthUsecase
 }
 
-func NewAuthHandler(u domain.AuthUsecase, router *mux.Router) {
+func NewAuthHandler(router *mux.Router, u domain.AuthUsecase) {
 	handler := &AuthHandler{
 		AuthUsecase: u,
 	}
@@ -27,18 +32,23 @@ func NewAuthHandler(u domain.AuthUsecase, router *mux.Router) {
 }
 
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	var user domain.User
+	var credentials domain.Credentials
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
 	}
 	defer closeAndAlert(r.Body)
 
-	session, err := a.AuthUsecase.Login(user)
+	if credentials.Password == "" || credentials.Name == "" {
+		http.Error(w, `{"error":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
+		return
+	}
+
+	session, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+		http.Error(w, `{"error":"`+err.Error()+`"}`, getStatusCode(err))
 		return
 	}
 
@@ -53,17 +63,17 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
+			http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnauthorized)
 			return
 		}
 
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
 	}
 	sessionToken := c.Value
 
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -79,17 +89,21 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
 	}
 	defer closeAndAlert(r.Body)
 
-	if err = a.AuthUsecase.Register(user); err != nil {
-		http.Error(w, err.Error(), getStatusCode(err))
+	if id, err := a.AuthUsecase.Register(user); err != nil {
+		http.Error(w, `{"error":"`+err.Error()+`"}`, getStatusCode(err))
 		return
-	}
 
-	w.WriteHeader(http.StatusNoContent)
+	} else {
+		body := map[string]interface{}{
+			"id": id,
+		}
+		json.NewEncoder(w).Encode(&Result{Body: body})
+	}
 }
 
 func getStatusCode(err error) int {
@@ -104,6 +118,8 @@ func getStatusCode(err error) int {
 		return http.StatusNotFound
 	case domain.ErrUnauthorized:
 		return http.StatusUnauthorized
+	case domain.ErrWrongCredentials:
+		return http.StatusForbidden
 	default:
 		return http.StatusInternalServerError
 	}

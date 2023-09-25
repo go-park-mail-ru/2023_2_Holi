@@ -47,7 +47,7 @@ func main() {
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
-	_http.NewAuthHandler(authUsecase, router)
+	_http.NewAuthHandler(router, authUsecase)
 
 	fmt.Println("starting server at :8080")
 	err = http.ListenAndServe(":8080", router)

@@ -42,24 +42,25 @@ func (r *authPostgresqlRepository) GetByName(name string) (domain.User, error) {
 	return user, nil
 }
 
-func (r *authPostgresqlRepository) AddUser(user domain.User) error {
+func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 	if user.Name == "" || user.Password == "" {
-		return domain.ErrBadRequest
+		return 0, domain.ErrBadRequest
 	}
 
-	_, err := r.db.Exec(
+	result := r.db.QueryRow(
 		`INSERT INTO "user" (password, name, email, date_joined, image_path) 
-		VALUES ($1, $2, $3, $4, $5)`,
+		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
 		user.Password,
 		user.Name,
 		user.Email,
 		user.DateJoined,
 		user.ImagePath)
 
-	if err != nil {
-		return err
+	var id int
+	if err := result.Scan(&id); err != nil {
+		return 0, err
 	}
-	return nil
+	return id, nil
 }
 
 type sessionPostgresqlRepository struct {

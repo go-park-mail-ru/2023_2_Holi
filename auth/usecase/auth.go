@@ -20,20 +20,20 @@ func NewAuthUsecase(ur domain.AuthRepository, sr domain.SessionRepository) domai
 	}
 }
 
-func (u *authUsecase) Login(user domain.User) (domain.Session, error) {
-	expectedUser, err := u.authRepo.GetByName(user.Name)
+func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
+	expectedUser, err := u.authRepo.GetByName(credentials.Name)
 	if err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, domain.ErrNotFound
 	}
 
-	if expectedUser.Password != user.Password {
-		return domain.Session{}, domain.ErrUnauthorized
+	if expectedUser.Password != credentials.Password {
+		return domain.Session{}, domain.ErrWrongCredentials
 	}
 
 	session := domain.Session{
 		Token:     uuid.NewString(),
-		ExpiresAt: time.Now().Add(120 * time.Second),
-		UserID:    user.ID,
+		ExpiresAt: time.Now().Add(24 * time.Hour),
+		UserID:    expectedUser.ID,
 	}
 	if err = u.sessionRepo.Add(session); err != nil {
 		return domain.Session{}, nil
@@ -50,11 +50,12 @@ func (u *authUsecase) Logout(token string) error {
 	return nil
 }
 
-func (u *authUsecase) Register(user domain.User) error {
+func (u *authUsecase) Register(user domain.User) (int, error) {
 	user.DateJoined = time.Now()
-	if err := u.authRepo.AddUser(user); err != nil {
-		return err
-	}
 
-	return nil
+	if id, err := u.authRepo.AddUser(user); err != nil {
+		return 0, err
+	} else {
+		return id, nil
+	}
 }
