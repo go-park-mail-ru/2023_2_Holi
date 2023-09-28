@@ -82,6 +82,15 @@ func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
 func (s *sessionPostgresqlRepository) DeleteByToken(token string) error {
 	_, err := s.db.Exec(`DELETE FROM "session" WHERE token = $1`, token)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return err
+		}
+		if err == sql.ErrTxDone {
+			return err
+		}
+		if err == sql.ErrConnDone {
+			return err
+		}
 		return err
 	}
 	return nil

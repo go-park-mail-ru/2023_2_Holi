@@ -30,6 +30,19 @@ func fromEnv() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
 
+// @title Netfilx API
+// @version 1.0
+// @description API of the nelfix project by holi
+
+// @contact.name Alex Chinaev
+// @contact.url https://vk.com/l.chinaev
+// @contact.email ax.chinaev@yandex.ru
+
+// @license.name AS IS (NO WARRANTY)
+
+// @host 127.0.0.1E
+// @schemes Zhttp
+// @BasePath /
 func main() {
 	err := godotenv.Load()
 	if err != nil {

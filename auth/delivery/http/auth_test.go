@@ -3,8 +3,10 @@ package http_test
 import (
 	"bytes"
 	"encoding/json"
+	"github.com/google/uuid"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"time"
 
@@ -127,6 +129,113 @@ func TestLogin(t *testing.T) {
 
 				expectedExpires := mockSession.ExpiresAt
 				assert.WithinDuration(t, expectedExpires, sessionCookie.Expires, time.Second)
+			}
+		})
+	}
+}
+
+func TestLogout(t *testing.T) {
+	tests := []struct {
+		name                 string
+		getCookie            func() *http.Cookie
+		setUCaseExpectations func(uCase *mocks.AuthUsecase)
+		status               int
+		wantCookie           bool
+	}{
+		{
+			name: "GoodCase/Common",
+			getCookie: func() *http.Cookie {
+				return &http.Cookie{
+					Name:    "session_token",
+					Value:   uuid.NewString(),
+					Expires: time.Now().Add(24 * time.Hour),
+				}
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Logout", mock.Anything).Return(nil)
+			},
+			status:     http.StatusOK,
+			wantCookie: true,
+		},
+		{
+			name: "BadCase/EmptyCookiePayload",
+			getCookie: func() *http.Cookie {
+				return &http.Cookie{
+					Name:    "session_token",
+					Value:   "",
+					Expires: time.Time{},
+				}
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Logout", mock.Anything).Return(nil).Maybe()
+			},
+			status:     http.StatusUnauthorized,
+			wantCookie: false,
+		},
+		{
+			name: "BadCase/UnsuitableName",
+			getCookie: func() *http.Cookie {
+				return &http.Cookie{
+					Name:    "rdtcfyvgubhj",
+					Value:   uuid.NewString(),
+					Expires: time.Now().Add(24 * time.Hour),
+				}
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Logout", mock.Anything).Return(nil).Maybe()
+			},
+			status:     http.StatusUnauthorized,
+			wantCookie: false,
+		},
+		{
+			name: "BadCase/EmptyCookie",
+			getCookie: func() *http.Cookie {
+				return &http.Cookie{}
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Logout", mock.Anything).Return(nil).Maybe()
+			},
+			status:     http.StatusUnauthorized,
+			wantCookie: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			//t.Parallel()
+
+			req, err := http.NewRequest("POST", "/api/v1/auth/logout", strings.NewReader(""))
+			assert.NoError(t, err)
+			req.AddCookie(test.getCookie())
+
+			mockUCase := new(mocks.AuthUsecase)
+			test.setUCaseExpectations(mockUCase)
+
+			rec := httptest.NewRecorder()
+			handler := &_http.AuthHandler{
+				AuthUsecase: mockUCase,
+			}
+
+			handler.Logout(rec, req)
+
+			assert.Equal(t, test.status, rec.Code)
+			mockUCase.AssertExpectations(t)
+
+			cookies := rec.Result().Cookies()
+			assert.NotEqual(t, len(cookies) == 0, test.wantCookie)
+
+			if test.wantCookie {
+				var sessionCookie *http.Cookie
+				for _, cookie := range cookies {
+					if cookie.Name == "session_token" {
+						sessionCookie = cookie
+						break
+					}
+				}
+				assert.NotNil(t, sessionCookie)
+				assert.Empty(t, sessionCookie.Value)
+
+				assert.WithinDuration(t, time.Now(), sessionCookie.Expires, 10*time.Second)
 			}
 		})
 	}

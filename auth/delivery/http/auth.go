@@ -26,11 +26,22 @@ func NewAuthHandler(router *mux.Router, u domain.AuthUsecase) {
 		AuthUsecase: u,
 	}
 
-	router.HandleFunc("api/v1/auth/login", handler.Login).Methods("POST")
-	router.HandleFunc("api/v1/auth/register", handler.Register).Methods("POST")
-	router.HandleFunc("api/v1/auth/logout", handler.Logout).Methods("POST")
+	router.HandleFunc("/api/v1/auth/login", handler.Login).Methods("POST")
+	router.HandleFunc("/api/v1/auth/register", handler.Register).Methods("POST")
+	router.HandleFunc("/api/v1/auth/logout", handler.Logout).Methods("POST")
 }
 
+// Login godoc
+// @Summary      login user
+// @Description  create user session and put it into cookie
+// @Tags         auth
+// @Accept       json
+// @Success      204
+// @Failure      400  {string} string "{"error":"<error message>"}"
+// @Failure      403  {string} string "{"error":"<error message>"}"
+// @Failure      404  {string} string "{"error":"<error message>"}"
+// @Failure      500  {string} string "{"error":"<error message>"}"
+// @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var credentials domain.Credentials
 
@@ -53,12 +64,26 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:    "session_token",
-		Value:   session.Token,
-		Expires: session.ExpiresAt,
+		Name:     "session_token",
+		Value:    session.Token,
+		Expires:  session.ExpiresAt,
+		Path:     "/",
+		HttpOnly: true,
 	})
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
+// Logout godoc
+// @Summary      logout user
+// @Description  delete current session and nullify cookie
+// @Tags         auth
+// @Success      204
+// @Failure      400  {string} string "{"error":"<error message>"}"
+// @Failure      403  {string} string "{"error":"<error message>"}"
+// @Failure      404  {string} string "{"error":"<error message>"}"
+// @Failure      500  {string} string "{"error":"<error message>"}"
+// @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_token")
 	if err != nil {
@@ -71,6 +96,10 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	sessionToken := c.Value
+	if sessionToken == "" {
+		http.Error(w, `{"error":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+		return
+	}
 
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusInternalServerError)
@@ -82,8 +111,20 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		Value:   "",
 		Expires: time.Now(),
 	})
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
+// Register godoc
+// @Summary      register user
+// @Description  add new user to db and return it id
+// @Tags         auth
+// @Success      200
+// @Produce      json
+// @Accept       json
+// @Failure      400  {string} string "{"error":"<error message>"}"
+// @Failure      500  {string} string "{"error":"<error message>"}"
+// @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var user domain.User
 
