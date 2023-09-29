@@ -3,16 +3,20 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 
 	"github.com/joho/godotenv"
 
 	_http "2023_2_Holi/auth/delivery/http"
 	"2023_2_Holi/auth/repository/postgresql"
 	"2023_2_Holi/auth/usecase"
+
 	_ "github.com/lib/pq"
 )
 
@@ -28,6 +32,41 @@ func fromEnv() string {
 	dbname := os.Getenv("DB_NAME")
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
+}
+
+func loggerInit() *logrus.Logger {
+	logger := logrus.New()
+	logger.SetFormatter(&logrus.TextFormatter{})
+
+	logLevel := os.Getenv("LOG_LEVEL")
+	switch logLevel {
+	case "debug":
+		logger.SetLevel(logrus.DebugLevel)
+	case "info":
+		logger.SetLevel(logrus.InfoLevel)
+	case "error":
+		logger.SetLevel(logrus.ErrorLevel)
+	case "fatal":
+		logger.SetLevel(logrus.FatalLevel)
+	}
+	return logger
+}
+
+type AccessLogger struct {
+	LogrusLogger *logrus.Entry
+}
+
+func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+
+		ac.LogrusLogger.WithFields(logrus.Fields{
+			"method":      r.Method,
+			"remote_addr": r.RemoteAddr,
+			"work_time":   time.Since(start),
+		}).Info(r.URL.Path)
+	})
 }
 
 // @title Netfilx API
@@ -46,26 +85,42 @@ func fromEnv() string {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Failed to get config : ", err)
 	}
 
-	fmt.Println("starting connect to db")
+	logger := loggerInit()
+	accessLogger := AccessLogger{
+		LogrusLogger: logrus.NewEntry(logger),
+	}
+
+	logger.Info("starting connect to db")
+
 	db, err := sql.Open("postgres", fromEnv())
+	logger.Debug("db conf :", db)
 	if err != nil {
-		log.Fatal(err)
+		logger.WithFields(logrus.Fields{
+			"package":  "main",
+			"function": "main",
+			"error":    err,
+		}).Fatal("Failed to open db")
 	}
 	defer db.Close()
 
 	router := mux.NewRouter()
+	router.Use(accessLogger.accessLogMiddleware)
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
 	_http.NewAuthHandler(router, authUsecase)
 
-	fmt.Println("starting server at :8080")
+	logger.Info("starting server at :8080")
 	err = http.ListenAndServe(":8080", router)
 	if err != nil {
-		log.Fatal(err)
+		logger.WithFields(logrus.Fields{
+			"package":  "main",
+			"function": "main",
+			"error":    err,
+		}).Fatal("Failed to open server")
 	}
-	fmt.Println("server stopped")
+	logger.Info("server stopped")
 }
