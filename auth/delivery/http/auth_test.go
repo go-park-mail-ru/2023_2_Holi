@@ -202,7 +202,7 @@ func TestLogout(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			//t.Parallel()
+			t.Parallel()
 
 			req, err := http.NewRequest("POST", "/api/v1/auth/logout", strings.NewReader(""))
 			assert.NoError(t, err)
@@ -236,6 +236,94 @@ func TestLogout(t *testing.T) {
 				assert.Empty(t, sessionCookie.Value)
 
 				assert.WithinDuration(t, time.Now(), sessionCookie.Expires, 10*time.Second)
+			}
+		})
+	}
+}
+
+func TestRegister(t *testing.T) {
+	tests := []struct {
+		name                 string
+		getBody              func() []byte
+		setUCaseExpectations func(uCase *mocks.AuthUsecase)
+		status               int
+	}{
+		{
+			name: "GoodCase/Common",
+			getBody: func() []byte {
+				var user domain.User
+				faker.FakeData(&user)
+				jsonBody, _ := json.Marshal(user)
+				return jsonBody
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Register", mock.Anything).Return(1, nil)
+			},
+			status: http.StatusOK,
+		},
+		{
+			name: "BadCase/EmptyJson",
+			getBody: func() []byte {
+				return []byte("{}")
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
+			},
+			status: http.StatusForbidden,
+		},
+		{
+			name: "BadCase/EmptyBody",
+			getBody: func() []byte {
+				return []byte("")
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
+			},
+			status: http.StatusBadRequest,
+		},
+		{
+			name: "BadCase/InvalidJson",
+			getBody: func() []byte {
+				return []byte("{043895uith,redfsvdf;vfdv4er")
+			},
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
+			},
+			status: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			//t.Parallel()
+
+			req, err := http.NewRequest("POST", "/api/v1/auth/register", bytes.NewReader(test.getBody()))
+			assert.NoError(t, err)
+
+			mockUCase := new(mocks.AuthUsecase)
+			test.setUCaseExpectations(mockUCase)
+
+			rec := httptest.NewRecorder()
+			handler := &_http.AuthHandler{
+				AuthUsecase: mockUCase,
+			}
+
+			handler.Register(rec, req)
+
+			assert.Equal(t, test.status, rec.Code)
+			mockUCase.AssertExpectations(t)
+
+			var result *_http.Result
+			err = json.NewDecoder(rec.Result().Body).Decode(&result)
+			assert.NoError(t, err)
+			defer _http.CloseAndAlert(rec.Result().Body)
+
+			if test.status < 300 {
+				assert.NotEmpty(t, result.Body)
+				assert.Empty(t, result.Err)
+			} else {
+				assert.Empty(t, result.Body)
+				assert.NotEmpty(t, result.Err)
 			}
 		})
 	}

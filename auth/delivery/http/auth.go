@@ -50,16 +50,16 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
 	}
-	defer closeAndAlert(r.Body)
+	defer CloseAndAlert(r.Body)
 
 	if credentials.Password == "" || credentials.Name == "" {
-		http.Error(w, `{"error":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
+		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
 		return
 	}
 
 	session, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, getStatusCode(err))
+		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
 		return
 	}
 
@@ -88,21 +88,21 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnauthorized)
+			http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusUnauthorized)
 			return
 		}
 
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
 	}
 	sessionToken := c.Value
 	if sessionToken == "" {
-		http.Error(w, `{"error":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+		http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
 		return
 	}
 
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusInternalServerError)
+		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusInternalServerError)
 		return
 	}
 
@@ -119,9 +119,9 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Summary      register user
 // @Description  add new user to db and return it id
 // @Tags         auth
-// @Success      200
 // @Produce      json
 // @Accept       json
+// @Success      200  {object} Result
 // @Failure      400  {string} string "{"error":"<error message>"}"
 // @Failure      500  {string} string "{"error":"<error message>"}"
 // @Router       /api/v1/auth/register [post]
@@ -130,13 +130,18 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
 		return
 	}
-	defer closeAndAlert(r.Body)
+	defer CloseAndAlert(r.Body)
+
+	if user.Name == "" || user.Password == "" {
+		http.Error(w, `{"err":"name or password is empty"}`, http.StatusForbidden)
+		return
+	}
 
 	if id, err := a.AuthUsecase.Register(user); err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, getStatusCode(err))
+		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
 		return
 
 	} else {
@@ -166,9 +171,9 @@ func getStatusCode(err error) int {
 	}
 }
 
-func closeAndAlert(body io.ReadCloser) {
+func CloseAndAlert(body io.ReadCloser) {
 	err := body.Close()
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println("err: ", err)
 	}
 }
