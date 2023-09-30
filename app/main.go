@@ -3,7 +3,6 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -70,7 +69,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Failed to get config : ", err)
+		logger.Fatal("Failed to get config : ", err)
 	}
 
 	accessLogger := AccessLogger{
@@ -80,10 +79,10 @@ func main() {
 	logger.Info("starting connect to db")
 
 	db, err := sql.Open("postgres", dbParamsfromEnv())
-	logger.Debug("db conf :", db)
 	if err != nil {
 		logfuncs.LogFatal(logger, "main", "main", err, "Failed to open db")
 	}
+	logger.Debug("db conf :", db)
 	defer db.Close()
 
 	router := mux.NewRouter()
