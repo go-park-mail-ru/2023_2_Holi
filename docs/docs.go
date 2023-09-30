@@ -116,7 +116,10 @@ const docTemplate = `{
                 "summary": "register user",
                 "responses": {
                     "200": {
-                        "description": "OK"
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/http.Result"
+                        }
                     },
                     "400": {
                         "description": "{\"error\":\"\u003cerror message\u003e\"}",
@@ -130,6 +133,17 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "http.Result": {
+            "type": "object",
+            "properties": {
+                "body": {},
+                "err": {
+                    "type": "string"
                 }
             }
         }
