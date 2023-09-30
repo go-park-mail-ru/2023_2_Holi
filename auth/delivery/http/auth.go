@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"time"
@@ -10,7 +9,10 @@ import (
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
+	"2023_2_Holi/logfuncs"
 )
+
+var logger = logfuncs.LoggerInit()
 
 type Result struct {
 	Body interface{} `json:"body,omitempty"`
@@ -48,20 +50,25 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		logfuncs.LogError(logger, "http", "Login", err, "Failed to decode json from body")
 		return
 	}
-	defer CloseAndAlert(r.Body)
+	logger.Debug("Login credentials:", credentials)
+	defer a.CloseAndAlert(r.Body)
 
 	if credentials.Password == "" || credentials.Name == "" {
 		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
+		logfuncs.LogError(logger, "http", "Login", err, "Credentials are empy")
 		return
 	}
 
 	session, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Login", err, "Failed to login")
 		return
 	}
+	logger.Debug("Login: session:", session)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
@@ -89,20 +96,26 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err == http.ErrNoCookie {
 			http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusUnauthorized)
+			logfuncs.LogError(logger, "http", "Logout", err, "No cookie")
 			return
 		}
 
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
-		return
-	}
-	sessionToken := c.Value
-	if sessionToken == "" {
-		http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+		logfuncs.LogError(logger, "http", "Logout", err, "Failed to get cookie")
 		return
 	}
 
+	sessionToken := c.Value
+	if sessionToken == "" {
+		http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+		logfuncs.LogError(logger, "http", "Logout", err, "Session token is empty")
+		return
+	}
+	logger.Debug("Logout: session token:", c)
+
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusInternalServerError)
+		logfuncs.LogError(logger, "http", "Logout", err, "Failed to logout")
 		return
 	}
 
@@ -131,17 +144,21 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+		logfuncs.LogError(logger, "http", "Register", err, "Failed to decode json from body")
 		return
 	}
-	defer CloseAndAlert(r.Body)
+	logger.Debug("Register user:", user)
+	defer a.CloseAndAlert(r.Body)
 
 	if user.Name == "" || user.Password == "" {
 		http.Error(w, `{"err":"name or password is empty"}`, http.StatusForbidden)
+		logfuncs.LogError(logger, "http", "Register", err, "User fields are empty")
 		return
 	}
 
 	if id, err := a.AuthUsecase.Register(user); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Register", err, "Failed to register")
 		return
 
 	} else {
@@ -171,9 +188,9 @@ func getStatusCode(err error) int {
 	}
 }
 
-func CloseAndAlert(body io.ReadCloser) {
+func (a *AuthHandler) CloseAndAlert(body io.ReadCloser) {
 	err := body.Close()
 	if err != nil {
-		fmt.Println("err: ", err)
+		logfuncs.LogError(logger, "http", "CloseAndAlert", err, "Failed to close body")
 	}
 }

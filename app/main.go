@@ -16,11 +16,12 @@ import (
 	_http "2023_2_Holi/auth/delivery/http"
 	"2023_2_Holi/auth/repository/postgresql"
 	"2023_2_Holi/auth/usecase"
+	"2023_2_Holi/logfuncs"
 
 	_ "github.com/lib/pq"
 )
 
-func fromEnv() string {
+func dbParamsfromEnv() string {
 	host := os.Getenv("DB_HOST")
 	if host == "" {
 		return ""
@@ -34,26 +35,10 @@ func fromEnv() string {
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
 
-func loggerInit() *logrus.Logger {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{})
-
-	logLevel := os.Getenv("LOG_LEVEL")
-	switch logLevel {
-	case "debug":
-		logger.SetLevel(logrus.DebugLevel)
-	case "info":
-		logger.SetLevel(logrus.InfoLevel)
-	case "error":
-		logger.SetLevel(logrus.ErrorLevel)
-	case "fatal":
-		logger.SetLevel(logrus.FatalLevel)
-	}
-	return logger
-}
+var logger = logfuncs.LoggerInit()
 
 type AccessLogger struct {
-	LogrusLogger *logrus.Entry
+	LogrusLogger *logrus.Logger
 }
 
 func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
@@ -88,21 +73,16 @@ func main() {
 		log.Fatal("Failed to get config : ", err)
 	}
 
-	logger := loggerInit()
 	accessLogger := AccessLogger{
-		LogrusLogger: logrus.NewEntry(logger),
+		LogrusLogger: logger,
 	}
 
 	logger.Info("starting connect to db")
 
-	db, err := sql.Open("postgres", fromEnv())
+	db, err := sql.Open("postgres", dbParamsfromEnv())
 	logger.Debug("db conf :", db)
 	if err != nil {
-		logger.WithFields(logrus.Fields{
-			"package":  "main",
-			"function": "main",
-			"error":    err,
-		}).Fatal("Failed to open db")
+		logfuncs.LogFatal(logger, "main", "main", err, "Failed to open db")
 	}
 	defer db.Close()
 
@@ -111,16 +91,13 @@ func main() {
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
+
 	_http.NewAuthHandler(router, authUsecase)
 
 	logger.Info("starting server at :8080")
 	err = http.ListenAndServe(":8080", router)
 	if err != nil {
-		logger.WithFields(logrus.Fields{
-			"package":  "main",
-			"function": "main",
-			"error":    err,
-		}).Fatal("Failed to open server")
+		logfuncs.LogFatal(logger, "main", "main", err, "Failed to start server")
 	}
 	logger.Info("server stopped")
 }

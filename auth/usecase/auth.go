@@ -6,7 +6,10 @@ import (
 	"github.com/google/uuid"
 
 	"2023_2_Holi/domain"
+	"2023_2_Holi/logfuncs"
 )
+
+var logger = logfuncs.LoggerInit()
 
 type authUsecase struct {
 	authRepo    domain.AuthRepository
@@ -25,6 +28,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, err
 	if err != nil {
 		return domain.Session{}, domain.ErrNotFound
 	}
+	logger.Debug("Usecase Login expected user:", expectedUser)
 
 	if expectedUser.Password != credentials.Password {
 		return domain.Session{}, domain.ErrWrongCredentials
