@@ -21,15 +21,15 @@ import (
 )
 
 func dbParamsfromEnv() string {
-	host := os.Getenv("DB_HOST")
+	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
 		return ""
 	}
 
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	dbname := os.Getenv("DB_NAME")
+	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	pass := os.Getenv("POSTGRES_PASSWORD")
+	dbname := os.Getenv("POSTGRES_DB")
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
@@ -67,7 +67,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @schemes Zhttp
 // @BasePath /
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("../.env")
 	if err != nil {
 		logger.Fatal("Failed to get config : ", err)
 	}
@@ -76,14 +76,18 @@ func main() {
 		LogrusLogger: logger,
 	}
 
-	logger.Info("starting connect to db")
-
 	db, err := sql.Open("postgres", dbParamsfromEnv())
 	if err != nil {
-		logfuncs.LogFatal(logger, "main", "main", err, "Failed to open db")
+		logfuncs.LogFatal(logger, "main", "main", err, "Failed to connect to db")
 	}
-	logger.Debug("db conf :", db)
 	defer db.Close()
+	logger.Debug("db conf :", db)
+
+	err = db.Ping()
+	if err != nil {
+		logfuncs.LogFatal(logger, "main", "main", err, "DB doesn't listen")
+	}
+	logger.Info("Connected to postgres")
 
 	router := mux.NewRouter()
 	router.Use(accessLogger.accessLogMiddleware)
