@@ -15,7 +15,7 @@ import (
 	_http "2023_2_Holi/auth/delivery/http"
 	"2023_2_Holi/auth/repository/postgresql"
 	"2023_2_Holi/auth/usecase"
-	"2023_2_Holi/logfuncs"
+	logs "2023_2_Holi/logs"
 
 	_ "github.com/lib/pq"
 )
@@ -33,8 +33,6 @@ func dbParamsfromEnv() string {
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
-
-var logger = logfuncs.LoggerInit()
 
 type AccessLogger struct {
 	LogrusLogger *logrus.Logger
@@ -69,25 +67,25 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 func main() {
 	err := godotenv.Load("../.env")
 	if err != nil {
-		logger.Fatal("Failed to get config : ", err)
+		logs.Logger.Fatal("Failed to get config : ", err)
 	}
 
 	accessLogger := AccessLogger{
-		LogrusLogger: logger,
+		LogrusLogger: logs.Logger,
 	}
 
 	db, err := sql.Open("postgres", dbParamsfromEnv())
 	if err != nil {
-		logfuncs.LogFatal(logger, "main", "main", err, "Failed to connect to db")
+		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to connect to db")
 	}
 	defer db.Close()
-	logger.Debug("db conf :", db)
+	logs.Logger.Debug("db conf :", db)
 
 	err = db.Ping()
 	if err != nil {
-		logfuncs.LogFatal(logger, "main", "main", err, "DB doesn't listen")
+		logs.LogFatal(logs.Logger, "main", "main", err, "DB doesn't listen")
 	}
-	logger.Info("Connected to postgres")
+	logs.Logger.Info("Connected to postgres")
 
 	router := mux.NewRouter()
 	router.Use(accessLogger.accessLogMiddleware)
@@ -97,10 +95,10 @@ func main() {
 
 	_http.NewAuthHandler(router, authUsecase)
 
-	logger.Info("starting server at :8080")
+	logs.Logger.Info("starting server at :8080")
 	err = http.ListenAndServe(":8080", router)
 	if err != nil {
-		logfuncs.LogFatal(logger, "main", "main", err, "Failed to start server")
+		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}
-	logger.Info("server stopped")
+	logs.Logger.Info("server stopped")
 }
