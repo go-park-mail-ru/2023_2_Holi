@@ -6,10 +6,10 @@ import (
 	"github.com/google/uuid"
 
 	"2023_2_Holi/domain"
-	"2023_2_Holi/logfuncs"
+	logs "2023_2_Holi/logs"
 )
 
-var logger = logfuncs.LoggerInit()
+var logger = logs.LoggerInit()
 
 type authUsecase struct {
 	authRepo    domain.AuthRepository
