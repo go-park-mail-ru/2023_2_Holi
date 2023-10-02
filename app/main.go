@@ -42,6 +42,7 @@ type AccessLogger struct {
 func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 		next.ServeHTTP(w, r)
 
 		ac.LogrusLogger.WithFields(logrus.Fields{
@@ -104,6 +105,14 @@ func main() {
 	_http.NewAuthHandler(mainRouter, authUsecase)
 
 	logs.Logger.Info("starting server at :8080")
+
+	authRouter.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Max-Age", "86400")
+		w.WriteHeader(http.StatusOK)
+	})
+
 	err = http.ListenAndServe(":8080", authRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
