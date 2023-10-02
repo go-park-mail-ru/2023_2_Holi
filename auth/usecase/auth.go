@@ -13,9 +13,9 @@ type authUsecase struct {
 	sessionRepo domain.SessionRepository
 }
 
-func NewAuthUsecase(ur domain.AuthRepository, sr domain.SessionRepository) domain.AuthUsecase {
+func NewAuthUsecase(ar domain.AuthRepository, sr domain.SessionRepository) domain.AuthUsecase {
 	return &authUsecase{
-		authRepo:    ur,
+		authRepo:    ar,
 		sessionRepo: sr,
 	}
 }

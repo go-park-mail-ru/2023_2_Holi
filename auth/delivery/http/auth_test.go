@@ -245,7 +245,7 @@ func TestRegister(t *testing.T) {
 	tests := []struct {
 		name                 string
 		getBody              func() []byte
-		setUCaseExpectations func(uCase *mocks.AuthUsecase)
+		setUCaseExpectations func(uCase *mocks.AuthUsecase, session *domain.Session)
 		status               int
 	}{
 		{
@@ -253,11 +253,16 @@ func TestRegister(t *testing.T) {
 			getBody: func() []byte {
 				var user domain.User
 				faker.FakeData(&user)
+				user.Email = "chgvj@mail.ru"
 				jsonBody, _ := json.Marshal(user)
 				return jsonBody
 			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
 				uCase.On("Register", mock.Anything).Return(1, nil)
+
+				err := faker.FakeData(session)
+				assert.NoError(t, err)
+				uCase.On("Login", mock.Anything).Return(*session, nil)
 			},
 			status: http.StatusOK,
 		},
@@ -266,8 +271,9 @@ func TestRegister(t *testing.T) {
 			getBody: func() []byte {
 				return []byte("{}")
 			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
 				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
+				uCase.On("Login", mock.Anything).Return(*session, domain.ErrWrongCredentials).Maybe()
 			},
 			status: http.StatusForbidden,
 		},
@@ -276,8 +282,9 @@ func TestRegister(t *testing.T) {
 			getBody: func() []byte {
 				return []byte("")
 			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
 				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
+				uCase.On("Login", mock.Anything).Return(*session, domain.ErrBadRequest).Maybe()
 			},
 			status: http.StatusBadRequest,
 		},
@@ -286,8 +293,9 @@ func TestRegister(t *testing.T) {
 			getBody: func() []byte {
 				return []byte("{043895uith,redfsvdf;vfdv4er")
 			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+			setUCaseExpectations: func(uCase *mocks.AuthUsecase, session *domain.Session) {
 				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
+				uCase.On("Login", mock.Anything).Return(*session, domain.ErrBadRequest).Maybe()
 			},
 			status: http.StatusBadRequest,
 		},
@@ -301,7 +309,8 @@ func TestRegister(t *testing.T) {
 			assert.NoError(t, err)
 
 			mockUCase := new(mocks.AuthUsecase)
-			test.setUCaseExpectations(mockUCase)
+			var mockSession domain.Session
+			test.setUCaseExpectations(mockUCase, &mockSession)
 
 			rec := httptest.NewRecorder()
 			handler := &_http.AuthHandler{
