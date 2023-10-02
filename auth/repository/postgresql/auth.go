@@ -16,7 +16,7 @@ func NewAuthPostgresqlRepository(conn *sql.DB) domain.AuthRepository {
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
-	result, err := r.db.Query(`SELECT email, password FROM "user" WHERE email = $1`, email)
+	result, err := r.db.Query(`SELECT id, email, password FROM "user" WHERE email = $1`, email)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -30,6 +30,7 @@ func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error)
 	var user domain.User
 	for result.Next() {
 		err = result.Scan(
+			&user.ID,
 			&user.Email,
 			&user.Password,
 		)
@@ -83,7 +84,7 @@ func NewSessionPostgresqlRepository(conn *sql.DB) domain.SessionRepository {
 }
 
 func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
-	_, err := s.db.Exec(`INSERT INTO "session" VALUES ($1, $2, $3)`, session.Token, session.UserID, session.ExpiresAt)
+	_, err := s.db.Exec(`INSERT INTO "session" VALUES ($1, $2, $3)`, session.Token, session.ExpiresAt, session.UserID)
 	if err != nil {
 		return err
 	}

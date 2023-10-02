@@ -36,7 +36,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, err
 		UserID:    expectedUser.ID,
 	}
 	if err = u.sessionRepo.Add(session); err != nil {
-		return domain.Session{}, nil
+		return domain.Session{}, err
 	}
 
 	return session, nil
