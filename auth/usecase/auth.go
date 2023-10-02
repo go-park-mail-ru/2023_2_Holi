@@ -59,3 +59,16 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 		return id, nil
 	}
 }
+
+func (u *authUsecase) IsAuth(token string) (bool, error) {
+	if token == "" {
+		return false, domain.ErrBadRequest
+	}
+
+	auth, err := u.sessionRepo.IsAuth(token)
+	if err != nil {
+		return false, err
+	}
+
+	return auth, nil
+}

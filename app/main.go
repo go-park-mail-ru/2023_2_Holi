@@ -1,6 +1,7 @@
 package main
 
 import (
+	"2023_2_Holi/auth/delivery/http/middleware"
 	"database/sql"
 	"fmt"
 	"github.com/gorilla/mux"
@@ -56,14 +57,19 @@ func main() {
 	}
 	defer db.Close()
 
-	router := mux.NewRouter()
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
-	_http.NewAuthHandler(router, authUsecase)
+
+	authRouter := mux.NewRouter()
+	_http.NewAuthHandler(authRouter, authUsecase)
+
+	mainRouter := authRouter.PathPrefix("api/").Subrouter()
+	mw := middleware.InitMiddleware(authUsecase)
+	mainRouter.Use(mw.IsAuth)
 
 	fmt.Println("starting server at :8080")
-	err = http.ListenAndServe(":8080", router)
+	err = http.ListenAndServe(":8080", authRouter)
 	if err != nil {
 		log.Fatal(err)
 	}
