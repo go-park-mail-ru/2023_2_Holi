@@ -21,7 +21,7 @@ func NewAuthUsecase(ur domain.AuthRepository, sr domain.SessionRepository) domai
 }
 
 func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
-	expectedUser, err := u.authRepo.GetByName(credentials.Name)
+	expectedUser, err := u.authRepo.GetByEmail(credentials.Email)
 	if err != nil {
 		return domain.Session{}, domain.ErrNotFound
 	}
@@ -53,6 +53,9 @@ func (u *authUsecase) Logout(token string) error {
 func (u *authUsecase) Register(user domain.User) (int, error) {
 	user.DateJoined = time.Now()
 
+	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
+		return 0, domain.ErrAlreadyExists
+	}
 	if id, err := u.authRepo.AddUser(user); err != nil {
 		return 0, err
 	} else {
@@ -65,7 +68,7 @@ func (u *authUsecase) IsAuth(token string) (bool, error) {
 		return false, domain.ErrBadRequest
 	}
 
-	auth, err := u.sessionRepo.IsAuth(token)
+	auth, err := u.sessionRepo.SessionExists(token)
 	if err != nil {
 		return false, err
 	}
