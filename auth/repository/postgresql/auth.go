@@ -2,17 +2,21 @@ package postgresql
 
 import (
 	"database/sql"
-	"fmt"
 
 	"2023_2_Holi/domain"
+	"2023_2_Holi/logfuncs"
 )
+
+var logger = logfuncs.LoggerInit()
 
 type authPostgresqlRepository struct {
 	db *sql.DB
 }
 
 func NewAuthPostgresqlRepository(conn *sql.DB) domain.AuthRepository {
-	return &authPostgresqlRepository{conn}
+	return &authPostgresqlRepository{
+		db: conn,
+	}
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
@@ -23,9 +27,10 @@ func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error)
 	defer func(result *sql.Rows) {
 		err := result.Close()
 		if err != nil {
-			fmt.Println("Error: ", err)
+			logfuncs.LogError(logger, "postgresql", "GetByName", err, "Failed to close query")
 		}
 	}(result)
+	logger.Debug("GetByName query result:", result)
 
 	var user domain.User
 	for result.Next() {
@@ -56,6 +61,8 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 		user.Email,
 		user.DateJoined,
 		user.ImagePath)
+
+	logger.Debug("AddUser queryRow result:", result)
 
 	var id int
 	if err := result.Scan(&id); err != nil {

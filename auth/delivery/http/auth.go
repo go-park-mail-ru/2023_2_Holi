@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/mail"
@@ -12,7 +11,10 @@ import (
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
+	"2023_2_Holi/logfuncs"
 )
+
+var logger = logfuncs.LoggerInit()
 
 type Result struct {
 	Body interface{} `json:"body,omitempty"`
@@ -55,12 +57,15 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		logfuncs.LogError(logger, "http", "Login", err, "Failed to decode json from body")
 		return
 	}
-	defer CloseAndAlert(r.Body)
+	logger.Debug("Login credentials:", credentials)
+	defer a.CloseAndAlert(r.Body)
 
 	if credentials.Password == "" || credentials.Email == "" {
 		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
+		logfuncs.LogError(logger, "http", "Login", err, "Credentials are empy")
 		return
 	}
 
@@ -73,8 +78,10 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	session, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Login", err, "Failed to login")
 		return
 	}
+	logger.Debug("Login: session:", session)
 
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
@@ -101,17 +108,22 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	auth, err := a.auth(r)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Logout", err, err.Error())
 		return
 	}
 	if !auth {
 		http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+		logfuncs.LogError(logger, "http", "Logout", err, err.Error())
 		return
 	}
 
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
+	logger.Debug("Logout: session token:", c)
+
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusInternalServerError)
+		logfuncs.LogError(logger, "http", "Logout", err, "Failed to logout")
 		return
 	}
 
@@ -135,33 +147,39 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {string} string "{"error":"<error message>"}"
 // @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	auth, _ := a.auth(r)
+	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
+		logfuncs.LogError(logger, "http", "Register", err, "user is authorised")
 	}
 
 	var user domain.User
 	err := json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+		logfuncs.LogError(logger, "http", "Register", err, "Failed to decode json from body")
 		return
 	}
-	defer CloseAndAlert(r.Body)
+	logger.Debug("Register user:", user)
+	defer a.CloseAndAlert(r.Body)
 
 	user.Email = strings.TrimSpace(user.Email)
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Register", err, "creds are invalid")
 	}
 
 	var id int
 	if id, err = a.AuthUsecase.Register(user); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Register", err, "Failed to register")
 		return
 	}
 
 	session, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logfuncs.LogError(logger, "http", "Register", err, "Failed to login")
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -223,10 +241,10 @@ func getStatusCode(err error) int {
 	}
 }
 
-func CloseAndAlert(body io.ReadCloser) {
+func (a *AuthHandler) CloseAndAlert(body io.ReadCloser) {
 	err := body.Close()
 	if err != nil {
-		fmt.Println("err: ", err)
+		logfuncs.LogError(logger, "http", "CloseAndAlert", err, "Failed to close body")
 	}
 }
 

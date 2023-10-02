@@ -3,12 +3,13 @@ package http_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/google/uuid"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/bxcodec/faker"
 	"github.com/stretchr/testify/assert"
@@ -325,7 +326,6 @@ func TestRegister(t *testing.T) {
 			var result *_http.Result
 			err = json.NewDecoder(rec.Result().Body).Decode(&result)
 			assert.NoError(t, err)
-			defer _http.CloseAndAlert(rec.Result().Body)
 
 			if test.status < 300 {
 				assert.NotEmpty(t, result.Body)
