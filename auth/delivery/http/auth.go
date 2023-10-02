@@ -152,7 +152,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user domain.User
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err = json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
 		logs.LogError(logs.Logger, "http", "Register", err, "Failed to decode json from body")

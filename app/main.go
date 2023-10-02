@@ -89,31 +89,31 @@ func main() {
 	}
 	logs.Logger.Info("Connected to postgres")
 
-	authRouter := mux.NewRouter()
+	mainRouter := mux.NewRouter()
 
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
 
-	_http.NewAuthHandler(authRouter, authUsecase)
+	_http.NewAuthHandler(mainRouter, authUsecase)
 
-	mainRouter := authRouter.PathPrefix("api/").Subrouter()
+	authMiddlewareRouter := mainRouter.PathPrefix("api/").Subrouter()
 	mw := middleware.InitMiddleware(authUsecase)
 
-	mainRouter.Use(mw.IsAuth)
+	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.accessLogMiddleware)
-	_http.NewAuthHandler(mainRouter, authUsecase)
+	_http.NewAuthHandler(authMiddlewareRouter, authUsecase)
 
 	logs.Logger.Info("starting server at :8080")
 
-	authRouter.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	mainRouter.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 		w.Header().Set("Access-Control-Max-Age", "86400")
 		w.WriteHeader(http.StatusOK)
 	})
 
-	err = http.ListenAndServe(":8080", authRouter)
+	err = http.ListenAndServe(":8080", mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}
