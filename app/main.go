@@ -42,7 +42,9 @@ type AccessLogger struct {
 func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		//w.Header().Set("Access-Control-Allow-Origin", "*")
+		
 		next.ServeHTTP(w, r)
 
 		ac.LogrusLogger.WithFields(logrus.Fields{
@@ -67,7 +69,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @schemes Zhttp
 // @BasePath /
 func main() {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load()
 	if err != nil {
 		logs.Logger.Fatal("Failed to get config : ", err)
 	}
@@ -102,16 +104,19 @@ func main() {
 
 	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.accessLogMiddleware)
+	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
+	mainRouter.Use(mw.CORS)
+
 	_http.NewAuthHandler(authMiddlewareRouter, authUsecase)
 
 	logs.Logger.Info("starting server at :8080")
 
-	mainRouter.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		w.Header().Set("Access-Control-Max-Age", "86400")
-		w.WriteHeader(http.StatusOK)
-	})
+	//mainRouter.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	//	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+	//	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, User-Agent")
+	//	w.Header().Set("Access-Control-Max-Age", "86400")
+	//	w.WriteHeader(http.StatusOK)
+	//})
 
 	err = http.ListenAndServe(":8080", mainRouter)
 	if err != nil {

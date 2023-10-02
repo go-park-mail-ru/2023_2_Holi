@@ -3,7 +3,6 @@ package logfuncs
 import (
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 )
 
@@ -13,10 +12,10 @@ func LoggerInit() *logrus.Logger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{})
 
-	err := godotenv.Load("../.env")
-	if err != nil {
-		logger.Fatal("Failed to get config : ", err)
-	}
+	//err := godotenv.Load()
+	//if err != nil {
+	//	logger.Fatal("Failed to get config : ", err)
+	//}
 
 	logLevel := os.Getenv("LOG_LEVEL")
 	switch logLevel {

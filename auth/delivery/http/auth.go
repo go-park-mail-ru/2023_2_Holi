@@ -28,9 +28,9 @@ func NewAuthHandler(router *mux.Router, u domain.AuthUsecase) {
 		AuthUsecase: u,
 	}
 
-	router.HandleFunc("/api/v1/auth/login", handler.Login).Methods("POST")
-	router.HandleFunc("/api/v1/auth/register", handler.Register).Methods("POST")
-	router.HandleFunc("/api/v1/auth/logout", handler.Logout).Methods("POST")
+	router.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/api/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
 }
 
 // Login godoc
