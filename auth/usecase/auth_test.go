@@ -4,6 +4,7 @@ import (
 	"2023_2_Holi/auth/usecase"
 	"errors"
 	"github.com/bxcodec/faker"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -111,6 +112,100 @@ func TestLogin(t *testing.T) {
 			}
 
 			ar.AssertExpectations(t)
+			sr.AssertExpectations(t)
+		})
+	}
+}
+
+func TestLogout(t *testing.T) {
+	tests := []struct {
+		name                       string
+		token                      string
+		setSessionRepoExpectations func(sessionRepo *mocks.SessionRepository)
+		good                       bool
+	}{
+		{
+			name:  "GoodCase/Common",
+			token: uuid.NewString(),
+			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
+				sessionRepo.On("DeleteByToken", mock.Anything).Return(nil)
+			},
+			good: true,
+		},
+		{
+			name:  "BadCase/EmptyToken",
+			token: "",
+			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
+				sessionRepo.On("DeleteByToken", mock.Anything).Return(errors.New("some db error")).Maybe()
+			},
+			good: false,
+		},
+		{
+			name:  "BadCase/InvalidToken",
+			token: "8/refvd 3fdf  sdc",
+			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
+				sessionRepo.On("DeleteByToken", mock.Anything).Return(errors.New("another db error"))
+			},
+			good: false,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			//t.Parallel()
+
+			ar := new(mocks.AuthRepository)
+			sr := new(mocks.SessionRepository)
+			test.setSessionRepoExpectations(sr)
+
+			auCase := usecase.NewAuthUsecase(ar, sr)
+			err := auCase.Logout(test.token)
+
+			if test.good {
+				assert.Nil(t, err)
+			} else {
+				assert.NotNil(t, err)
+			}
+
+			sr.AssertExpectations(t)
+		})
+	}
+}
+
+func TestRegister(t *testing.T) {
+	tests := []struct {
+		name                       string
+		token                      string
+		setUserUsecaseExpectations func(u *authUsecase)
+		good                       bool
+	}{
+		{
+			name:  "GoodCase/Common",
+			token: uuid.NewString(),
+			setUserUsecaseExpectations: func(u *authUsecase) {
+				sessionRepo.On("DeleteByToken", mock.Anything).Return(nil)
+			},
+			good: true,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			//t.Parallel()
+
+			ar := new(mocks.AuthRepository)
+			sr := new(mocks.SessionRepository)
+			test.setSessionRepoExpectations(sr)
+
+			auCase := usecase.NewAuthUsecase(ar, sr)
+			err := auCase.Logout(test.token)
+
+			if test.good {
+				assert.Nil(t, err)
+			} else {
+				assert.NotNil(t, err)
+			}
+
 			sr.AssertExpectations(t)
 		})
 	}
