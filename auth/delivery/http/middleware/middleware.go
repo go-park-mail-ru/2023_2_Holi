@@ -11,16 +11,9 @@ type Middleware struct {
 	AuthUsecase domain.AuthUsecase
 }
 
-//func (m *Middleware) CORS(next echo.HandlerFunc) echo.HandlerFunc {
-//	return func(c echo.Context) error {
-//		c.Response().Header().Set("Access-Control-Allow-Origin", "*")
-//		return next(c)
-//	}
-//}
-
 func (m *Middleware) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://localhost")
+		w.Header().Set("Access-Control-Allow-Origin", "http://84.23.54.38")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if r.Method == http.MethodOptions {

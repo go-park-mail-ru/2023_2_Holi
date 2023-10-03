@@ -45,7 +45,7 @@ func main() {
 		log.Fatalf("Ошибка подключения к базе данных: %v", err)
 	}
 
-	file, err := os.Open("Netflix_Dataset.csv")
+	file, err := os.Open("app/fill/Netflix_Dataset.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
