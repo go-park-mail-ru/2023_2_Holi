@@ -1,20 +1,40 @@
-package fill
+package main
 
 import (
 	"database/sql"
 	"encoding/csv"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
+func dbParamsfromEnv() string {
+	host := os.Getenv("POSTGRES_HOST")
+	if host == "" {
+		return ""
+	}
+
+	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	pass := os.Getenv("POSTGRES_PASSWORD")
+	dbname := os.Getenv("POSTGRES_DB")
+
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
+}
+
 func main() {
-	connStr := "host=localhost port=5432 dbname=netflix_proj user=aleksej password=postgres sslmode=disable"
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Failed to get config: %v", err)
+	}
 	count := 0
-	db, err := sql.Open("postgres", connStr)
+	genreID := 0
+	db, err := sql.Open("postgres", dbParamsfromEnv())
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -24,9 +44,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Ошибка подключения к базе данных: %v", err)
 	}
-	defer db.Close()
 
-	file, err := os.Open("app/fill/Netflix_Dataset.csv")
+	file, err := os.Open("Netflix_Dataset.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,23 +57,66 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	genreMap := make(map[string]int)
+
 	for {
-		count++
-		if count == 101 {
+		genreID++
+		if genreID == 2000 {
 			break
 		}
 		row, err := reader.Read()
 		if err != nil {
 			break
 		}
-		sqlStatement := "INSERT INTO film (id, name, preview_path,rating) VALUES ($1, $2, $3, $4)"
-		strings.Join(headers, ", ")
-		_, err = db.Exec(sqlStatement, count, row[0], row[26], row[12])
+		genres := strings.Split(row[1], ",")
+		for _, genre := range genres {
+			genre = strings.TrimSpace(genre)
+			idToInsert := genreID
+			if existingID, ok := genreMap[genre]; ok {
+				idToInsert = existingID
+			} else {
+				er := db.QueryRow("SELECT id FROM genre WHERE name = $1", genre).Scan(&idToInsert)
+				if er != nil {
+					strings.Join(headers, ", ")
+					_, er = db.Exec("INSERT INTO genre (id, name) VALUES ($1,$2)", idToInsert, genre)
+					if er != nil {
+						idToInsert--
+						continue
+					}
+				}
+				genreMap[genre] = idToInsert
+			}
+		}
+	}
+
+	_, err = file.Seek(0, 0)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for {
+		count++
+		if count == 100 {
+			fmt.Println("break")
+			break
+		}
+		row, err := reader.Read()
 		if err != nil {
-			log.Println(err)
-			continue
+			if err == io.EOF {
+				break
+			} else {
+				continue
+			}
 		}
 		genres := strings.Split(row[1], ",")
+
+		sqlStatement := "INSERT INTO film (id, name, preview_path, rating) VALUES ($1, $2, $3, $4)"
+		_, err = db.Exec(sqlStatement, count, row[0], row[26], row[12])
+		if err != nil {
+			log.Printf("Ошибка при вставке фильма: %v", err)
+			continue
+		}
 
 		for _, genre := range genres {
 			genre = strings.TrimSpace(genre)
