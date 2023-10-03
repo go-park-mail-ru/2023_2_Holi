@@ -13,7 +13,7 @@ func LoggerInit() *logrus.Logger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{})
 
-	err := godotenv.Load("../.env")
+	err := godotenv.Load()
 	if err != nil {
 		logger.Fatal("Failed to get config : ", err)
 	}
