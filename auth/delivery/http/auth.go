@@ -89,7 +89,6 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		Expires:  session.ExpiresAt,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
 	})
 
 	w.WriteHeader(http.StatusNoContent)
@@ -122,7 +121,6 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now(),
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
 	})
 
 	w.WriteHeader(http.StatusNoContent)
@@ -180,7 +178,6 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		Expires:  session.ExpiresAt,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode,
 	})
 
 	body := map[string]interface{}{

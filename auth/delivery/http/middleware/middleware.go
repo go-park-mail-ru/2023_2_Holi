@@ -20,8 +20,9 @@ type Middleware struct {
 
 func (m *Middleware) CORS(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "http://95.73.36.164")
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost")
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
+		w.Header().Set("Content-Security-Policy", "default-src 'self' http://localhost")
 
 		if r.Method == http.MethodOptions {
 			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, User-Agent")
