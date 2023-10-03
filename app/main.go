@@ -96,9 +96,10 @@ func main() {
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
 
-	_http.NewAuthHandler(mainRouter, authUsecase)
+	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
-	authMiddlewareRouter := mainRouter.PathPrefix("api/").Subrouter()
+	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
+
 	mw := middleware.InitMiddleware(authUsecase)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
@@ -106,16 +107,9 @@ func main() {
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 
-	_http.NewAuthHandler(authMiddlewareRouter, authUsecase)
+	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 
 	logs.Logger.Info("starting server at :8080")
-
-	//mainRouter.Methods(http.MethodOptions).HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	//	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
-	//	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, User-Agent")
-	//	w.Header().Set("Access-Control-Max-Age", "86400")
-	//	w.WriteHeader(http.StatusOK)
-	//})
 
 	err = http.ListenAndServe(":8080", mainRouter)
 	if err != nil {

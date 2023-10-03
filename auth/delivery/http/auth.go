@@ -23,14 +23,16 @@ type AuthHandler struct {
 	AuthUsecase domain.AuthUsecase
 }
 
-func NewAuthHandler(router *mux.Router, u domain.AuthUsecase) {
+func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.AuthUsecase) {
 	handler := &AuthHandler{
 		AuthUsecase: u,
 	}
 
-	router.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
-	router.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
-	router.HandleFunc("/api/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
+
+	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }).Methods(http.MethodPost, http.MethodOptions)
+	authMwRouter.HandleFunc("/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
 }
 
 // Login godoc
@@ -103,18 +105,6 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {string} string "{"error":"<error message>"}"
 // @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	auth, err := a.auth(r)
-	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Logout", err, err.Error())
-		return
-	}
-	if !auth {
-		http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
-		logs.LogError(logs.Logger, "http", "Logout", err, err.Error())
-		return
-	}
-
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
 	logs.Logger.Debug("Logout: session token:", c)
