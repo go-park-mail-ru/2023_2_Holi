@@ -117,7 +117,7 @@ func main() {
 
 	logs.Logger.Info("starting server at :8080")
 
-	err = http.ListenAndServe(":8093", mainRouter)
+	err = http.ListenAndServe(":8080", mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}
