@@ -16,7 +16,7 @@ func NewAuthPostgresqlRepository(conn *sql.DB) domain.AuthRepository {
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
-	result, err := r.db.Query(`SELECT id, email, password FROM "user" WHERE email = $1`, email)
+	result, err := r.db.Query(`SELECT id, email, password FROM "user" WHERE email = ?`, email)
 	if err != nil {
 		return domain.User{}, err
 	}
@@ -50,7 +50,7 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 
 	result := r.db.QueryRow(
 		`INSERT INTO "user" (password, name, email, date_joined, image_path) 
-		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+		VALUES (?, ?, ?, ?, ?) RETURNING id`,
 		user.Password,
 		user.Name,
 		user.Email,
@@ -65,7 +65,7 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 }
 
 func (r *authPostgresqlRepository) UserExists(email string) (bool, error) {
-	result := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "user" WHERE email = $1)`, email)
+	result := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "user" WHERE email = ?)`, email)
 
 	var exist bool
 	if err := result.Scan(&exist); err != nil {
@@ -84,7 +84,7 @@ func NewSessionPostgresqlRepository(conn *sql.DB) domain.SessionRepository {
 }
 
 func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
-	_, err := s.db.Exec(`INSERT INTO "session" VALUES ($1, $2, $3)`, session.Token, session.ExpiresAt, session.UserID)
+	_, err := s.db.Exec(`INSERT INTO "session" VALUES (?, ?, ?)`, session.Token, session.ExpiresAt, session.UserID)
 	if err != nil {
 		return err
 	}
@@ -92,7 +92,7 @@ func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
 }
 
 func (s *sessionPostgresqlRepository) DeleteByToken(token string) error {
-	_, err := s.db.Exec(`DELETE FROM "session" WHERE token = $1`, token)
+	_, err := s.db.Exec(`DELETE FROM "session" WHERE token = ?`, token)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (s *sessionPostgresqlRepository) DeleteByToken(token string) error {
 }
 
 func (s *sessionPostgresqlRepository) SessionExists(token string) (bool, error) {
-	result := s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "session" WHERE token = $1)`, token)
+	result := s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "session" WHERE token = ?)`, token)
 
 	var exist bool
 	if err := result.Scan(&exist); err != nil {
