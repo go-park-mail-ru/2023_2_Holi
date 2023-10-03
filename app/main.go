@@ -17,6 +17,10 @@ import (
 	"2023_2_Holi/auth/usecase"
 	"2023_2_Holi/logfuncs"
 
+	"2023_2_Holi/collections/collections_usecase"
+	_httpCol "2023_2_Holi/collections/delivery/collections_http"
+	"2023_2_Holi/collections/repository/collections_postgresql"
+
 	_ "github.com/lib/pq"
 )
 
@@ -86,6 +90,7 @@ func main() {
 	defer db.Close()
 
 	router := mux.NewRouter()
+
 	router.Use(accessLogger.accessLogMiddleware)
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
@@ -93,8 +98,12 @@ func main() {
 
 	_http.NewAuthHandler(router, authUsecase)
 
+	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
+	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
+	_httpCol.NewFilmHandler(router, filmUsecase)
+
 	logger.Info("starting server at :8080")
-	err = http.ListenAndServe(":8080", router)
+	err = http.ListenAndServe(":8094", router)
 	if err != nil {
 		logfuncs.LogFatal(logger, "main", "main", err, "Failed to start server")
 	}
