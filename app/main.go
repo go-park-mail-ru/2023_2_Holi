@@ -16,6 +16,10 @@ import (
 	"2023_2_Holi/auth/delivery/http/middleware"
 	"2023_2_Holi/auth/repository/postgresql"
 	"2023_2_Holi/auth/usecase"
+
+	"2023_2_Holi/collections/collections_usecase"
+	_httpCol "2023_2_Holi/collections/delivery/collections_http"
+	"2023_2_Holi/collections/repository/collections_postgresql"
 	logs "2023_2_Holi/logs"
 
 	_ "github.com/lib/pq"
@@ -68,7 +72,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @schemes Zhttp
 // @BasePath /
 func main() {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load()
 	if err != nil {
 		logs.Logger.Fatal("Failed to get config : ", err)
 	}
@@ -100,6 +104,10 @@ func main() {
 
 	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 
+	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
+	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
+	_httpCol.NewFilmHandler(authMiddlewareRouter, filmUsecase)
+
 	mw := middleware.InitMiddleware(authUsecase)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
@@ -107,11 +115,9 @@ func main() {
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 
-	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
-
 	logs.Logger.Info("starting server at :8080")
 
-	err = http.ListenAndServe(":8080", mainRouter)
+	err = http.ListenAndServe(":8093", mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}
