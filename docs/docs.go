@@ -127,6 +127,12 @@ const docTemplate = `{
                             "type": "json"
                         }
                     },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
@@ -159,10 +165,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/domain.Film"
-                            }
+                            "type": "json"
                         }
                     },
                     "400": {
@@ -183,25 +186,6 @@ const docTemplate = `{
                             "type": "json"
                         }
                     }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "domain.Film": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "previewPath": {
-                    "type": "string"
-                },
-                "rating": {
-                    "type": "number"
                 }
             }
         }

@@ -1,16 +1,4 @@
 basePath: /
-definitions:
-  domain.Film:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-      previewPath:
-        type: string
-      rating:
-        type: number
-    type: object
 host: 127.0.0.1E
 info:
   contact:
@@ -91,6 +79,10 @@ paths:
           description: Bad Request
           schema:
             type: json
+        "403":
+          description: Forbidden
+          schema:
+            type: json
         "500":
           description: Internal Server Error
           schema:
@@ -113,9 +105,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/domain.Film'
-            type: array
+            type: json
         "400":
           description: Bad Request
           schema:
