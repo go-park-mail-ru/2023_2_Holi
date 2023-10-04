@@ -98,6 +98,10 @@ func main() {
 
 	_http.NewAuthHandler(router, authUsecase)
 
+	genreRepository := collections_postgresql.GenrePostgresqlRepository(db)
+	genreUsecase := collections_usecase.NewGenreUsecase(genreRepository)
+	_httpCol.NewGenreHandler(router, genreUsecase)
+
 	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
 	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
 	_httpCol.NewFilmHandler(router, filmUsecase)
