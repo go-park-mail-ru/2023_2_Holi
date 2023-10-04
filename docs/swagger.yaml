@@ -1,0 +1,98 @@
+basePath: /
+definitions:
+  http.Result:
+    properties:
+      body: {}
+      err:
+        type: string
+    type: object
+host: 127.0.0.1E
+info:
+  contact:
+    email: ax.chinaev@yandex.ru
+    name: Alex Chinaev
+    url: https://vk.com/l.chinaev
+  description: API of the nelfix project by holi
+  license:
+    name: AS IS (NO WARRANTY)
+  title: Netfilx API
+  version: "1.0"
+paths:
+  /api/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: create user session and put it into cookie
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "403":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "404":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "500":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+      summary: login user
+      tags:
+      - auth
+  /api/v1/auth/logout:
+    post:
+      description: delete current session and nullify cookie
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "403":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "404":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "500":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+      summary: logout user
+      tags:
+      - auth
+  /api/v1/auth/register:
+    post:
+      consumes:
+      - application/json
+      description: add new user to db and return it id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/http.Result'
+        "400":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+        "500":
+          description: '{"error":"<error message>"}'
+          schema:
+            type: string
+      summary: register user
+      tags:
+      - auth
+schemes:
+- Zhttp
+swagger: "2.0"
