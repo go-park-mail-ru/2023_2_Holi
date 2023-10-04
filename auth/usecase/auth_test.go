@@ -200,8 +200,8 @@ func TestRegister(t *testing.T) {
 			},
 			id: 0,
 			setUserAuthRepoExpectations: func(ar *mocks.AuthRepository, id int) {
-				ar.On("UserExists", mock.Anything).Return(true, nil).Maybe()
-				ar.On("AddUser", mock.Anything).Return(0, errors.New("some db error"))
+				ar.On("UserExists", mock.Anything).Return(false, errors.New("some db error")).Maybe()
+				ar.On("AddUser", mock.Anything).Return(0, errors.New("some db error")).Maybe()
 			},
 		},
 		{
