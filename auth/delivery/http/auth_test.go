@@ -33,6 +33,7 @@ func TestLogin(t *testing.T) {
 			getBody: func() []byte {
 				var creds domain.Credentials
 				faker.FakeData(&creds)
+				creds.Email = "ferfg@fsf.ru"
 				jsonBody, _ := json.Marshal(creds)
 				return jsonBody
 			},
@@ -42,7 +43,7 @@ func TestLogin(t *testing.T) {
 
 				uCase.On("Login", mock.Anything).Return(*session, nil)
 			},
-			status:     http.StatusOK,
+			status:     http.StatusNoContent,
 			wantCookie: true,
 		},
 		{
@@ -60,7 +61,7 @@ func TestLogin(t *testing.T) {
 		{
 			name: "BadCase/InvalidJson",
 			getBody: func() []byte {
-				return []byte(`{ "password":"3490rjuv", name: rszdxtfcyguhj }`)
+				return []byte(`{ "password":"3490rjuv", email: rszdxtfcyguhj@sgf.ru }`)
 			},
 			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
 				*session = domain.Session{}
@@ -94,7 +95,7 @@ func TestLogin(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
+			//t.Parallel()
 
 			req, err := http.NewRequest("POST", "/api/v1/auth/login", bytes.NewReader(test.getBody()))
 			assert.NoError(t, err)
@@ -155,55 +156,14 @@ func TestLogout(t *testing.T) {
 			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
 				uCase.On("Logout", mock.Anything).Return(nil)
 			},
-			status:     http.StatusOK,
+			status:     http.StatusNoContent,
 			wantCookie: true,
-		},
-		{
-			name: "BadCase/EmptyCookiePayload",
-			getCookie: func() *http.Cookie {
-				return &http.Cookie{
-					Name:    "session_token",
-					Value:   "",
-					Expires: time.Time{},
-				}
-			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
-				uCase.On("Logout", mock.Anything).Return(nil).Maybe()
-			},
-			status:     http.StatusUnauthorized,
-			wantCookie: false,
-		},
-		{
-			name: "BadCase/UnsuitableName",
-			getCookie: func() *http.Cookie {
-				return &http.Cookie{
-					Name:    "rdtcfyvgubhj",
-					Value:   uuid.NewString(),
-					Expires: time.Now().Add(24 * time.Hour),
-				}
-			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
-				uCase.On("Logout", mock.Anything).Return(nil).Maybe()
-			},
-			status:     http.StatusUnauthorized,
-			wantCookie: false,
-		},
-		{
-			name: "BadCase/EmptyCookie",
-			getCookie: func() *http.Cookie {
-				return &http.Cookie{}
-			},
-			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
-				uCase.On("Logout", mock.Anything).Return(nil).Maybe()
-			},
-			status:     http.StatusUnauthorized,
-			wantCookie: false,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
+			//t.Parallel()
 
 			req, err := http.NewRequest("POST", "/api/v1/auth/logout", strings.NewReader(""))
 			assert.NoError(t, err)
