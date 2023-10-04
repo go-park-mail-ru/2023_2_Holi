@@ -33,7 +33,7 @@ func NewFilmHandler(router *mux.Router, fu domain.FilmUsecase) {
 // @Tags films
 // @Param genre path string true "The genre of the films you want to retrieve."
 // @Produce json
-// @Success 200 {json} ApiResponse
+// @Success 200 {json} domain.Film
 // @Failure 400 {json} ApiResponse
 // @Failure 404 {json} ApiResponse
 // @Failure 500 {json} ApiResponse
