@@ -8,6 +8,8 @@ https://www.figma.com/file/PEfIZ5K8ox9OKbxckS0KPo/NetflixHoliProject?type=design
 Алексей Молдованов
 Алексей Чинаев
 
+https://raw.githubusercontent.com/go-park-mail-ru/2023_2_Holi/deploy_dev/docs/swagger.yaml
+
 https://github.com/frontend-park-mail-ru/2023_2_Holi
 
 http://84.23.54.38
