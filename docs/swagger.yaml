@@ -1,10 +1,15 @@
 basePath: /
 definitions:
-  http.Result:
+  domain.Film:
     properties:
-      body: {}
-      err:
+      id:
+        type: integer
+      name:
         type: string
+      previewPath:
+        type: string
+      rating:
+        type: number
     type: object
 host: 127.0.0.1E
 info:
@@ -27,21 +32,21 @@ paths:
         "204":
           description: No Content
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "403":
-          description: '{"error":"<error message>"}'
+          description: Forbidden
           schema:
-            type: string
+            type: json
         "404":
-          description: '{"error":"<error message>"}'
+          description: Not Found
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: login user
       tags:
       - auth
@@ -52,21 +57,21 @@ paths:
         "204":
           description: No Content
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "403":
-          description: '{"error":"<error message>"}'
+          description: Forbidden
           schema:
-            type: string
+            type: json
         "404":
-          description: '{"error":"<error message>"}'
+          description: Not Found
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: logout user
       tags:
       - auth
@@ -81,18 +86,51 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/http.Result'
+            type: json
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: register user
       tags:
       - auth
+  /api/v1/films/genre/{genre}:
+    get:
+      description: Get a list of films based on the specified genre.
+      parameters:
+      - description: The genre of the films you want to retrieve.
+        in: path
+        name: genre
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Film'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get films by genre
+      tags:
+      - films
 schemes:
-- Zhttp
+- http
 swagger: "2.0"

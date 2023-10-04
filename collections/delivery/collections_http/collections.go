@@ -33,12 +33,11 @@ func NewFilmHandler(router *mux.Router, fu domain.FilmUsecase) {
 // @Tags films
 // @Param genre path string true "The genre of the films you want to retrieve."
 // @Produce json
-// @Success 200 {array} Film
-// @Failure 400 {application/json} ErrorResponse
-// @Failure 404 {application/json} ErrorResponse
-// @Failure 500 {application/json} ErrorResponse
+// @Success 200 {json} ApiResponse
+// @Failure 400 {json} ApiResponse
+// @Failure 404 {json} ApiResponse
+// @Failure 500 {json} ApiResponse
 // @Router /api/v1/films/genre/{genre} [get]
-
 func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	genre := vars["genre"]

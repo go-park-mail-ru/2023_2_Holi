@@ -41,10 +41,10 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Tags         auth
 // @Accept       json
 // @Success      204
-// @Failure      400  {string} string "{"error":"<error message>"}"
-// @Failure      403  {string} string "{"error":"<error message>"}"
-// @Failure      404  {string} string "{"error":"<error message>"}"
-// @Failure      500  {string} string "{"error":"<error message>"}"
+// @Failure      400  {json} Result
+// @Failure      403  {json} Result
+// @Failure      404  {json} Result
+// @Failure      500  {json} Result
 // @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	auth, _ := a.auth(r)
@@ -99,10 +99,10 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Description  delete current session and nullify cookie
 // @Tags         auth
 // @Success      204
-// @Failure      400  {string} string "{"error":"<error message>"}"
-// @Failure      403  {string} string "{"error":"<error message>"}"
-// @Failure      404  {string} string "{"error":"<error message>"}"
-// @Failure      500  {string} string "{"error":"<error message>"}"
+// @Failure      400  {json} Result
+// @Failure      403  {json Result
+// @Failure      404  {json} Result
+// @Failure      500  {json} Result
 // @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	c, err := r.Cookie("session_token")
@@ -132,9 +132,10 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Produce      json
 // @Accept       json
-// @Success      200  {object} Result
-// @Failure      400  {string} string "{"error":"<error message>"}"
-// @Failure      500  {string} string "{"error":"<error message>"}"
+// @Success      200  {json} Result
+// @Failure      400  {json} Result
+// @Failure      403  {json} Result
+// @Failure      500  {json} Result
 // @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	auth, err := a.auth(r)

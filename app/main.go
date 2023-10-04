@@ -69,7 +69,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @license.name AS IS (NO WARRANTY)
 
 // @host 127.0.0.1E
-// @schemes Zhttp
+// @schemes http
 // @BasePath /
 func main() {
 	err := godotenv.Load("../.env")
