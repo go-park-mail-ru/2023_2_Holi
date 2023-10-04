@@ -6,12 +6,10 @@ import (
 
 	"2023_2_Holi/domain"
 
-	"2023_2_Holi/logs"
+	logs "2023_2_Holi/logs"
 
 	"github.com/gorilla/mux"
 )
-
-var logger = logfuncs.LoggerInit()
 
 type ApiResponse struct {
 	Status int         `json:"status"`
@@ -64,7 +62,7 @@ func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	logger.Debug("Films:", films)
+	logs.Logger.Debug("Films:", films)
 	json.NewEncoder(w).Encode(response)
 }
 
