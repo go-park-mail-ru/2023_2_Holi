@@ -20,13 +20,23 @@ func TestGetFilmsByGenre(t *testing.T) {
 		name                 string
 		setUCaseExpectations func(usecase *mocks.FilmUsecase)
 		status               int
+		expectedResponse     string
 	}{
 		{
 			name: "GoodCase/Common",
 			setUCaseExpectations: func(usecase *mocks.FilmUsecase) {
 				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, nil)
 			},
-			status: http.StatusOK,
+			status:           http.StatusOK,
+			expectedResponse: `{"status":200,"body":{"films":[]}}`,
+		},
+		{
+			name: "No films found for the genre",
+			setUCaseExpectations: func(usecase *mocks.FilmUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, nil)
+			},
+			status:           http.StatusOK,
+			expectedResponse: `{"status":200,"body":{"films":[]}}`,
 		},
 	}
 

@@ -29,17 +29,17 @@ func NewFilmHandler(router *mux.Router, fu domain.FilmUsecase) {
 	router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods("GET")
 }
 
-// GetFilmsByGenre godoc
-// @Summary Get films by genre
-// @Description Get a list of films based on the specified genre.
-// @Tags films
-// @Param genre path string true "The genre of the films you want to retrieve."
-// @Produce json
-// @Success 200 {array} Film
-// @Failure 400 {application/json} ErrorResponse
-// @Failure 404 {application/json} ErrorResponse
-// @Failure 500 {application/json} ErrorResponse
-// @Router /api/v1/films/genre/{genre} [get]
+//GetFilmsByGenre godoc
+//@Summary Get films by genre
+//@Description Get a list of films based on the specified genre.
+//@Tags films
+//@Param genre path string true "The genre of the films you want to retrieve."
+//@Produce json
+//@Success 200 {array} domain.Film
+//@Failure 400 {application/json} ErrorResponse
+//@Failure 404 {application/json} ErrorResponse
+//@Failure 500 {application/json} ErrorResponse
+//@Router /api/v1/films/genre/{genre} [get]
 
 func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
