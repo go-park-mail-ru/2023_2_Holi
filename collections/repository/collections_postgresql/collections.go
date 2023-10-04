@@ -1,8 +1,10 @@
 package collections_postgresql
 
 import (
-	"2023_2_Holi/domain"
 	"database/sql"
+
+	"2023_2_Holi/domain"
+	logs "2023_2_Holi/logs"
 )
 
 type filmPostgresqlRepository struct {
@@ -26,7 +28,7 @@ func (r *filmPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film,
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-
+			logs.LogError(logs.Logger, "collections_postgresql", "GetFilmsByGenre", err, err.Error())
 		}
 	}(rows)
 
