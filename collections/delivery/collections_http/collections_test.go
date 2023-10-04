@@ -1,6 +1,7 @@
 package collections_http_test
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,6 +21,7 @@ func TestGetFilmsByGenre(t *testing.T) {
 		name                 string
 		setUCaseExpectations func(usecase *mocks.FilmUsecase)
 		status               int
+		good                 bool
 	}{
 		{
 			name: "GoodCase/Common",
@@ -27,12 +29,20 @@ func TestGetFilmsByGenre(t *testing.T) {
 				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, nil)
 			},
 			status: http.StatusOK,
+			good:   true,
+		},
+		{
+			name: "GoodCase/EmptyFilms",
+			setUCaseExpectations: func(usecase *mocks.FilmUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, errors.New("error"))
+			},
+			status: http.StatusOK,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			t.Parallel()
+			//t.Parallel()
 
 			router := mux.NewRouter()
 			mockUsecase := new(mocks.FilmUsecase)
@@ -42,6 +52,8 @@ func TestGetFilmsByGenre(t *testing.T) {
 			assert.NoError(t, err)
 
 			rec := httptest.NewRecorder()
+
+			collections_http.NewFilmHandler(router, mockUsecase)
 
 			handler := &collections_http.FilmHandler{
 				FilmUsecase: mockUsecase,

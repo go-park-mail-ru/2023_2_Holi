@@ -47,6 +47,10 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, err
 }
 
 func (u *authUsecase) Logout(token string) error {
+	if token == "" {
+		return domain.ErrBadRequest
+	}
+
 	if err := u.sessionRepo.DeleteByToken(token); err != nil {
 		return err
 	}
@@ -55,6 +59,10 @@ func (u *authUsecase) Logout(token string) error {
 }
 
 func (u *authUsecase) Register(user domain.User) (int, error) {
+	if user == (domain.User{}) {
+		return 0, domain.ErrBadRequest
+	}
+
 	user.DateJoined = time.Now()
 
 	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
