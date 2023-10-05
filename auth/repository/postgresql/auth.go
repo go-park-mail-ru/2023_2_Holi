@@ -7,8 +7,6 @@ import (
 	logs "2023_2_Holi/logs"
 )
 
-var logger = logs.LoggerInit()
-
 type authPostgresqlRepository struct {
 	db *sql.DB
 }
@@ -27,10 +25,10 @@ func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error)
 	defer func(result *sql.Rows) {
 		err := result.Close()
 		if err != nil {
-			logs.LogError(logger, "postgresql", "GetByName", err, "Failed to close query")
+			logs.LogError(logs.Logger, "postgresql", "GetByName", err, "Failed to close query")
 		}
 	}(result)
-	logger.Debug("GetByName query result:", result)
+	logs.Logger.Debug("GetByName query result:", result)
 
 	var user domain.User
 	for result.Next() {
@@ -62,7 +60,7 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 		user.DateJoined,
 		user.ImagePath)
 
-	logger.Debug("AddUser queryRow result:", result)
+	logs.Logger.Debug("AddUser queryRow result:", result)
 
 	var id int
 	if err := result.Scan(&id); err != nil {

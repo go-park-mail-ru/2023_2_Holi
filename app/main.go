@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -8,13 +9,13 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
-
-	"github.com/joho/godotenv"
 
 	_http "2023_2_Holi/auth/delivery/http"
 	"2023_2_Holi/auth/delivery/http/middleware"
 	"2023_2_Holi/auth/repository/postgresql"
+	session "2023_2_Holi/auth/repository/redis"
 	"2023_2_Holi/auth/usecase"
 
 	"2023_2_Holi/collections/collections_usecase"
@@ -25,7 +26,23 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func dbParamsfromEnv() string {
+func redisConnector() *redis.Client {
+	redis := redis.NewClient(&redis.Options{
+		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
+		Password: os.Getenv("REDIS_PASSWORD"),
+	})
+	defer redis.Close()
+
+	_, err := redis.Ping(context.Background()).Result()
+	if err != nil {
+		logs.LogFatal(logs.Logger, "main", "redisConnector", err, "Failed to connect to redis")
+	}
+	logs.Logger.Info("Connected to redis")
+
+	return redis
+}
+
+func postgresParamsfromEnv() string {
 	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
 		return ""
@@ -72,39 +89,38 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @schemes http
 // @BasePath /
 func main() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		logs.Logger.Fatal("Failed to get config : ", err)
-	}
-
 	accessLogger := AccessLogger{
 		LogrusLogger: logs.Logger,
 	}
 
-	db, err := sql.Open("postgres", dbParamsfromEnv())
+	postgres, err := sql.Open("postgres", postgresParamsfromEnv())
 	if err != nil {
-		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to connect to db")
+		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to connect to postgres")
 	}
-	defer db.Close()
-	logs.Logger.Debug("db conf :", db)
+	defer postgres.Close()
+	logs.Logger.Debug("postgres conf :", postgres)
 
-	err = db.Ping()
+	redis := redisConnector()
+	logs.Logger.Debug("redis client :", redis)
+
+	err = postgres.Ping()
 	if err != nil {
-		logs.LogFatal(logs.Logger, "main", "main", err, "DB doesn't listen")
+		logs.LogFatal(logs.Logger, "main", "main", err, "postgres doesn't listen")
 	}
 	logs.Logger.Info("Connected to postgres")
 
 	mainRouter := mux.NewRouter()
 
-	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
-	authRepository := postgresql.NewAuthPostgresqlRepository(db)
+	sessionRepository := session.NewSessionRedisRepository(redis)
+
+	authRepository := postgresql.NewAuthPostgresqlRepository(postgres)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
 
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
 	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 
-	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
+	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(postgres)
 	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
 	_httpCol.NewFilmHandler(authMiddlewareRouter, filmUsecase)
 
