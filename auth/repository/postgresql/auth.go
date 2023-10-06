@@ -79,38 +79,3 @@ func (r *authPostgresqlRepository) UserExists(email string) (bool, error) {
 
 	return exist, nil
 }
-
-type sessionPostgresqlRepository struct {
-	db *sql.DB
-}
-
-func NewSessionPostgresqlRepository(conn *sql.DB) domain.SessionRepository {
-	return &sessionPostgresqlRepository{conn}
-}
-
-func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
-	_, err := s.db.Exec(`INSERT INTO "session" VALUES ($1, $2, $3)`, session.Token, session.ExpiresAt, session.UserID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *sessionPostgresqlRepository) DeleteByToken(token string) error {
-	_, err := s.db.Exec(`DELETE FROM "session" WHERE token = $1`, token)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *sessionPostgresqlRepository) SessionExists(token string) (bool, error) {
-	result := s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "session" WHERE token = $1)`, token)
-
-	var exist bool
-	if err := result.Scan(&exist); err != nil {
-		return false, err
-	}
-
-	return exist, nil
-}
