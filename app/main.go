@@ -31,7 +31,6 @@ func redisConnector() *redis.Client {
 		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
 		Password: os.Getenv("REDIS_PASSWORD"),
 	})
-	defer redis.Close()
 
 	_, err := redis.Ping(context.Background()).Result()
 	if err != nil {
@@ -101,6 +100,7 @@ func main() {
 	logs.Logger.Debug("postgres conf :", postgres)
 
 	redis := redisConnector()
+	defer redis.Close()
 	logs.Logger.Debug("redis client :", redis)
 
 	err = postgres.Ping()

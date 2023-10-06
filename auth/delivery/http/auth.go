@@ -141,14 +141,14 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
-		logs.LogError(logs.Logger, "http", "Register", err, "user is authorised")
+		logs.LogError(logs.Logger, "http", "Register.auth", err, "user is authorised")
 	}
 
 	var user domain.User
 	err = json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "http", "Register", err, "Failed to decode json from body")
+		logs.LogError(logs.Logger, "http", "Register.decode", err, "Failed to decode json from body")
 		return
 	}
 	logs.Logger.Debug("Register user:", user)
@@ -157,20 +157,20 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	user.Email = strings.TrimSpace(user.Email)
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Register", err, "creds are invalid")
+		logs.LogError(logs.Logger, "http", "Register.credentials", err, "creds are invalid")
 	}
 
 	var id int
 	if id, err = a.AuthUsecase.Register(user); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Register", err, "Failed to register")
+		logs.LogError(logs.Logger, "http", "Register.register", err, "Failed to register")
 		return
 	}
 
 	session, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Register", err, "Failed to login")
+		logs.LogError(logs.Logger, "http", "Register.login", err, "Failed to login")
 		return
 	}
 	http.SetCookie(w, &http.Cookie{

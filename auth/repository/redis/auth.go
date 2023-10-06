@@ -23,7 +23,6 @@ func (s *sessionRedisRepository) Add(session domain.Session) error {
 		return err
 	}
 	return nil
-
 }
 
 func (s *sessionRedisRepository) DeleteByToken(token string) error {
