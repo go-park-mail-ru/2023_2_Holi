@@ -72,7 +72,7 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @schemes http
 // @BasePath /
 func main() {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load()
 	if err != nil {
 		logs.Logger.Fatal("Failed to get config : ", err)
 	}
