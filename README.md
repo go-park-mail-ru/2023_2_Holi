@@ -4,15 +4,34 @@ Backend репозиторий команды Holi
 
 
 ### Функциональные зависимости
-Relation A:
+Relation VIDEO:
 
-{Attr1, Attr2} -> Attr3, Attr4, Attr5
+{id} -> name, description, duration, preview_path, media_path, release_path, rating, age_restriction, seasons_count
 
-Relation B:
+Relation EPISODE:
 
-{Attr1} -> Attr3
+{id} -> name, description, duration, preview_path, number
 
-{Attr2} -> Attr4
+Relation USER:
+
+{id} -> name, email, password, date_joined, image_path
+
+Relation CAST:
+
+{id} -> name
+
+Relation TAG:
+
+{id} -> name
+
+Relation GENRE:
+
+{id} -> name
+
+Relation VIDEO_ESTIMATION:
+
+{user_id, video_id} -> rate
+
 
 ### ER
 
@@ -72,9 +91,9 @@ erDiagram
 
     USER {
         _ id PK
-        _ name 
-        _ email
-        _ password
+        _ name
+        _ email "UNIQUE NOT NULL"
+        _ password "NOT NULL"
         _ date_joined
         _ image_path
     }
@@ -86,5 +105,18 @@ erDiagram
         _ video_id FK
         _ rate
     }
+
+    TAG {
+        _ id PK
+        _ name
+    }
+
+    VIDEO-TAG ||--|{ VIDEO: video
+    VIDEO-TAG ||--|{ TAG: tag
+    VIDEO-TAG {
+        _ video_id FK
+        _ tag_id FK
+    }
+    
 
 ```
