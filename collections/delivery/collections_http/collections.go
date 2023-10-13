@@ -6,7 +6,7 @@ import (
 
 	"2023_2_Holi/domain"
 
-	"2023_2_Holi/logfuncs"
+	"2023_2_Holi/logs"
 
 	"github.com/gorilla/mux"
 )
@@ -26,7 +26,8 @@ func NewFilmHandler(router *mux.Router, fu domain.FilmUsecase) {
 	handler := &FilmHandler{
 		FilmUsecase: fu,
 	}
-	router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods("GET")
+
+	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
 }
 
 //GetFilmsByGenre godoc

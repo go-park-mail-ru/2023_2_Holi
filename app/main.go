@@ -15,11 +15,11 @@ import (
 	_http "2023_2_Holi/auth/delivery/http"
 	"2023_2_Holi/auth/repository/postgresql"
 	"2023_2_Holi/auth/usecase"
-	"2023_2_Holi/logfuncs"
 
 	"2023_2_Holi/collections/collections_usecase"
 	_httpCol "2023_2_Holi/collections/delivery/collections_http"
 	"2023_2_Holi/collections/repository/collections_postgresql"
+	logs "2023_2_Holi/logs"
 
 	_httpGen "2023_2_Holi/genre/delivery/genre_http"
 	"2023_2_Holi/genre/genre_usecase"
@@ -29,20 +29,18 @@ import (
 )
 
 func dbParamsfromEnv() string {
-	host := os.Getenv("DB_HOST")
+	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
 		return ""
 	}
 
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	dbname := os.Getenv("DB_NAME")
+	port := os.Getenv("POSTGRES_PORT")
+	user := os.Getenv("POSTGRES_USER")
+	pass := os.Getenv("POSTGRES_PASSWORD")
+	dbname := os.Getenv("POSTGRES_NAME")
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
-
-var logger = logfuncs.LoggerInit()
 
 type AccessLogger struct {
 	LogrusLogger *logrus.Logger
@@ -51,6 +49,8 @@ type AccessLogger struct {
 func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
+		//w.Header().Set("Access-Control-Allow-Origin", "*")
+
 		next.ServeHTTP(w, r)
 
 		ac.LogrusLogger.WithFields(logrus.Fields{
@@ -77,43 +77,56 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		logger.Fatal("Failed to get config : ", err)
+		logs.Logger.Fatal("Failed to get config : ", err)
 	}
 
-	accessLogger := AccessLogger{
-		LogrusLogger: logger,
-	}
-
-	logger.Info("starting connect to db")
+	/*accessLogger := AccessLogger{
+		LogrusLogger: logs.Logger,
+	}*/
 
 	db, err := sql.Open("postgres", dbParamsfromEnv())
 	if err != nil {
-		logfuncs.LogFatal(logger, "main", "main", err, "Failed to open db")
+		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to connect to db")
 	}
-	logger.Debug("db conf :", db)
 	defer db.Close()
+	logs.Logger.Debug("db conf :", db)
 
-	router := mux.NewRouter()
+	err = db.Ping()
+	if err != nil {
+		logs.LogFatal(logs.Logger, "main", "main", err, "DB doesn't listen")
+	}
+	logs.Logger.Info("Connected to postgres")
 
-	router.Use(accessLogger.accessLogMiddleware)
+	mainRouter := mux.NewRouter()
+
 	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
 	authRepository := postgresql.NewAuthPostgresqlRepository(db)
 	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
 
-	_http.NewAuthHandler(router, authUsecase)
+	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
+
+	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 
 	genreRepository := genre_postgresql.GenrePostgresqlRepository(db)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
-	_httpGen.NewGenreHandler(router, genreUsecase)
+	_httpGen.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 
 	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
 	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
-	_httpCol.NewFilmHandler(router, filmUsecase)
+	_httpCol.NewFilmHandler(authMiddlewareRouter, filmUsecase)
 
-	logger.Info("starting server at :8080")
-	err = http.ListenAndServe(":8080", router)
+	/*mw := middleware.InitMiddleware(authUsecase)
+
+	authMiddlewareRouter.Use(mw.IsAuth)
+	mainRouter.Use(accessLogger.accessLogMiddleware)
+	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
+	mainRouter.Use(mw.CORS)*/
+
+	logs.Logger.Info("starting server at :8080")
+
+	err = http.ListenAndServe(":8080", mainRouter)
 	if err != nil {
-		logfuncs.LogFatal(logger, "main", "main", err, "Failed to start server")
+		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}
-	logger.Info("server stopped")
+	logs.Logger.Info("server stopped")
 }

@@ -1,4 +1,11 @@
 basePath: /
+definitions:
+  http.Result:
+    properties:
+      body: {}
+      err:
+        type: string
+    type: object
 host: 127.0.0.1E
 info:
   contact:
@@ -73,6 +80,8 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/http.Result'
         "400":
           description: '{"error":"<error message>"}'
           schema:

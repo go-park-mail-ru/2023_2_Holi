@@ -6,7 +6,7 @@ import (
 
 type Credentials struct {
 	Password string `json:"password"`
-	Name     string `json:"name"`
+	Email    string `json:"email"`
 }
 
 type User struct {
@@ -22,11 +22,13 @@ type AuthUsecase interface {
 	Login(credentials Credentials) (Session, error)
 	Logout(token string) error
 	Register(user User) (int, error)
+	IsAuth(token string) (bool, error)
 }
 
 type AuthRepository interface {
-	GetByName(name string) (User, error)
+	GetByEmail(email string) (User, error)
 	AddUser(user User) (int, error)
+	UserExists(email string) (bool, error)
 }
 
 type Session struct {
@@ -38,4 +40,5 @@ type Session struct {
 type SessionRepository interface {
 	Add(session Session) error
 	DeleteByToken(token string) error
+	SessionExists(token string) (bool, error)
 }
