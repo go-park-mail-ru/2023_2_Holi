@@ -5,15 +5,15 @@ import (
 	"database/sql"
 )
 
-type filmPostgresqlRepository struct {
+type FilmPostgresqlRepository struct {
 	db *sql.DB
 }
 
 func NewFilmPostgresqlRepository(conn *sql.DB) domain.FilmRepository {
-	return &filmPostgresqlRepository{db: conn}
+	return &FilmPostgresqlRepository{db: conn}
 }
 
-func (r *filmPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film, error) {
+func (r *FilmPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	rows, err := r.db.Query(
 		`SELECT film.id, film.name, film.preview_path, film.rating
 		FROM film

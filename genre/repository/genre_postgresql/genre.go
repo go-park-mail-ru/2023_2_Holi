@@ -1,4 +1,4 @@
-package collections_postgresql
+package genre_postgresql
 
 import (
 	"2023_2_Holi/domain"

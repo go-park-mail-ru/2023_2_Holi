@@ -1,4 +1,4 @@
-package collections_usecase
+package genre_usecase
 
 import "2023_2_Holi/domain"
 

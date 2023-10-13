@@ -67,14 +67,6 @@ func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
-func (h *FilmHandler) GetImage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	filename := vars["filename"]
-	imagePath := "static/preview_path/" + filename
-
-	http.ServeFile(w, r, imagePath)
-}
-
 func getStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK

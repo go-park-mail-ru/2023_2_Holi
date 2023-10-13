@@ -1,13 +1,21 @@
-package collections_http
+package genre_http
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"2023_2_Holi/domain"
+	"2023_2_Holi/logfuncs"
 
 	"github.com/gorilla/mux"
 )
+
+var logger = logfuncs.LoggerInit()
+
+type ApiResponse struct {
+	Status int         `json:"status"`
+	Body   interface{} `json:"body"`
+}
 
 type GenreHandler struct {
 	GenreUsecase domain.GenreUsecase
@@ -50,6 +58,25 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	logger.Debug("Films:", genres)
+	logger.Debug("Genres:", genres)
 	json.NewEncoder(w).Encode(response)
+}
+
+func getStatusCode(err error) int {
+	if err == nil {
+		return http.StatusOK
+	}
+
+	switch err {
+	case domain.ErrInternalServerError:
+		return http.StatusInternalServerError
+	case domain.ErrNotFound:
+		return http.StatusNotFound
+	case domain.ErrUnauthorized:
+		return http.StatusUnauthorized
+	case domain.ErrWrongCredentials:
+		return http.StatusForbidden
+	default:
+		return http.StatusInternalServerError
+	}
 }
