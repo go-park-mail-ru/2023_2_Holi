@@ -1,9 +1,12 @@
 # 2023_2_Holi
 Backend репозиторий команды Holi
 
+## Объяснение нормальных форм(нф):
+- 1я нф - т.к. каждый столбец содержит в себе атомарное значение
+- 2я нф -  т.к. нет составных ключей
+- 3я нф - т.к. каждый столбец таблицы зависит только от PK (нет зависимостей между неключевыми атрибутами)
 
-
-### Функциональные зависимости
+## Функциональные зависимости
 Relation VIDEO:
 
 {id} -> name, description, duration, preview_path, media_path, release_path, rating, age_restriction, seasons_count
@@ -33,7 +36,7 @@ Relation VIDEO_ESTIMATION:
 {user_id, video_id} -> rate
 
 
-### ER
+## ER
 
 ```mermaid
 ---
@@ -92,8 +95,8 @@ erDiagram
     USER {
         _ id PK
         _ name
-        _ email "UNIQUE NOT NULL"
-        _ password "NOT NULL"
+        _ email
+        _ password
         _ date_joined
         _ image_path
     }
