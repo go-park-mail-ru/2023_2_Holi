@@ -4,7 +4,7 @@ import (
 	"database/sql"
 
 	"2023_2_Holi/domain"
-	logs "2023_2_Holi/logs"
+	logs "2023_2_Holi/logger"
 )
 
 type filmPostgresqlRepository struct {

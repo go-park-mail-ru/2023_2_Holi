@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
-	logs "2023_2_Holi/logs"
+	logs "2023_2_Holi/logger"
 )
 
 type Result struct {
@@ -47,14 +47,15 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	auth, _ := a.auth(r)
+	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
+		logs.LogError(logs.Logger, "http", "Login", err, "User is already logged in")
 	}
 
 	var credentials domain.Credentials
 
-	err := json.NewDecoder(r.Body).Decode(&credentials)
+	err = json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
 		logs.LogError(logs.Logger, "http", "Login", err, "Failed to decode json from body")
@@ -73,6 +74,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if err = checkCredentials(credentials); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
+		logs.LogError(logs.Logger, "http", "Login", err, "Credentials are incorrect")
 	}
 
 	session, err := a.AuthUsecase.Login(credentials)
