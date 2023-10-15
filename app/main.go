@@ -75,10 +75,10 @@ func main() {
 	filmRepository := movies_postgresql.NewFilmPostgresqlRepository(postgres)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
-	filmUsecase := movies_usecase.NewFilmUsecase(filmRepository)
+	filmUsecase := movies_usecase.NewMoviesUsecase(filmRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
-	movies_http.NewFilmHandler(authMiddlewareRouter, filmUsecase)
+	movies_http.NewMoviesHandler(authMiddlewareRouter, filmUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 
