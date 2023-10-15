@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"2023_2_Holi/collections/delivery/collections_http"
+	collections_http "2023_2_Holi/collections/delivery/http"
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
 

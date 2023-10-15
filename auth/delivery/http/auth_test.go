@@ -1,4 +1,4 @@
-package http_test
+package auth_http_test
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package http
+package auth_http
 
 import (
 	"encoding/json"

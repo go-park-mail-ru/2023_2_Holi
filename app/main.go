@@ -8,17 +8,19 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/sirupsen/logrus"
 
-	_http "2023_2_Holi/auth/delivery/http"
+	auth_http "2023_2_Holi/auth/delivery/http"
+
+	auth_postgresql "2023_2_Holi/auth/repository/postgresql"
+	auth_redis "2023_2_Holi/auth/repository/redis"
+	auth_usecase "2023_2_Holi/auth/usecase"
+
+	collections_http "2023_2_Holi/collections/delivery/http"
+	collections_postgresql "2023_2_Holi/collections/repository/postgresql"
+	collections_usecase "2023_2_Holi/collections/usecase"
+
 	"2023_2_Holi/auth/delivery/http/middleware"
-	"2023_2_Holi/auth/repository/postgresql"
-	session "2023_2_Holi/auth/repository/redis"
-	"2023_2_Holi/auth/usecase"
 	postgres "2023_2_Holi/db_connector/postgres"
 	redis "2023_2_Holi/db_connector/redis"
-
-	"2023_2_Holi/collections/collections_usecase"
-	_httpCol "2023_2_Holi/collections/delivery/collections_http"
-	"2023_2_Holi/collections/repository/collections_postgresql"
 	logs "2023_2_Holi/logger"
 
 	_ "github.com/lib/pq"
@@ -68,15 +70,15 @@ func main() {
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
-	sessionRepository := session.NewSessionRedisRepository(redis)
-	authRepository := postgresql.NewAuthPostgresqlRepository(postgres)
+	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
+	authRepository := auth_postgresql.NewAuthPostgresqlRepository(postgres)
 	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(postgres)
 
-	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
+	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
 
-	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
-	_httpCol.NewFilmHandler(authMiddlewareRouter, filmUsecase)
+	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
+	collections_http.NewFilmHandler(authMiddlewareRouter, filmUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

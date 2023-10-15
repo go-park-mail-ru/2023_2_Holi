@@ -1,4 +1,4 @@
-package postgresql
+package auth_postgresql
 
 import (
 	"database/sql"
