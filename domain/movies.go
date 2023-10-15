@@ -1,6 +1,6 @@
 package domain
 
-type Film struct {
+type Movie struct {
 	ID             int     `json:"id"`
 	Name           string  `json:"name"`
 	Description    string  `json:"-"`
@@ -14,10 +14,10 @@ type Film struct {
 	Duration       int     `json:"-"`
 }
 
-type FilmRepository interface {
-	GetFilmsByGenre(genre string) ([]Film, error)
+type MoviesRepository interface {
+	GetMoviesByGenre(genre string) ([]Movie, error)
 }
 
-type FilmUsecase interface {
-	GetFilmsByGenre(genre string) ([]Film, error)
+type MoviesUsecase interface {
+	GetMoviesByGenre(genre string) ([]Movie, error)
 }

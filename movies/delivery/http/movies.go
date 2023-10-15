@@ -1,4 +1,4 @@
-package collections_http
+package movies_http
 
 import (
 	"encoding/json"
@@ -15,34 +15,34 @@ type ApiResponse struct {
 	Body   interface{} `json:"body"`
 }
 
-type FilmHandler struct {
-	FilmUsecase domain.FilmUsecase
+type MoviesHandler struct {
+	MoviesUsecase domain.MoviesUsecase
 }
 
-func NewFilmHandler(router *mux.Router, fu domain.FilmUsecase) {
-	handler := &FilmHandler{
-		FilmUsecase: fu,
+func NewMoviesHandler(router *mux.Router, fu domain.MoviesUsecase) {
+	handler := &MoviesHandler{
+		MoviesUsecase: fu,
 	}
 
-	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/Moviess/genre/{genre}", handler.GetMoviesByGenre).Methods(http.MethodGet, http.MethodOptions)
 }
 
-// GetFilmsByGenre godoc
-// @Summary Get films by genre
-// @Description Get a list of films based on the specified genre.
-// @Tags films
-// @Param genre path string true "The genre of the films you want to retrieve."
+// GetMoviessByGenre godoc
+// @Summary Get Moviess by genre
+// @Description Get a list of Moviess based on the specified genre.
+// @Tags Moviess
+// @Param genre path string true "The genre of the Moviess you want to retrieve."
 // @Produce json
-// @Success 200 {json} domain.Film
+// @Success 200 {json} domain.Movies
 // @Failure 400 {json} ApiResponse
 // @Failure 404 {json} ApiResponse
 // @Failure 500 {json} ApiResponse
-// @Router /api/v1/films/genre/{genre} [get]
-func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
+// @Router /api/v1/Moviess/genre/{genre} [get]
+func (h *MoviesHandler) GetMoviesByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	genre := vars["genre"]
 
-	films, err := h.FilmUsecase.GetFilmsByGenre(genre)
+	movies, err := h.MoviesUsecase.GetMoviesByGenre(genre)
 	if err != nil {
 		response := ApiResponse{
 			Status: getStatusCode(err),
@@ -56,20 +56,12 @@ func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	response := ApiResponse{
 		Status: http.StatusOK,
 		Body: map[string]interface{}{
-			"films": films,
+			"Moviess": movies,
 		},
 	}
 
-	logs.Logger.Debug("Films:", films)
+	logs.Logger.Debug("Moviess:", movies)
 	json.NewEncoder(w).Encode(response)
-}
-
-func (h *FilmHandler) GetImage(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	filename := vars["filename"]
-	imagePath := "static/preview_path/" + filename
-
-	http.ServeFile(w, r, imagePath)
 }
 
 func getStatusCode(err error) int {
