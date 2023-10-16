@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
-
 	auth_postgresql "2023_2_Holi/auth/repository/postgresql"
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
@@ -88,9 +87,9 @@ func main() {
 	mainRouter.Use(mw.CORS)
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
-	logs.Logger.Info("starting server at", serverPort)
+	logs.Logger.Info("starting server at ", serverPort)
 
-	err := http.ListenAndServe(":8080", mainRouter)
+	err := http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}

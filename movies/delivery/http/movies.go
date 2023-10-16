@@ -56,11 +56,11 @@ func (h *MoviesHandler) GetMoviesByGenre(w http.ResponseWriter, r *http.Request)
 	response := ApiResponse{
 		Status: http.StatusOK,
 		Body: map[string]interface{}{
-			"Moviess": movies,
+			"films": movies,
 		},
 	}
 
-	logs.Logger.Debug("Moviess:", movies)
+	logs.Logger.Debug("movies:", movies)
 	json.NewEncoder(w).Encode(response)
 }
 
