@@ -31,7 +31,7 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 	mainRouter.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
 	mainRouter.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
 
-	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }).Methods(http.MethodPost, http.MethodOptions)
+	//authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }).Methods(http.MethodPost, http.MethodOptions)
 	authMwRouter.HandleFunc("/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
 }
 
@@ -50,7 +50,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
-		logs.LogError(logs.Logger, "http", "Login", err, "User is already logged in")
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "User is already logged in")
 	}
 
 	var credentials domain.Credentials
@@ -58,7 +58,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	err = json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "http", "Login", err, "Failed to decode json from body")
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to decode json from body")
 		return
 	}
 	logs.Logger.Debug("Login credentials:", credentials)
@@ -66,21 +66,21 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	if credentials.Password == "" || credentials.Email == "" {
 		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
-		logs.LogError(logs.Logger, "http", "Login", err, "Credentials are empy")
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are empy")
 		return
 	}
 
 	credentials.Email = strings.TrimSpace(credentials.Email)
 
 	if err = checkCredentials(credentials); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Login", err, "Credentials are incorrect")
+		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are incorrect")
 	}
 
 	session, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Login", err, "Failed to login")
+		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to login")
 		return
 	}
 	logs.Logger.Debug("Login: session:", session)
@@ -113,7 +113,7 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusInternalServerError)
-		logs.LogError(logs.Logger, "http", "Logout", err, "Failed to logout")
+		logs.LogError(logs.Logger, "auth_http", "Logout", err, "Failed to logout")
 		return
 	}
 
@@ -143,14 +143,14 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
-		logs.LogError(logs.Logger, "http", "Register.auth", err, "user is authorised")
+		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
 	}
 
 	var user domain.User
 	err = json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "http", "Register.decode", err, "Failed to decode json from body")
+		logs.LogError(logs.Logger, "auth_http", "Register.decode", err, "Failed to decode json from body")
 		return
 	}
 	logs.Logger.Debug("Register user:", user)
@@ -158,21 +158,21 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user.Email = strings.TrimSpace(user.Email)
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Register.credentials", err, "creds are invalid")
+		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Register.credentials", err, "creds are invalid")
 	}
 
 	var id int
 	if id, err = a.AuthUsecase.Register(user); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Register.register", err, "Failed to register")
+		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Register.register", err, "Failed to register")
 		return
 	}
 
 	session, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, getStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Register.login", err, "Failed to login")
+		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Register.login", err, "Failed to login")
 		return
 	}
 	http.SetCookie(w, &http.Cookie{
@@ -213,31 +213,10 @@ func (a *AuthHandler) auth(r *http.Request) (bool, error) {
 	return true, nil
 }
 
-func getStatusCode(err error) int {
-	if err == nil {
-		return http.StatusOK
-	}
-
-	switch err {
-	case domain.ErrInternalServerError:
-		return http.StatusInternalServerError
-	case domain.ErrNotFound:
-		return http.StatusNotFound
-	case domain.ErrUnauthorized:
-		return http.StatusUnauthorized
-	case domain.ErrWrongCredentials:
-		return http.StatusForbidden
-	case domain.ErrAlreadyExists:
-		return http.StatusForbidden
-	default:
-		return http.StatusInternalServerError
-	}
-}
-
 func (a *AuthHandler) CloseAndAlert(body io.ReadCloser) {
 	err := body.Close()
 	if err != nil {
-		logs.LogError(logs.Logger, "http", "CloseAndAlert", err, "Failed to close body")
+		logs.LogError(logs.Logger, "auth_http", "CloseAndAlert", err, "Failed to close body")
 	}
 }
 

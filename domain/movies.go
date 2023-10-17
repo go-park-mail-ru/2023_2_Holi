@@ -16,8 +16,11 @@ type Movie struct {
 
 type MoviesRepository interface {
 	GetMoviesByGenre(genre string) ([]Movie, error)
+	GetMovieData(id int) (*Movie, error)
+	GetMovieArtists(movieId int) ([]Artist, error)
 }
 
 type MoviesUsecase interface {
 	GetMoviesByGenre(genre string) ([]Movie, error)
+	GetMovieData(id int) (*Movie, []Artist, error)
 }
