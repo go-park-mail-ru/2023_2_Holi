@@ -1,4 +1,4 @@
-package movies_http_test
+package films_http_test
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
-	movies_http "2023_2_Holi/movies/delivery/http"
+	films_http "2023_2_Holi/films/delivery/http"
 
 	"github.com/gorilla/mux"
 )
@@ -19,22 +19,22 @@ import (
 func TestGetMoviesByGenre(t *testing.T) {
 	tests := []struct {
 		name                 string
-		setUCaseExpectations func(usecase *mocks.MoviesUsecase)
+		setUCaseExpectations func(usecase *mocks.FilmsUsecase)
 		status               int
 		good                 bool
 	}{
 		{
 			name: "GoodCase/Common",
-			setUCaseExpectations: func(usecase *mocks.MoviesUsecase) {
-				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Movie{}, nil)
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, nil)
 			},
 			status: http.StatusOK,
 			good:   true,
 		},
 		{
 			name: "GoodCase/EmptyFilms",
-			setUCaseExpectations: func(usecase *mocks.MoviesUsecase) {
-				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Movie{}, errors.New("error"))
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, errors.New("error"))
 			},
 			status: http.StatusOK,
 		},
@@ -45,7 +45,7 @@ func TestGetMoviesByGenre(t *testing.T) {
 			//t.Parallel()
 
 			router := mux.NewRouter()
-			mockUsecase := new(mocks.MoviesUsecase)
+			mockUsecase := new(mocks.FilmsUsecase)
 			test.setUCaseExpectations(mockUsecase)
 
 			req, err := http.NewRequest("GET", "/api/v1/films/genre/{genre}", nil)
@@ -53,13 +53,13 @@ func TestGetMoviesByGenre(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			movies_http.NewMoviesHandler(router, mockUsecase)
+			films_http.NewFilmsHandler(router, mockUsecase)
 
-			handler := &movies_http.MoviesHandler{
-				MoviesUsecase: mockUsecase,
+			handler := &films_http.FilmsHandler{
+				FilmsUsecase: mockUsecase,
 			}
 
-			router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetMoviesByGenre).Methods("GET")
+			router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods("GET")
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)

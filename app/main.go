@@ -11,9 +11,9 @@ import (
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
 
-	movies_http "2023_2_Holi/movies/delivery/http"
-	movies_postgresql "2023_2_Holi/movies/repository/postgresql"
-	movies_usecase "2023_2_Holi/movies/usecase"
+	films_http "2023_2_Holi/films/delivery/http"
+	films_postgresql "2023_2_Holi/films/repository/postgresql"
+	films_usecase "2023_2_Holi/films/usecase"
 
 	postgres "2023_2_Holi/db_connector/postgres"
 	redis "2023_2_Holi/db_connector/redis"
@@ -52,13 +52,13 @@ func main() {
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
 	authRepository := auth_postgresql.NewAuthPostgresqlRepository(postgres)
-	filmRepository := movies_postgresql.NewFilmPostgresqlRepository(postgres)
+	filmRepository := films_postgresql.NewFilmsPostgresqlRepository(postgres)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
-	moviesUsecase := movies_usecase.NewMoviesUsecase(filmRepository)
+	moviesUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
-	movies_http.NewMoviesHandler(authMiddlewareRouter, moviesUsecase)
+	films_http.NewFilmsHandler(authMiddlewareRouter, moviesUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

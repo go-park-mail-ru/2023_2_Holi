@@ -20,4 +20,3 @@
   COPY --from=build-stage /fill/fill/Netflix_Dataset.csv /Netflix_Dataset.csv
   
   ENTRYPOINT ["/fill"]
-

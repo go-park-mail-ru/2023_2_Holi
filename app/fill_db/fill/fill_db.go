@@ -9,16 +9,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 func dbParamsfromEnv() string {
 	host := os.Getenv("POSTGRES_HOST")
-	if host == "" {
-		return ""
-	}
-
 	port := os.Getenv("POSTGRES_PORT")
 	user := os.Getenv("POSTGRES_USER")
 	pass := os.Getenv("POSTGRES_PASSWORD")
@@ -28,10 +23,6 @@ func dbParamsfromEnv() string {
 }
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Failed to get config: %v", err)
-	}
 	count := 0
 	genreID := 0
 	db, err := sql.Open("postgres", dbParamsfromEnv())
@@ -45,7 +36,7 @@ func main() {
 		log.Fatalf("Ошибка подключения к базе данных: %v", err)
 	}
 
-	file, err := os.Open("app/fill/Netflix_Dataset.csv")
+	file, err := os.Open("../Netflix_Dataset.csv")
 	if err != nil {
 		log.Fatal(err)
 	}
