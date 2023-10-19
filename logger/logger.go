@@ -1,4 +1,4 @@
-package logfuncs
+package logs
 
 import (
 	"os"

@@ -2,6 +2,7 @@ package films_usecase
 
 import (
 	"2023_2_Holi/domain"
+	logs "2023_2_Holi/logger"
 )
 
 type filmsUsecase struct {
@@ -19,7 +20,7 @@ func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	logs.Logger.Debug("Usecase GetFilmsByGenre:", films)
 	return films, nil
 }
 

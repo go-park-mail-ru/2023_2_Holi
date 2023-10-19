@@ -7,18 +7,26 @@ import (
 	"github.com/gorilla/mux"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
-	auth_postgresql "2023_2_Holi/auth/repository/postgresql"
+	auth_postgres "2023_2_Holi/auth/repository/postgresql"
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
 
 	films_http "2023_2_Holi/films/delivery/http"
-	films_postgresql "2023_2_Holi/films/repository/postgresql"
+	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
 
 	postgres "2023_2_Holi/db_connector/postgres"
 	redis "2023_2_Holi/db_connector/redis"
 	logs "2023_2_Holi/logger"
 	middleware "2023_2_Holi/middleware"
+
+	genre_http "2023_2_Holi/genre/delivery/http"
+	genre_postgres "2023_2_Holi/genre/repository/postgresql"
+	genre_usecase "2023_2_Holi/genre/usecase"
+
+	artist_http "2023_2_Holi/artist/delivery/http"
+	artist_postgres "2023_2_Holi/artist/repository/postgresql"
+	artist_usecase "2023_2_Holi/artist/usecase"
 
 	_ "github.com/lib/pq"
 )
@@ -51,14 +59,20 @@ func main() {
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
-	authRepository := auth_postgresql.NewAuthPostgresqlRepository(postgres)
-	filmRepository := films_postgresql.NewFilmsPostgresqlRepository(postgres)
+	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres)
+	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres)
+	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres)
+	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
-	moviesUsecase := films_usecase.NewFilmsUsecase(filmRepository)
+	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
+	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
+	artistUsecase := artist_usecase.NewArtistUsecase(artistRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
-	films_http.NewFilmsHandler(authMiddlewareRouter, moviesUsecase)
+	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
+	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
+	artist_http.NewArtistHandler(authMiddlewareRouter, artistUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

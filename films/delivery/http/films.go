@@ -53,6 +53,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 			},
 		}
 		json.NewEncoder(w).Encode(response)
+		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		return
 	}
 	response := ApiResponse{

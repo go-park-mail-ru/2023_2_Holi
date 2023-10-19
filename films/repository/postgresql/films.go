@@ -1,4 +1,4 @@
-package films_postgresql
+package films_postgres
 
 import (
 	"database/sql"
@@ -25,9 +25,10 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
+			logs.LogError(logs.Logger, "postgresql", "GetFilmsByGenre", err, "Failed to close query")
 		}
 	}(rows)
+	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
 
 	var films []domain.Film
 	for rows.Next() {

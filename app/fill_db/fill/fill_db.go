@@ -12,12 +12,14 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const path = "https://static_holi.hb.ru-msk.vkcs.cloud/Preview_Film/"
+
 func dbParamsfromEnv() string {
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
 	user := os.Getenv("POSTGRES_USER")
 	pass := os.Getenv("POSTGRES_PASSWORD")
-	dbname := os.Getenv("POSTGRES_DB")
+	dbname := os.Getenv("POSTGRES_NAME")
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
@@ -103,7 +105,9 @@ func main() {
 		genres := strings.Split(row[1], ",")
 
 		sqlStatement := "INSERT INTO film (id, name, preview_path, rating) VALUES ($1, $2, $3, $4)"
-		_, err = db.Exec(sqlStatement, count, row[0], row[26], row[12])
+		name := strings.Replace(row[0], " ", "_", -1)
+		preview_path := path + name + ".jpg"
+		_, err = db.Exec(sqlStatement, count, row[0], preview_path, row[12])
 		if err != nil {
 			log.Printf("Ошибка при вставке фильма: %v", err)
 			continue
