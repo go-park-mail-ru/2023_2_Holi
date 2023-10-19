@@ -1,4 +1,4 @@
-package collections_http
+package http
 
 import (
 	"encoding/json"
@@ -6,12 +6,12 @@ import (
 
 	"2023_2_Holi/domain"
 
-	"2023_2_Holi/logs"
+	logs "2023_2_Holi/logs"
 
 	"github.com/gorilla/mux"
 )
 
-var logger = logfuncs.LoggerInit()
+var logger = logs.LoggerInit()
 
 type ApiResponse struct {
 	Status int         `json:"status"`
@@ -54,6 +54,7 @@ func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			},
 		}
+		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -64,7 +65,7 @@ func (h *FilmHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	logger.Debug("Films:", films)
+	logger.Debug("Http GetFilmsByGenre:", films)
 	json.NewEncoder(w).Encode(response)
 }
 

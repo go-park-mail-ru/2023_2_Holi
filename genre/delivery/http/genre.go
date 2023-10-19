@@ -1,16 +1,16 @@
-package genre_http
+package http
 
 import (
 	"encoding/json"
 	"net/http"
 
 	"2023_2_Holi/domain"
-	"2023_2_Holi/logfuncs"
+	logs "2023_2_Holi/logs"
 
 	"github.com/gorilla/mux"
 )
 
-var logger = logfuncs.LoggerInit()
+var logger = logs.LoggerInit()
 
 type ApiResponse struct {
 	Status int         `json:"status"`
@@ -26,7 +26,7 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 		GenreUsecase: gu,
 	}
 
-	router.HandleFunc("/api/v1/genres", handler.GetGenres).Methods("GET")
+	router.HandleFunc("/v1/genres", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetGenres godoc
@@ -48,6 +48,7 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 				"error": err.Error(),
 			},
 		}
+		logs.LogError(logs.Logger, "http", "GetGenres", err, "Failed to get genres")
 		json.NewEncoder(w).Encode(response)
 		return
 	}
@@ -58,7 +59,7 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	logger.Debug("Genres:", genres)
+	logger.Debug("Http GetGenres:", genres)
 	json.NewEncoder(w).Encode(response)
 }
 

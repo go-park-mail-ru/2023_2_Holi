@@ -1,4 +1,4 @@
-package collections_postgresql_test
+package postgresql_test
 
 import (
 	"database/sql"

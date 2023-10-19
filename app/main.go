@@ -13,17 +13,22 @@ import (
 	"github.com/joho/godotenv"
 
 	_http "2023_2_Holi/auth/delivery/http"
+	"2023_2_Holi/auth/delivery/http/middleware"
 	"2023_2_Holi/auth/repository/postgresql"
 	"2023_2_Holi/auth/usecase"
 
-	"2023_2_Holi/collections/collections_usecase"
-	_httpCol "2023_2_Holi/collections/delivery/collections_http"
-	"2023_2_Holi/collections/repository/collections_postgresql"
+	_httpCol "2023_2_Holi/collections/delivery/http"
+	cr "2023_2_Holi/collections/repository/postgresql"
+	cu "2023_2_Holi/collections/usecase"
 	logs "2023_2_Holi/logs"
 
-	_httpGen "2023_2_Holi/genre/delivery/genre_http"
-	"2023_2_Holi/genre/genre_usecase"
-	"2023_2_Holi/genre/repository/genre_postgresql"
+	_httpGen "2023_2_Holi/genre/delivery/http"
+	gr "2023_2_Holi/genre/repository/postgresql"
+	gu "2023_2_Holi/genre/usecase"
+
+	_httpAr "2023_2_Holi/artist/delivery/http"
+	ar "2023_2_Holi/artist/repository/postgresql"
+	au "2023_2_Holi/artist/usecase"
 
 	_ "github.com/lib/pq"
 )
@@ -49,7 +54,7 @@ type AccessLogger struct {
 func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		//w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
 
 		next.ServeHTTP(w, r)
 
@@ -80,9 +85,9 @@ func main() {
 		logs.Logger.Fatal("Failed to get config : ", err)
 	}
 
-	/*accessLogger := AccessLogger{
+	accessLogger := AccessLogger{
 		LogrusLogger: logs.Logger,
-	}*/
+	}
 
 	db, err := sql.Open("postgres", dbParamsfromEnv())
 	if err != nil {
@@ -107,20 +112,24 @@ func main() {
 
 	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 
-	genreRepository := genre_postgresql.GenrePostgresqlRepository(db)
-	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
+	genreRepository := gr.GenrePostgresqlRepository(db)
+	genreUsecase := gu.NewGenreUsecase(genreRepository)
 	_httpGen.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 
-	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
-	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
+	filmRepository := cr.NewFilmPostgresqlRepository(db)
+	filmUsecase := cu.NewFilmUsecase(filmRepository)
 	_httpCol.NewFilmHandler(authMiddlewareRouter, filmUsecase)
 
-	/*mw := middleware.InitMiddleware(authUsecase)
+	artistRepository := ar.NewArtistPostgresqlRepository(db)
+	artistUsecase := au.NewArtistUsecase(artistRepository)
+	_httpAr.NewArtistHandler(authMiddlewareRouter, artistUsecase)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	mw := middleware.InitMiddleware(authUsecase)
+
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.accessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
-	mainRouter.Use(mw.CORS)*/
+	mainRouter.Use(mw.CORS)
 
 	logs.Logger.Info("starting server at :8080")
 

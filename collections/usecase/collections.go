@@ -1,8 +1,11 @@
-package collections_usecase
+package usecase
 
 import (
 	"2023_2_Holi/domain"
+	logs "2023_2_Holi/logs"
 )
+
+var logger = logs.LoggerInit()
 
 type filmUsecase struct {
 	filmRepo domain.FilmRepository
@@ -19,6 +22,7 @@ func (u *filmUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	if err != nil {
 		return nil, err
 	}
+	logger.Debug("Usecase GetFilmsByGenre:", films)
 
 	return films, nil
 }

@@ -1,9 +1,12 @@
-package collections_postgresql
+package postgresql
 
 import (
 	"2023_2_Holi/domain"
+	logs "2023_2_Holi/logs"
 	"database/sql"
 )
+
+var logger = logs.LoggerInit()
 
 type FilmPostgresqlRepository struct {
 	db *sql.DB
@@ -26,9 +29,10 @@ func (r *FilmPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film,
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-
+			logs.LogError(logger, "postgresql", "GetFilmsByGenre", err, "Failed to close query")
 		}
 	}(rows)
+	logger.Debug("GetFilmsByGenre query result:", rows)
 
 	var films []domain.Film
 	for rows.Next() {

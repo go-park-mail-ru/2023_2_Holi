@@ -1,4 +1,4 @@
-package collections_http_test
+package http_test
 
 import (
 	"net/http"

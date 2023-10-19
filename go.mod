@@ -3,7 +3,6 @@ module 2023_2_Holi
 go 1.21.1
 
 require (
-	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/google/uuid v1.3.1
 	github.com/gorilla/mux v1.8.0
