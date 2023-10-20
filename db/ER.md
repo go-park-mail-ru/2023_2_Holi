@@ -20,7 +20,7 @@ Relation EPISODE:
 
 Relation USER:
 
-{id} -> name, email, password, date_joined, image_path
+{id} -> name, email, password, date_joined, image_path, created_at
 
 Relation CAST:
 
@@ -48,37 +48,37 @@ title: Netflix
 erDiagram
     VIDEO {
         _ id PK
-        _ name "not null"
+        _ name "NOT NULL"
         _ description
-        _ duration "not null"
-        _ preview_path "not null"
-        _ media_path "not null"
+        _ duration "NOT NULL"
+        _ preview_path "NOT NULL"
+        _ media_path "NOT NULL"
         _ release_year
         _ rating
         _ age_restriction
-        _ seasons_count "not null default 0"
-        _ created_at "default current_timestamp not null"
-        _ updated_at "default current_timestamp not null"
+        _ seasons_count "NOT NULL DEFAULT 0"
+        _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
     }
     
     VIDEO ||--|{ EPISODE: contains
     EPISODE {
         _ id PK
-        _ name "not null"
+        _ name "NOT NULL"
         _ description
-        _ duration "not null"
-        _ preview_path "not null"
-        _ media_path "not null"
-        _ number "not null"
-        _ season_number "not null"
-        _ created_at "default current_timestamp not null"
-        _ updated_at "default current_timestamp not null"
+        _ duration "NOT NULL"
+        _ preview_path "NOT NULL"
+        _ media_path "NOT NULL"
+        _ number "NOT NULL"
+        _ season_number "NOT NULL"
+        _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
         _ video_id FK
     }
 
     CAST {
         _ id PK
-        _ name "not null unqiue"
+        _ name "NOT NULL unqiue"
     }
 
     VIDEO-CAST ||--|{ VIDEO: video
@@ -86,11 +86,12 @@ erDiagram
     VIDEO-CAST {
         _ video_id FK
         _ cast_id FK
+        "UNIQUE (video_id, cast_id)"
     }
     
     GENRE {
         _ id PK
-        _ name "not null unque"
+        _ name "NOT NULL unque"
     }
 
     VIDEO-GENRE ||--|{ VIDEO: video 
@@ -98,16 +99,18 @@ erDiagram
     VIDEO-GENRE {
         _ video_id FK
         _ genre_id FK
+        "UNIQUE (video_id, genre_id)"
+        
     }
 
     USER {
         _ id PK
         _ name
-        _ email "not null unique"
-        _ password "not null"
+        _ email "NOT NULL UNIQUE"
+        _ password "NOT NULL"
         _ image_path
-        _ created_at "default current_timestamp not null"
-        _ updated_at "default current_timestamp not null"
+        _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
     }
     
     VIDEO_ESTIMATION ||--o{ VIDEO: video 
@@ -115,14 +118,15 @@ erDiagram
     VIDEO_ESTIMATION {
         _ user_id FK
         _ video_id FK
-        _ rate "not null"
-        _ created_at "default current_timestamp not null"
-        _ updated_at "default current_timestamp not null"
+        _ rate "NOT NULL"
+        _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        "UNIQUE (video_id, user_id)"
     }
 
     TAG {
         _ id PK
-        _ name "not null unique"
+        _ name "NOT NULL UNIQUE"
     }
 
     VIDEO-TAG ||--|{ VIDEO: video
@@ -130,6 +134,7 @@ erDiagram
     VIDEO-TAG {
         _ video_id FK
         _ tag_id FK
+        "UNIQUE (video_id, tag_id)"
     }
     
 
