@@ -14,21 +14,19 @@ type FilmsUsecase struct {
 }
 
 // GetFilmData provides a mock function with given fields: id
-func (_m *FilmsUsecase) GetFilmData(id int) (*domain.Film, []domain.Artist, error) {
+func (_m *FilmsUsecase) GetFilmData(id int) (domain.Film, []domain.Artist, error) {
 	ret := _m.Called(id)
 
-	var r0 *domain.Film
+	var r0 domain.Film
 	var r1 []domain.Artist
 	var r2 error
-	if rf, ok := ret.Get(0).(func(int) (*domain.Film, []domain.Artist, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (domain.Film, []domain.Artist, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(int) *domain.Film); ok {
+	if rf, ok := ret.Get(0).(func(int) domain.Film); ok {
 		r0 = rf(id)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*domain.Film)
-		}
+		r0 = ret.Get(0).(domain.Film)
 	}
 
 	if rf, ok := ret.Get(1).(func(int) []domain.Artist); ok {

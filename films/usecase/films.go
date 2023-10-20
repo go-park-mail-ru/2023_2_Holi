@@ -24,14 +24,14 @@ func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	return films, nil
 }
 
-func (u *filmsUsecase) GetFilmData(id int) (*domain.Film, []domain.Artist, error) {
+func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Artist, error) {
 	film, err := u.filmRepo.GetFilmData(id)
 	if err != nil {
-		return nil, nil, err
+		return domain.Film{}, nil, err
 	}
 	artists, err := u.filmRepo.GetFilmArtists(id)
 	if err != nil {
-		return nil, nil, err
+		return domain.Film{}, nil, err
 	}
 
 	return film, artists, nil

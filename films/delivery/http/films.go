@@ -77,33 +77,33 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Failure 		400 {json} ApiResponse
 // @Failure 		404 {json} ApiResponse
 // @Failure 		500 {json} ApiResponse
-// @Router 			/api/v1/Films/{id} [get]
+// @Router 			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	FilmID := vars["id"]
 	id, err := strconv.Atoi(FilmID)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "Films_http", "GetFilmData", err, err.Error())
+		logs.LogError(logs.Logger, "films_http", "GetFilmData", err, "failed to read film id")
 		return
 	}
 
 	Film, artists, err := h.FilmsUsecase.GetFilmData(id)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "Films_http", "GetFilmData", err, err.Error())
+		logs.LogError(logs.Logger, "films_http", "GetFilmData", err, err.Error())
 		return
 	}
 
 	response := ApiResponse{
 		Status: http.StatusOK,
 		Body: map[string]interface{}{
-			"Film":    Film,
+			"film":    Film,
 			"artists": artists,
 		},
 	}
 
-	logs.Logger.Debug("Film:", Film)
+	logs.Logger.Debug("film:", Film)
 	logs.Logger.Debug("artists:", artists)
 	json.NewEncoder(w).Encode(response)
 }

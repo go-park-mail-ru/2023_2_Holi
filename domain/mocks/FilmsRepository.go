@@ -40,20 +40,18 @@ func (_m *FilmsRepository) GetFilmArtists(filmId int) ([]domain.Artist, error) {
 }
 
 // GetFilmData provides a mock function with given fields: id
-func (_m *FilmsRepository) GetFilmData(id int) (*domain.Film, error) {
+func (_m *FilmsRepository) GetFilmData(id int) (domain.Film, error) {
 	ret := _m.Called(id)
 
-	var r0 *domain.Film
+	var r0 domain.Film
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int) (*domain.Film, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (domain.Film, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(int) *domain.Film); ok {
+	if rf, ok := ret.Get(0).(func(int) domain.Film); ok {
 		r0 = rf(id)
 	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*domain.Film)
-		}
+		r0 = ret.Get(0).(domain.Film)
 	}
 
 	if rf, ok := ret.Get(1).(func(int) error); ok {

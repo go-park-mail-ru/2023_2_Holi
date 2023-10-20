@@ -51,14 +51,14 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	return films, nil
 }
 
-func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
+func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 	row, err := r.db.Query(
 		`SELECT *
 		FROM film
 		WHERE id = $1`, id)
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())
-		return nil, err
+		return domain.Film{}, err
 	}
 	defer func(row *sql.Rows) {
 		err := row.Close()
@@ -67,24 +67,31 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
 		}
 	}(row)
 
-	film := new(domain.Film)
-	err = row.Scan(
-		&film.ID,
-		&film.Name,
-		&film.Description,
-		&film.Duration,
-		&film.PreviewPath,
-		&film.MediaPath,
-		&film.Country,
-		&film.ReleaseYear,
-		&film.Rating,
-		&film.RatesCount,
-		&film.AgeRestriction,
-	)
+	count := 0
+	for row.Next() {
+		count++
+	}
+
+	var film domain.Film
+	if count > 0 {
+		err = row.Scan(
+			&film.ID,
+			&film.Name,
+			&film.Description,
+			&film.Duration,
+			&film.PreviewPath,
+			&film.MediaPath,
+			&film.Country,
+			&film.ReleaseYear,
+			&film.Rating,
+			&film.RatesCount,
+			&film.AgeRestriction,
+		)
+	}
 
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())
-		return nil, err
+		return domain.Film{}, err
 	}
 
 	return film, nil
