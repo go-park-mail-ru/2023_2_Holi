@@ -66,3 +66,7 @@ func TestGetMoviesByGenre(t *testing.T) {
 		})
 	}
 }
+
+func TestGetFilmData(t *testing.T) {
+
+}
