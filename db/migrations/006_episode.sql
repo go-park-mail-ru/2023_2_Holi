@@ -3,7 +3,7 @@ CREATE TABLE episode
     id            SERIAL PRIMARY KEY,
     name          VARCHAR(100) NOT NULL,
     description   TEXT,
-    duration      VARCHAR(100) NOT NULL,
+    duration      INTERVAL     NOT NULL,
     preview_path  VARCHAR(100) NOT NULL,
     media_path    VARCHAR(100) NOT NULL,
     number        INTEGER      NOT NULL,

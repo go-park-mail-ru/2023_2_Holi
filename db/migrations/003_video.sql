@@ -3,7 +3,7 @@ CREATE TABLE video
     id              SERIAL PRIMARY KEY,
     name            VARCHAR(100)          NOT NULL,
     description     TEXT,
-    duration        VARCHAR(100)          NOT NULL,
+    duration        INTERVAL              NOT NULL,
     preview_path    VARCHAR(100)          NOT NULL,
     media_path      VARCHAR(100)          NOT NULL,
     country         VARCHAR(100),
@@ -13,10 +13,10 @@ CREATE TABLE video
                         AND release_year <= EXTRACT(YEAR FROM CURRENT_DATE)),
     rating          FLOAT(2)
                     CONSTRAINT rating_range
-                        CHECK (rating BETWEEN 0 AND 10),
+                    CHECK (rating BETWEEN 0 AND 10),
     age_restriction INTEGER
                     CONSTRAINT age_restriction_range
-                        CHECK (rating BETWEEN 0 AND 100),
+                    CHECK (rating BETWEEN 0 AND 100),
     seasons_count   INT         DEFAULT 0 NOT NULL,
     created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
