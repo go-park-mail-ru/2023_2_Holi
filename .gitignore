@@ -18,5 +18,5 @@
 .glide/
 
 .ide*
-
 .env
+coverage.out.tmp

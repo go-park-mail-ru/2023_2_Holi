@@ -1,4 +1,4 @@
-package usecase
+package auth_usecase
 
 import (
 	"time"
@@ -6,10 +6,8 @@ import (
 	"github.com/google/uuid"
 
 	"2023_2_Holi/domain"
-	logs "2023_2_Holi/logs"
+	logs "2023_2_Holi/logger"
 )
-
-var logger = logs.LoggerInit()
 
 type authUsecase struct {
 	authRepo    domain.AuthRepository
@@ -28,7 +26,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, err
 	if err != nil {
 		return domain.Session{}, domain.ErrNotFound
 	}
-	logger.Debug("Usecase Login expected user:", expectedUser)
+	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 
 	if expectedUser.Password != credentials.Password {
 		return domain.Session{}, domain.ErrWrongCredentials
@@ -81,7 +79,7 @@ func (u *authUsecase) IsAuth(token string) (bool, error) {
 	}
 
 	auth, err := u.sessionRepo.SessionExists(token)
-	logger.Debug("Usecase IsAuth auth: ", auth)
+	logs.Logger.Debug("Usecase IsAuth auth: ", auth)
 	if err != nil {
 		return false, err
 	}

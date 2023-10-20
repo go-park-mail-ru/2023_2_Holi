@@ -37,27 +37,27 @@ const docTemplate = `{
                         "description": "No Content"
                     },
                     "400": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "403": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Forbidden",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "404": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "500": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     }
                 }
@@ -75,27 +75,27 @@ const docTemplate = `{
                         "description": "No Content"
                     },
                     "400": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "403": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Forbidden",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "404": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "500": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     }
                 }
@@ -118,32 +118,121 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/http.Result"
+                            "type": "json"
                         }
                     },
                     "400": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "json"
                         }
                     },
                     "500": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     }
                 }
             }
-        }
-    },
-    "definitions": {
-        "http.Result": {
-            "type": "object",
-            "properties": {
-                "body": {},
-                "err": {
-                    "type": "string"
+        },
+        "/api/v1/movies/genre/{genre}": {
+            "get": {
+                "description": "Get a list of movies based on the specified genre.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movies by genre",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The genre of the movies you want to retrieve.",
+                        "name": "genre",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/movies/{id}": {
+            "get": {
+                "description": "Get content for movie page",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "movies"
+                ],
+                "summary": "Get movie data by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The genre of the movies you want to retrieve.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
                 }
             }
         }
@@ -155,7 +244,7 @@ var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "127.0.0.1E",
 	BasePath:         "/",
-	Schemes:          []string{"Zhttp"},
+	Schemes:          []string{"http"},
 	Title:            "Netfilx API",
 	Description:      "API of the nelfix project by holi",
 	InfoInstanceName: "swagger",

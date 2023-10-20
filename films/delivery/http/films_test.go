@@ -1,4 +1,4 @@
-package collections_http_test
+package films_http_test
 
 import (
 	"errors"
@@ -9,23 +9,23 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"2023_2_Holi/collections/delivery/collections_http"
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
+	films_http "2023_2_Holi/films/delivery/http"
 
 	"github.com/gorilla/mux"
 )
 
-func TestGetFilmsByGenre(t *testing.T) {
+func TestGetMoviesByGenre(t *testing.T) {
 	tests := []struct {
 		name                 string
-		setUCaseExpectations func(usecase *mocks.FilmUsecase)
+		setUCaseExpectations func(usecase *mocks.FilmsUsecase)
 		status               int
 		good                 bool
 	}{
 		{
 			name: "GoodCase/Common",
-			setUCaseExpectations: func(usecase *mocks.FilmUsecase) {
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
 				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, nil)
 			},
 			status: http.StatusOK,
@@ -33,7 +33,7 @@ func TestGetFilmsByGenre(t *testing.T) {
 		},
 		{
 			name: "GoodCase/EmptyFilms",
-			setUCaseExpectations: func(usecase *mocks.FilmUsecase) {
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
 				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, errors.New("error"))
 			},
 			status: http.StatusOK,
@@ -45,7 +45,7 @@ func TestGetFilmsByGenre(t *testing.T) {
 			//t.Parallel()
 
 			router := mux.NewRouter()
-			mockUsecase := new(mocks.FilmUsecase)
+			mockUsecase := new(mocks.FilmsUsecase)
 			test.setUCaseExpectations(mockUsecase)
 
 			req, err := http.NewRequest("GET", "/api/v1/films/genre/{genre}", nil)
@@ -53,10 +53,10 @@ func TestGetFilmsByGenre(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			collections_http.NewFilmHandler(router, mockUsecase)
+			films_http.NewFilmsHandler(router, mockUsecase)
 
-			handler := &collections_http.FilmHandler{
-				FilmUsecase: mockUsecase,
+			handler := &films_http.FilmsHandler{
+				FilmsUsecase: mockUsecase,
 			}
 
 			router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods("GET")

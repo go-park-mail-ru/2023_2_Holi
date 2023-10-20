@@ -1,62 +1,35 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/sirupsen/logrus"
 
-	"github.com/joho/godotenv"
+	auth_http "2023_2_Holi/auth/delivery/http"
+	auth_postgres "2023_2_Holi/auth/repository/postgresql"
+	auth_redis "2023_2_Holi/auth/repository/redis"
+	auth_usecase "2023_2_Holi/auth/usecase"
 
-	_http "2023_2_Holi/auth/delivery/http"
-	"2023_2_Holi/auth/delivery/http/middleware"
-	"2023_2_Holi/auth/repository/postgresql"
-	"2023_2_Holi/auth/usecase"
+	films_http "2023_2_Holi/films/delivery/http"
+	films_postgres "2023_2_Holi/films/repository/postgresql"
+	films_usecase "2023_2_Holi/films/usecase"
 
-	"2023_2_Holi/collections/collections_usecase"
-	_httpCol "2023_2_Holi/collections/delivery/collections_http"
-	"2023_2_Holi/collections/repository/collections_postgresql"
-	logs "2023_2_Holi/logs"
+	postgres "2023_2_Holi/db_connector/postgres"
+	redis "2023_2_Holi/db_connector/redis"
+	logs "2023_2_Holi/logger"
+	middleware "2023_2_Holi/middleware"
+
+	genre_http "2023_2_Holi/genre/delivery/http"
+	genre_postgres "2023_2_Holi/genre/repository/postgresql"
+	genre_usecase "2023_2_Holi/genre/usecase"
+
+	artist_http "2023_2_Holi/artist/delivery/http"
+	artist_postgres "2023_2_Holi/artist/repository/postgresql"
+	artist_usecase "2023_2_Holi/artist/usecase"
 
 	_ "github.com/lib/pq"
 )
-
-func dbParamsfromEnv() string {
-	host := os.Getenv("POSTGRES_HOST")
-	if host == "" {
-		return ""
-	}
-
-	port := os.Getenv("POSTGRES_PORT")
-	user := os.Getenv("POSTGRES_USER")
-	pass := os.Getenv("POSTGRES_PASSWORD")
-	dbname := os.Getenv("POSTGRES_DB")
-
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
-}
-
-type AccessLogger struct {
-	LogrusLogger *logrus.Logger
-}
-
-func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		//w.Header().Set("Access-Control-Allow-Origin", "*")
-
-		next.ServeHTTP(w, r)
-
-		ac.LogrusLogger.WithFields(logrus.Fields{
-			"method":      r.Method,
-			"remote_addr": r.RemoteAddr,
-			"work_time":   time.Since(start),
-		}).Info(r.URL.Path)
-	})
-}
 
 // @title Netfilx API
 // @version 1.0
@@ -69,55 +42,49 @@ func (ac *AccessLogger) accessLogMiddleware(next http.Handler) http.Handler {
 // @license.name AS IS (NO WARRANTY)
 
 // @host 127.0.0.1E
-// @schemes Zhttp
+// @schemes http
 // @BasePath /
 func main() {
-	err := godotenv.Load("../.env")
-	if err != nil {
-		logs.Logger.Fatal("Failed to get config : ", err)
-	}
-
-	accessLogger := AccessLogger{
+	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
 	}
 
-	db, err := sql.Open("postgres", dbParamsfromEnv())
-	if err != nil {
-		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to connect to db")
-	}
-	defer db.Close()
-	logs.Logger.Debug("db conf :", db)
+	postgres := postgres.PostgresConnector()
+	defer postgres.Close()
 
-	err = db.Ping()
-	if err != nil {
-		logs.LogFatal(logs.Logger, "main", "main", err, "DB doesn't listen")
-	}
-	logs.Logger.Info("Connected to postgres")
+	redis := redis.RedisConnector()
+	defer redis.Close()
 
 	mainRouter := mux.NewRouter()
-
-	sessionRepository := postgresql.NewSessionPostgresqlRepository(db)
-	authRepository := postgresql.NewAuthPostgresqlRepository(db)
-	authUsecase := usecase.NewAuthUsecase(authRepository, sessionRepository)
-
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
-	_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
+	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
+	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres)
+	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres)
+	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres)
+	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres)
 
-	filmRepository := collections_postgresql.NewFilmPostgresqlRepository(db)
-	filmUsecase := collections_usecase.NewFilmUsecase(filmRepository)
-	_httpCol.NewFilmHandler(authMiddlewareRouter, filmUsecase)
+	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
+	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
+	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
+	artistUsecase := artist_usecase.NewArtistUsecase(artistRepository)
+
+	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
+	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
+	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
+	artist_http.NewArtistHandler(authMiddlewareRouter, artistUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
-	mainRouter.Use(accessLogger.accessLogMiddleware)
+	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 
-	logs.Logger.Info("starting server at :8080")
+	serverPort := ":" + os.Getenv("SERVER_PORT")
+	logs.Logger.Info("starting server at ", serverPort)
 
-	err = http.ListenAndServe(":8080", mainRouter)
+	err := http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}

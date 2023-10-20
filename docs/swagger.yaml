@@ -1,11 +1,4 @@
 basePath: /
-definitions:
-  http.Result:
-    properties:
-      body: {}
-      err:
-        type: string
-    type: object
 host: 127.0.0.1E
 info:
   contact:
@@ -27,21 +20,21 @@ paths:
         "204":
           description: No Content
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "403":
-          description: '{"error":"<error message>"}'
+          description: Forbidden
           schema:
-            type: string
+            type: json
         "404":
-          description: '{"error":"<error message>"}'
+          description: Not Found
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: login user
       tags:
       - auth
@@ -52,21 +45,21 @@ paths:
         "204":
           description: No Content
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "403":
-          description: '{"error":"<error message>"}'
+          description: Forbidden
           schema:
-            type: string
+            type: json
         "404":
-          description: '{"error":"<error message>"}'
+          description: Not Found
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: logout user
       tags:
       - auth
@@ -81,18 +74,84 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/http.Result'
+            type: json
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
+        "403":
+          description: Forbidden
+          schema:
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: register user
       tags:
       - auth
+  /api/v1/movies/{id}:
+    get:
+      description: Get content for movie page
+      parameters:
+      - description: The genre of the movies you want to retrieve.
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get movie data by id
+      tags:
+      - movies
+  /api/v1/movies/genre/{genre}:
+    get:
+      description: Get a list of movies based on the specified genre.
+      parameters:
+      - description: The genre of the movies you want to retrieve.
+        in: path
+        name: genre
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get movies by genre
+      tags:
+      - movies
 schemes:
-- Zhttp
+- http
 swagger: "2.0"
