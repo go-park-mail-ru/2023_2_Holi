@@ -48,32 +48,37 @@ title: Netflix
 erDiagram
     VIDEO {
         _ id PK
-        _ name 
+        _ name "not null"
         _ description
-        _ duration
-        _ preview_path
-        _ media_path
+        _ duration "not null"
+        _ preview_path "not null"
+        _ media_path "not null"
         _ release_year
         _ rating
         _ age_restriction
-        _ seasons_count
+        _ seasons_count "not null default 0"
+        _ created_at "default current_timestamp not null"
+        _ updated_at "default current_timestamp not null"
     }
     
     VIDEO ||--|{ EPISODE: contains
     EPISODE {
         _ id PK
-        _ name 
+        _ name "not null"
         _ description
-        _ duration
-        _ preview_path
-        _ number
-        _ season_number
+        _ duration "not null"
+        _ preview_path "not null"
+        _ media_path "not null"
+        _ number "not null"
+        _ season_number "not null"
+        _ created_at "default current_timestamp not null"
+        _ updated_at "default current_timestamp not null"
         _ video_id FK
     }
 
     CAST {
         _ id PK
-        _ name
+        _ name "not null unqiue"
     }
 
     VIDEO-CAST ||--|{ VIDEO: video
@@ -85,7 +90,7 @@ erDiagram
     
     GENRE {
         _ id PK
-        _ name
+        _ name "not null unque"
     }
 
     VIDEO-GENRE ||--|{ VIDEO: video 
@@ -98,10 +103,12 @@ erDiagram
     USER {
         _ id PK
         _ name
-        _ email
-        _ password
-        _ date_joined
+        _ email "not null unique"
+        _ password "not null"
+        _ date_joined "default now"
         _ image_path
+        _ created_at "default current_timestamp not null"
+        _ updated_at "default current_timestamp not null"
     }
     
     VIDEO_ESTIMATION ||--o{ VIDEO: video 
@@ -109,12 +116,14 @@ erDiagram
     VIDEO_ESTIMATION {
         _ user_id FK
         _ video_id FK
-        _ rate
+        _ rate "not null"
+        _ created_at "default current_timestamp not null"
+        _ updated_at "default current_timestamp not null"
     }
 
     TAG {
         _ id PK
-        _ name
+        _ name "not null unique"
     }
 
     VIDEO-TAG ||--|{ VIDEO: video
