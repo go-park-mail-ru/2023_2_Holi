@@ -105,7 +105,6 @@ erDiagram
         _ name
         _ email "not null unique"
         _ password "not null"
-        _ date_joined "default now"
         _ image_path
         _ created_at "default current_timestamp not null"
         _ updated_at "default current_timestamp not null"
