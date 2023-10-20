@@ -78,12 +78,12 @@ erDiagram
 
     CAST {
         _ id PK
-        _ name "NOT NULL unqiue"
+        _ name "NOT NULL UNIQUE"
     }
 
-    VIDEO-CAST ||--|{ VIDEO: video
-    VIDEO-CAST ||--|{ CAST: cast
-    VIDEO-CAST {
+    VIDEO_CAST ||--|{ VIDEO: video
+    VIDEO_CAST ||--|{ CAST: cast
+    VIDEO_CAST {
         _ video_id FK
         _ cast_id FK
         "UNIQUE (video_id, cast_id)"
@@ -91,16 +91,15 @@ erDiagram
     
     GENRE {
         _ id PK
-        _ name "NOT NULL unque"
+        _ name "NOT NULL UNIQUE"
     }
 
-    VIDEO-GENRE ||--|{ VIDEO: video 
-    VIDEO-GENRE ||--|{ GENRE: genre
-    VIDEO-GENRE {
+    VIDEO_GENRE ||--|{ VIDEO: video 
+    VIDEO_GENRE ||--|{ GENRE: genre
+    VIDEO_GENRE {
         _ video_id FK
         _ genre_id FK
         "UNIQUE (video_id, genre_id)"
-        
     }
 
     USER {
@@ -116,11 +115,11 @@ erDiagram
     VIDEO_ESTIMATION ||--o{ VIDEO: video 
     VIDEO_ESTIMATION ||--o{ USER: user
     VIDEO_ESTIMATION {
-        _ user_id FK
-        _ video_id FK
         _ rate "NOT NULL"
         _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
         _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ user_id FK
+        _ video_id FK
         "UNIQUE (video_id, user_id)"
     }
 
@@ -129,13 +128,12 @@ erDiagram
         _ name "NOT NULL UNIQUE"
     }
 
-    VIDEO-TAG ||--|{ VIDEO: video
-    VIDEO-TAG ||--|{ TAG: tag
-    VIDEO-TAG {
+    VIDEO_TAG ||--|{ VIDEO: video
+    VIDEO_TAG ||--|{ TAG: tag
+    VIDEO_TAG {
         _ video_id FK
         _ tag_id FK
         "UNIQUE (video_id, tag_id)"
-    }
-    
+    }    
 
 ```
