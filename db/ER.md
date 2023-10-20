@@ -78,7 +78,7 @@ erDiagram
 
     CAST {
         _ id PK
-        _ name "NOT NULL unqiue"
+        _ name "NOT NULL UNIQUE"
     }
 
     VIDEO-CAST ||--|{ VIDEO: video
@@ -91,7 +91,7 @@ erDiagram
     
     GENRE {
         _ id PK
-        _ name "NOT NULL unque"
+        _ name "NOT NULL UNIQUE"
     }
 
     VIDEO-GENRE ||--|{ VIDEO: video 
@@ -100,7 +100,6 @@ erDiagram
         _ video_id FK
         _ genre_id FK
         "UNIQUE (video_id, genre_id)"
-        
     }
 
     USER {
@@ -116,11 +115,11 @@ erDiagram
     VIDEO_ESTIMATION ||--o{ VIDEO: video 
     VIDEO_ESTIMATION ||--o{ USER: user
     VIDEO_ESTIMATION {
-        _ user_id FK
-        _ video_id FK
         _ rate "NOT NULL"
         _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
         _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ user_id FK
+        _ video_id FK
         "UNIQUE (video_id, user_id)"
     }
 
@@ -135,7 +134,6 @@ erDiagram
         _ video_id FK
         _ tag_id FK
         "UNIQUE (video_id, tag_id)"
-    }
-    
+    }    
 
 ```
