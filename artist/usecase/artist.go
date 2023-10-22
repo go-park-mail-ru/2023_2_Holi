@@ -17,8 +17,8 @@ func NewArtistUsecase(ar domain.ArtistRepository) domain.ArtistUsecase {
 	}
 }
 
-func (u *artistUsecase) GetArtistPage(name, surname string) ([]domain.Film, error) {
-	films, err := u.atristRepo.GetArtistPage(name, surname)
+func (u *artistUsecase) GetArtistPage(name string) ([]domain.Film, error) {
+	films, err := u.atristRepo.GetArtistPage(name)
 	if err != nil {
 		return nil, err
 	}

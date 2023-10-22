@@ -24,7 +24,7 @@ func NewAuthUsecase(ar domain.AuthRepository, sr domain.SessionRepository) domai
 func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
 	expectedUser, err := u.authRepo.GetByEmail(credentials.Email)
 	if err != nil {
-		return domain.Session{}, domain.ErrNotFound
+		return domain.Session{}, err
 	}
 	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 

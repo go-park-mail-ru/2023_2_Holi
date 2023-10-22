@@ -1,35 +1,48 @@
 package genre_postgres
 
 import (
+	"context"
+	"github.com/jackc/pgx/v5"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-	"database/sql"
 )
 
 var logger = logs.LoggerInit()
 
 type genrePostgresRepo struct {
-	db *sql.DB
+	db  *pgxpool.Pool
+	ctx context.Context
 }
 
-func GenrePostgresqlRepository(conn *sql.DB) domain.GenreRepository {
-	return &genrePostgresRepo{db: conn}
+func GenrePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.GenreRepository {
+	return &genrePostgresRepo{
+		db:  pool,
+		ctx: ctx,
+	}
 }
 
 func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
-	rows, err := r.db.Query(
-		`SELECT name
-		FROM genre`)
+	sql, args, err := domain.Psql.Select("name").
+		From("genre").
+		ToSql()
 	if err != nil {
 		return nil, err
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			logs.LogError(logger, "postgresql", "GetGenres", err, "Failed to close query")
-		}
-	}(rows)
-	logger.Debug("GetFilmsByGenre query result:", rows)
+
+	rows, err := r.db.Query(r.ctx, sql, args...)
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "genre_postgres", "GetGenres", err, err.Error())
+		return nil, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "genre_postgres", "GetGenres", err, err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+	logs.Logger.Debug("GetGenres query result:", rows)
 
 	var genres []domain.Genre
 	for rows.Next() {

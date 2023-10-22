@@ -6,9 +6,9 @@ type Artist struct {
 	Surname string
 }
 type ArtistUsecase interface {
-	GetArtistPage(name, surname string) ([]Film, error)
+	GetArtistPage(name string) ([]Film, error)
 }
 
 type ArtistRepository interface {
-	GetArtistPage(name, surname string) ([]Film, error)
+	GetArtistPage(name string) ([]Film, error)
 }

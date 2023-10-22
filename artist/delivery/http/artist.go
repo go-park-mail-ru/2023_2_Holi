@@ -33,9 +33,8 @@ func NewArtistHandler(router *mux.Router, au domain.ArtistUsecase) {
 func (h *ArtistHandler) GetArtistPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	name := vars["name"]
-	surname := vars["surname"]
 
-	films, err := h.ArtistUsecase.GetArtistPage(name, surname)
+	films, err := h.ArtistUsecase.GetArtistPage(name)
 	if err != nil {
 		response := ApiResponse{
 			Status: getStatusCode(err),

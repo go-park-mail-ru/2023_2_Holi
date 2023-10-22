@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 
@@ -15,8 +16,8 @@ import (
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
 
-	postgres "2023_2_Holi/db_connector/postgres"
-	redis "2023_2_Holi/db_connector/redis"
+	postgres "2023_2_Holi/db/connector/postgres"
+	redis "2023_2_Holi/db/connector/redis"
 	logs "2023_2_Holi/logger"
 	middleware "2023_2_Holi/middleware"
 
@@ -41,15 +42,16 @@ import (
 
 // @license.name AS IS (NO WARRANTY)
 
-// @host 127.0.0.1E
+// @host 127.0.0.1
 // @schemes http
 // @BasePath /
 func main() {
+	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
 	}
 
-	postgres := postgres.PostgresConnector()
+	postgres := postgres.PostgresConnector(ctx)
 	defer postgres.Close()
 
 	redis := redis.RedisConnector()
@@ -59,8 +61,8 @@ func main() {
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
-	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres)
-	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres)
+	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
+	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres)
 	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres)
 

@@ -1,34 +1,47 @@
 package auth_postgres
 
 import (
-	"database/sql"
+	"context"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 )
 
 type authPostgresqlRepository struct {
-	db *sql.DB
+	db  *pgxpool.Pool
+	ctx context.Context
 }
 
-func NewAuthPostgresqlRepository(conn *sql.DB) domain.AuthRepository {
+func NewAuthPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.AuthRepository {
 	return &authPostgresqlRepository{
-		db: conn,
+		db:  pool,
+		ctx: ctx,
 	}
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
-	result, err := r.db.Query(`SELECT id, email, password FROM "user" WHERE email = $1`, email)
+	sql, args, err := domain.Psql.Select("id", "email", "password").
+		From("\"user\"").
+		Where("email = ?", email).
+		ToSql()
 	if err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
 		return domain.User{}, err
 	}
-	defer func(result *sql.Rows) {
-		err := result.Close()
-		if err != nil {
-			logs.LogError(logs.Logger, "postgresql", "GetByName", err, "Failed to close query")
-		}
-	}(result)
-	logs.Logger.Debug("GetByName query result:", result)
+
+	result, err := r.db.Query(r.ctx, sql, args...)
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
+		return domain.User{}, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
+		return domain.User{}, err
+	}
+	defer result.Close()
+	logs.Logger.Debug("GetByEmail query result:", result)
 
 	var user domain.User
 	for result.Next() {
@@ -51,29 +64,45 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 		return 0, domain.ErrBadRequest
 	}
 
-	result := r.db.QueryRow(
-		`INSERT INTO "user" (password, name, email, date_joined, image_path) 
-		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-		user.Password,
-		user.Name,
-		user.Email,
-		user.DateJoined,
-		user.ImagePath)
+	sql, args, err := domain.Psql.Insert("\"user\"").
+		Columns("password", "name", "email", "date_joined", "image_path").
+		Values(user.Password, user.Name, user.Email, user.DateJoined, user.ImagePath).
+		Suffix("RETURNING \"id\"").
+		ToSql()
+	if err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "AddUser", err, err.Error())
+		return 0, err
+	}
+
+	result := r.db.QueryRow(r.ctx, sql, args...)
 
 	logs.Logger.Debug("AddUser queryRow result:", result)
 
 	var id int
 	if err := result.Scan(&id); err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "AddUser", err, err.Error())
 		return 0, domain.ErrInternalServerError
 	}
 	return id, nil
 }
 
 func (r *authPostgresqlRepository) UserExists(email string) (bool, error) {
-	result := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "user" WHERE email = $1)`, email)
+	sql, args, err := domain.Psql.Select("1").
+		Prefix("SELECT EXISTS (").
+		From("\"user\"").
+		Where("email = ?", email).
+		Suffix(")").
+		ToSql()
+	if err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "UserExists", err, err.Error())
+		return false, err
+	}
+
+	result := r.db.QueryRow(r.ctx, sql, args...)
 
 	var exist bool
 	if err := result.Scan(&exist); err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "UserExists", err, err.Error())
 		return false, err
 	}
 

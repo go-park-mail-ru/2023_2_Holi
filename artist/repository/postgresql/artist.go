@@ -1,39 +1,51 @@
 package artist_postgres
 
 import (
+	"context"
+	"github.com/jackc/pgx/v5"
+
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var logger = logs.LoggerInit()
 
 type ArtistPostgresqlRepository struct {
-	db *sql.DB
+	db  *pgxpool.Pool
+	ctx context.Context
 }
 
-func NewArtistPostgresqlRepository(conn *sql.DB) domain.ArtistRepository {
-	return &ArtistPostgresqlRepository{db: conn}
+func NewArtistPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.ArtistRepository {
+	return &ArtistPostgresqlRepository{
+		db:  pool,
+		ctx: ctx,
+	}
 }
 
-func (r *ArtistPostgresqlRepository) GetArtistPage(name, surname string) ([]domain.Film, error) {
-	query := `SELECT film.id, film.name, film.preview_path, film.rating
-              FROM film
-              JOIN "artist-film" af ON film.id = af.film_id
-              JOIN artist a ON af.artist_id = a.id
-              WHERE a.name = $1 OR a.surname = $2`
-
-	rows, err := r.db.Query(query, name, surname)
+func (r *ArtistPostgresqlRepository) GetArtistPage(name string) ([]domain.Film, error) {
+	sqlString, args, err := domain.Psql.Select("film.id", "film.name", "film.preview_path", "film.rating").
+		From("video").
+		Join("video_cast AS vc ON video_id = vc.video_id").
+		Join("cast AS c ON vg.cast_id = c.id").
+		Where("c.name = ?", name).
+		ToSql()
 	if err != nil {
 		return nil, err
 	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			logs.LogError(logger, "postgresql", "GetArtistPage", err, "Failed to close query")
-		}
-	}(rows)
-	logger.Debug("GetArtistPage query result:", rows)
+
+	rows, err := r.db.Query(r.ctx, sqlString, args...)
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "artist_postgres", "GetArtistPage", err, err.Error())
+		return nil, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "artist_postgres", "GetArtistPage", err, err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+	logs.Logger.Debug("GetArtistPage query result:", rows)
 
 	var films []domain.Film
 	for rows.Next() {
