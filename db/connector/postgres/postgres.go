@@ -26,7 +26,6 @@ func PostgresConnector(ctx context.Context) *pgxpool.Pool {
 	if err != nil {
 		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, "postgres doesn't listen")
 	}
-	defer dbpool.Close()
 
 	err = dbpool.Ping(ctx)
 	if err != nil {
