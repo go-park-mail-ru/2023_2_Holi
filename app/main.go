@@ -63,8 +63,8 @@ func main() {
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
 	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
-	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres)
-	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres)
+	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
+	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
