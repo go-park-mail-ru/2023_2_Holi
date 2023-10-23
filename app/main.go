@@ -6,15 +6,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	auth_http "2023_2_Holi/auth/delivery/http"
-	auth_postgres "2023_2_Holi/auth/repository/postgresql"
-	auth_redis "2023_2_Holi/auth/repository/redis"
-	auth_usecase "2023_2_Holi/auth/usecase"
-
-	films_http "2023_2_Holi/films/delivery/http"
-	films_postgres "2023_2_Holi/films/repository/postgresql"
-	films_usecase "2023_2_Holi/films/usecase"
-
 	postgres "2023_2_Holi/db_connector/postgres"
 	redis "2023_2_Holi/db_connector/redis"
 	logs "2023_2_Holi/logger"
@@ -27,6 +18,19 @@ import (
 	artist_http "2023_2_Holi/artist/delivery/http"
 	artist_postgres "2023_2_Holi/artist/repository/postgresql"
 	artist_usecase "2023_2_Holi/artist/usecase"
+
+	auth_http "2023_2_Holi/auth/delivery/http"
+	auth_postgres "2023_2_Holi/auth/repository/postgresql"
+	auth_redis "2023_2_Holi/auth/repository/redis"
+	auth_usecase "2023_2_Holi/auth/usecase"
+
+	films_http "2023_2_Holi/films/delivery/http"
+	films_postgres "2023_2_Holi/films/repository/postgresql"
+	films_usecase "2023_2_Holi/films/usecase"
+
+	profile_http "2023_2_Holi/profile/delivery/http"
+	profile_postgres "2023_2_Holi/profile/repository/postgresql"
+	profile_usecase "2023_2_Holi/profile/usecase"
 
 	_ "github.com/lib/pq"
 )
@@ -63,16 +67,19 @@ func main() {
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres)
 	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres)
+	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
 	artistUsecase := artist_usecase.NewArtistUsecase(artistRepository)
+	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	artist_http.NewArtistHandler(authMiddlewareRouter, artistUsecase)
+	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

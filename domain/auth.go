@@ -9,15 +9,6 @@ type Credentials struct {
 	Email    string `json:"email"`
 }
 
-type User struct {
-	ID         int       `json:"-"`
-	Name       string    `json:"name"`
-	Password   string    `json:"password"`
-	Email      string    `json:"email"`
-	DateJoined time.Time `json:"-"`
-	ImagePath  string    `json:"imagePath"`
-}
-
 type AuthUsecase interface {
 	Login(credentials Credentials) (Session, error)
 	Logout(token string) error
