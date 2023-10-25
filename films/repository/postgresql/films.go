@@ -67,9 +67,11 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 }
 
 func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
-	sql, args, err := domain.Psql.Select("*").
+	sql, args, err := domain.Psql.Select("e.name", "e.description", "e.duration",
+		"e.preview_path", "e.media_path", "release_year", "rating", "age_restriction").
 		From("video").
-		Where("id = ?", id).
+		Join("episode AS e ON video.id = video_id").
+		Where("video.id = ?", id).
 		ToSql()
 	if err != nil {
 		return nil, err
@@ -89,16 +91,13 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
 
 	film := new(domain.Film)
 	err = row.Scan(
-		&film.ID,
 		&film.Name,
 		&film.Description,
 		&film.Duration,
 		&film.PreviewPath,
 		&film.MediaPath,
-		&film.Country,
 		&film.ReleaseYear,
 		&film.Rating,
-		&film.RatesCount,
 		&film.AgeRestriction,
 	)
 

@@ -6,10 +6,8 @@ type Film struct {
 	Description    string  `json:"-"`
 	PreviewPath    string  `json:"previewPath"`
 	MediaPath      string  `json:"-"`
-	Country        string  `json:"-"`
 	ReleaseYear    int     `json:"-"`
 	Rating         float64 `json:"rating"`
-	RatesCount     int     `json:"-"`
 	AgeRestriction int     `json:"-"`
 	Duration       int     `json:"-"`
 }
