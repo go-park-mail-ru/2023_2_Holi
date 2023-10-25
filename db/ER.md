@@ -51,7 +51,7 @@ erDiagram
         _ description
         _ duration "NOT NULL"
         _ preview_path "NOT NULL"
-        _ media_path "NOT NULL"
+        _ media_path
         _ release_year
         _ rating
         _ age_restriction
