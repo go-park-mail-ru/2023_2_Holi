@@ -5,7 +5,7 @@ CREATE TABLE video
     description     TEXT,
     duration        INTERVAL              NOT NULL,
     preview_path    VARCHAR(100)          NOT NULL,
-    media_path      VARCHAR(100)          NOT NULL,
+    media_path      VARCHAR(100),
     country         VARCHAR(100),
     release_year    INTEGER
                     CONSTRAINT release_year_range
