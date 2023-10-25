@@ -3,10 +3,7 @@ CREATE TABLE video
     id              SERIAL PRIMARY KEY,
     name            VARCHAR(100)          NOT NULL,
     description     TEXT,
-    duration        INTERVAL              NOT NULL,
     preview_path    VARCHAR(100)          NOT NULL,
-    media_path      VARCHAR(100),
-    country         VARCHAR(100),
     release_year    INTEGER
                     CONSTRAINT release_year_range
                     CHECK (release_year >= 1890

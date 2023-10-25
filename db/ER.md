@@ -3,23 +3,24 @@
 ## Объяснение нормальных форм(нф):
 
 - 1я нф - т.к. каждый столбец содержит в себе атомарное значение
-- 2я нф -  т.к. нет составных ключей
-- 3я нф - т.к. каждый столбец таблицы зависит только от PK (нет зависимостей между неключевыми атрибутами)
-- НФБК - т.к. нет составных потенциальных ключей
+- 2я нф - т.к. нет зависимостей от части составных ключей
+- 3я нф - т.к. каждый столбец таблицы зависит от PK (нет транзитивных зависимостей)
+- НФБК - т.к. нет множественных составных потенциальных ключей
 
 ## Функциональные зависимости
 
 Relation VIDEO:
 
-{id} -> name, description, duration, preview_path, media_path, release_path, rating, age_restriction, seasons_count
+{id} -> name, description, preview_path, release_year, rating, age_restriction, seasons_count
 
 Relation EPISODE:
 
-{id} -> name, description, duration, preview_path, number
+{id} -> name, description, duration, preview_path, media_path, number, season_number, video_id
 
 Relation USER:
 
 {id} -> name, email, password, date_joined, image_path, created_at
+{email} -> name, password, date_joined, image_path, created_at
 
 Relation CAST:
 
@@ -49,9 +50,7 @@ erDiagram
         _ id PK
         _ name "NOT NULL"
         _ description
-        _ duration "NOT NULL"
         _ preview_path "NOT NULL"
-        _ media_path
         _ release_year
         _ rating
         _ age_restriction
