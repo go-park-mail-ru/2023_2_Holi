@@ -19,7 +19,7 @@ Relation EPISODE:
 
 Relation USER:
 
-{id} -> name, email, password, date_joined, image_path, created_at
+{id} -> name, email, password, date_joined, image_path, created_at  
 {email} -> name, password, date_joined, image_path, created_at
 
 Relation CAST:
