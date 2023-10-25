@@ -9,6 +9,24 @@ import (
 	logs "2023_2_Holi/logger"
 )
 
+const getByEmailQuery = `
+	SELECT id, email, password
+	FROM "user"
+	WHERE email = $1
+`
+
+const addUserQuery = `
+	INSERT INTO "user" (password, name, email, date_joined, image_path)
+	VALUES ($1, $2, $3, $4, $5)
+	RETURNING id
+`
+
+const userExistsQuery = `
+	SELECT EXISTS(SELECT 1
+				  FROM "user"
+				  WHERE email = $1)
+`
+
 type authPostgresqlRepository struct {
 	db  *pgxpool.Pool
 	ctx context.Context
@@ -22,16 +40,7 @@ func NewAuthPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
-	sql, args, err := domain.Psql.Select("id", "email", "password").
-		From("\"user\"").
-		Where("email = ?", email).
-		ToSql()
-	if err != nil {
-		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
-		return domain.User{}, err
-	}
-
-	result, err := r.db.Query(r.ctx, sql, args...)
+	result, err := r.db.Query(r.ctx, getByEmailQuery, email)
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
 		return domain.User{}, domain.ErrNotFound
@@ -64,17 +73,12 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 		return 0, domain.ErrBadRequest
 	}
 
-	sql, args, err := domain.Psql.Insert("\"user\"").
-		Columns("password", "name", "email", "date_joined", "image_path").
-		Values(user.Password, user.Name, user.Email, user.DateJoined, user.ImagePath).
-		Suffix("RETURNING \"id\"").
-		ToSql()
-	if err != nil {
-		logs.LogError(logs.Logger, "auth_postgres", "AddUser", err, err.Error())
-		return 0, err
-	}
-
-	result := r.db.QueryRow(r.ctx, sql, args...)
+	result := r.db.QueryRow(r.ctx, addUserQuery,
+		user.Password,
+		user.Name,
+		user.Email,
+		user.DateJoined,
+		user.ImagePath)
 
 	logs.Logger.Debug("AddUser queryRow result:", result)
 
@@ -87,18 +91,7 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 }
 
 func (r *authPostgresqlRepository) UserExists(email string) (bool, error) {
-	sql, args, err := domain.Psql.Select("1").
-		Prefix("SELECT EXISTS (").
-		From("\"user\"").
-		Where("email = ?", email).
-		Suffix(")").
-		ToSql()
-	if err != nil {
-		logs.LogError(logs.Logger, "auth_postgres", "UserExists", err, err.Error())
-		return false, err
-	}
-
-	result := r.db.QueryRow(r.ctx, sql, args...)
+	result := r.db.QueryRow(r.ctx, userExistsQuery, email)
 
 	var exist bool
 	if err := result.Scan(&exist); err != nil {

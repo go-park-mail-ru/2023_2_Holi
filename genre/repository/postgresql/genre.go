@@ -12,6 +12,11 @@ import (
 
 var logger = logs.LoggerInit()
 
+const getGenresQuery = `
+	SELECT name
+	FROM genre
+`
+
 type genrePostgresRepo struct {
 	db  *pgxpool.Pool
 	ctx context.Context
@@ -25,14 +30,7 @@ func GenrePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.G
 }
 
 func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
-	sql, args, err := domain.Psql.Select("name").
-		From("genre").
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.db.Query(r.ctx, sql, args...)
+	rows, err := r.db.Query(r.ctx, getGenresQuery)
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "genre_postgres", "GetGenres", err, err.Error())
 		return nil, domain.ErrNotFound

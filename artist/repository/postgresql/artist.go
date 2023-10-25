@@ -12,6 +12,15 @@ import (
 
 var logger = logs.LoggerInit()
 
+const artistPageQuery = `
+	SELECT video.id, e.name, e.preview_path, video.rating
+	FROM video
+			 JOIN video_cast AS vc ON video_id = vc.video_id
+			 JOIN cast AS c ON vc.cast_id = c.id
+			 JOIN episode AS e ON e.video_id = video.id
+	WHERE c.name = $1
+`
+
 type ArtistPostgresqlRepository struct {
 	db  *pgxpool.Pool
 	ctx context.Context
@@ -25,17 +34,7 @@ func NewArtistPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) doma
 }
 
 func (r *ArtistPostgresqlRepository) GetArtistPage(name string) ([]domain.Film, error) {
-	sqlString, args, err := domain.Psql.Select("film.id", "film.name", "film.preview_path", "film.rating").
-		From("video").
-		Join("video_cast AS vc ON video_id = vc.video_id").
-		Join("cast AS c ON vg.cast_id = c.id").
-		Where("c.name = ?", name).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.db.Query(r.ctx, sqlString, args...)
+	rows, err := r.db.Query(r.ctx, artistPageQuery, name)
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "artist_postgres", "GetArtistPage", err, err.Error())
 		return nil, domain.ErrNotFound

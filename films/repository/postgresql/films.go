@@ -10,6 +10,30 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const getFilmsByGenreQuery = `
+	SELECT video.id, e.name, e.preview_path, video.rating
+	FROM video
+         JOIN video_cast AS vc ON video_id = vc.video_id
+         JOIN cast AS c ON vc.cast_id = c.id
+         JOIN episode AS e ON e.video_id = video.id
+	WHERE c.name = $1
+`
+
+const getFilmDataQuery = `
+	SELECT (e.name, e.description, e.duration,
+		e.preview_path, e.media_path, release_year, rating, age_restriction)
+	FROM video
+		JOIN episode AS e ON video.id = video_id
+	WHERE video.id = $1
+`
+
+const getFilmArtistsQuery = `
+	SELECT name
+	FROM cast
+		JOIN video_film AS vf ON id = cast_id
+	WHERE vf.video_id = $1
+`
+
 type filmsPostgresqlRepository struct {
 	db  *pgxpool.Pool
 	ctx context.Context
@@ -23,17 +47,7 @@ func NewFilmsPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domai
 }
 
 func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film, error) {
-	sqlString, args, err := domain.Psql.Select("video.id", "video.name", "video.preview_path", "video.rating").
-		From("video").
-		Join("video_genre AS vg ON video_id = vg.video_id").
-		Join("genre AS g ON vg.genre_id = g.id").
-		Where("g.name = ?", genre).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.db.Query(r.ctx, sqlString, args...)
+	rows, err := r.db.Query(r.ctx, getFilmsByGenreQuery, genre)
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
 		return nil, domain.ErrNotFound
@@ -67,17 +81,7 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 }
 
 func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
-	sql, args, err := domain.Psql.Select("e.name", "e.description", "e.duration",
-		"e.preview_path", "e.media_path", "release_year", "rating", "age_restriction").
-		From("video").
-		Join("episode AS e ON video.id = video_id").
-		Where("video.id = ?", id).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	row, err := r.db.Query(r.ctx, sql, args...)
+	row, err := r.db.Query(r.ctx, getFilmDataQuery, id)
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())
 		return nil, domain.ErrNotFound
@@ -110,16 +114,7 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
 }
 
 func (r *filmsPostgresqlRepository) GetFilmArtists(FilmId int) ([]domain.Artist, error) {
-	sql, args, err := domain.Psql.Select("name").
-		From("cast").
-		Join("video_film AS vf ON id = cast_id").
-		Where("af.video_id = ?", FilmId).
-		ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := r.db.Query(r.ctx, sql, args...)
+	rows, err := r.db.Query(r.ctx, getFilmArtistsQuery, FilmId)
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmArtists", err, err.Error())
 		return nil, domain.ErrNotFound
