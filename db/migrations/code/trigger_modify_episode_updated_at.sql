@@ -5,3 +5,4 @@ CREATE TRIGGER modify_episode_updated_at
     ON episode
     FOR EACH ROW
 EXECUTE PROCEDURE public.moddatetime(updated_at);
+--

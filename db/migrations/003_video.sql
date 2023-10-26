@@ -1,13 +1,13 @@
 CREATE TABLE video
 (
     id              SERIAL PRIMARY KEY,
-    name            VARCHAR(100)          NOT NULL,
+    name            TEXT                  NOT NULL,
     description     TEXT,
-    preview_path    VARCHAR(100)          NOT NULL,
+    preview_path    TEXT                  NOT NULL,
     release_year    INTEGER
                     CONSTRAINT release_year_range
                     CHECK (release_year >= 1890
-                        AND release_year <= EXTRACT(YEAR FROM CURRENT_DATE)),
+                    AND release_year <= EXTRACT(YEAR FROM CURRENT_DATE)),
     rating          FLOAT(2)
                     CONSTRAINT rating_range
                     CHECK (rating BETWEEN 0 AND 10),
@@ -18,6 +18,12 @@ CREATE TABLE video
     created_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TRIGGER modify_video_updated_at
+    BEFORE UPDATE
+    ON video
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
 
 ---- create above / drop below ----
 

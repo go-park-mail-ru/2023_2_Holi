@@ -10,6 +10,12 @@ CREATE TABLE video_estimation
     UNIQUE (video_id, user_id)
 );
 
+CREATE TRIGGER modify_video_estimation_updated_at
+    BEFORE UPDATE
+    ON video_estimation
+    FOR EACH ROW
+EXECUTE PROCEDURE public.moddatetime(updated_at);
+
 ---- create above / drop below ----
 
 DROP TABLE video_estimation
