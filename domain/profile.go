@@ -3,22 +3,22 @@ package domain
 import "time"
 
 type User struct {
-	ID         int       `json:"-"`
+	ID         int       `json:"id"`
 	Name       string    `json:"name"`
 	Password   string    `json:"password"`
 	Email      string    `json:"email"`
 	DateJoined time.Time `json:"-"`
 	ImagePath  string    `json:"imagePath"`
+	ImageData  []byte    `json:"imageData"`
 }
 
 type ProfileUsecase interface {
-	GetProfile(userID int) (User, error)
-	UpdateProfile(userID int, newUser User) (User, error)
-	UploadImage(userID int, image []byte) error
+	GetUserData(userID int) (User, error)
+	UpdateUser(newUser User) (User, error)
+	UploadImage(userID int, imageData []byte) (string, error)
 }
 
 type ProfileRepository interface {
-	GetProfile(userID int) (User, error)
-	UpdateProfile(userID int, newUser User) (User, error)
-	UploadImage(userID int, image []byte) error
+	GetUser(userID int) (User, error)
+	UpdateUser(newUser User) (User, error)
 }

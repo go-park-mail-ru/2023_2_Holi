@@ -25,7 +25,7 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	defer func(rows *sql.Rows) {
 		err := rows.Close()
 		if err != nil {
-			logs.LogError(logs.Logger, "postgresql", "GetFilmsByGenre", err, "Failed to close query")
+			logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, "Failed to close query")
 		}
 	}(rows)
 	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
@@ -67,27 +67,20 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 		}
 	}(row)
 
-	count := 0
-	for row.Next() {
-		count++
-	}
-
 	var film domain.Film
-	if count > 0 {
-		err = row.Scan(
-			&film.ID,
-			&film.Name,
-			&film.Description,
-			&film.Duration,
-			&film.PreviewPath,
-			&film.MediaPath,
-			&film.Country,
-			&film.ReleaseYear,
-			&film.Rating,
-			&film.RatesCount,
-			&film.AgeRestriction,
-		)
-	}
+	err = row.Scan(
+		&film.ID,
+		&film.Name,
+		&film.Description,
+		&film.Duration,
+		&film.PreviewPath,
+		&film.MediaPath,
+		&film.Country,
+		&film.ReleaseYear,
+		&film.Rating,
+		&film.RatesCount,
+		&film.AgeRestriction,
+	)
 
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())

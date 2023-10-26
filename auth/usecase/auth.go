@@ -3,6 +3,7 @@ package auth_usecase
 import (
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 
 	"2023_2_Holi/domain"
@@ -57,7 +58,7 @@ func (u *authUsecase) Logout(token string) error {
 }
 
 func (u *authUsecase) Register(user domain.User) (int, error) {
-	if user == (domain.User{}) {
+	if cmp.Equal(user, domain.User{}) {
 		return 0, domain.ErrBadRequest
 	}
 
