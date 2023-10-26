@@ -37,7 +37,7 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase) {
 // GetUserData godoc
 // @Summary 		Get user by id
 // @Description 	Get user data by id
-// @Tags 			Profile
+// @Tags 			profile
 // @Param 			id path int true "The user id you want to retrieve."
 // @Produce 		json
 // @Success 		200 {json} domain.User

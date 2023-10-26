@@ -45,6 +45,7 @@ const (
 	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
 	defaultRegion         = "ru-msk"
 	bucketName            = "user_images_holi"
+	directory             = "User_Images"
 )
 
 func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, error) {
@@ -52,7 +53,7 @@ func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, erro
 	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
 	uploadInput := &s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
-		Key:         aws.String(strconv.Itoa(userID)),
+		Key:         aws.String(directory + "/" + strconv.Itoa(userID)),
 		Body:        bytes.NewReader(imageData),
 		ACL:         aws.String("public-read"),
 		ContentType: aws.String("image/jpeg"),
@@ -62,7 +63,7 @@ func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, erro
 		logs.LogError(logs.Logger, "profile_usecase", "UploadImage", err, "Failed to upload image")
 		return "", err
 	}
-	imagePath := "https://" + bucketName + ".hb." + defaultRegion + ".vkcs.cloud/" + strconv.Itoa(userID)
+	imagePath := "https://" + bucketName + ".hb." + defaultRegion + ".vkcs.cloud/" + directory + "/" + strconv.Itoa(userID)
 
 	return imagePath, nil
 }
