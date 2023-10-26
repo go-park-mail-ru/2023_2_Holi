@@ -84,7 +84,7 @@ erDiagram
     VIDEO_CAST {
         _ video_id FK
         _ cast_id FK
-        "UNIQUE (video_id, cast_id)"
+        "PK (video_id, cast_id)"
     }
     
     GENRE {
@@ -97,7 +97,7 @@ erDiagram
     VIDEO_GENRE {
         _ video_id FK
         _ genre_id FK
-        "UNIQUE (video_id, genre_id)"
+        "PK (video_id, genre_id)"
     }
 
     USER {
@@ -118,7 +118,7 @@ erDiagram
         _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
         _ user_id FK
         _ video_id FK
-        "UNIQUE (video_id, user_id)"
+        "PK (video_id, user_id)"
     }
 
     TAG {
@@ -131,7 +131,7 @@ erDiagram
     VIDEO_TAG {
         _ video_id FK
         _ tag_id FK
-        "UNIQUE (video_id, tag_id)"
+        "PK (video_id, tag_id)"
     }    
 
 ```
