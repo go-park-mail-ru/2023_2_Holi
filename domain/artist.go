@@ -5,6 +5,7 @@ type Artist struct {
 	Name    string
 	Surname string
 }
+
 type ArtistUsecase interface {
 	GetArtistPage(name, surname string) ([]Film, error)
 }
