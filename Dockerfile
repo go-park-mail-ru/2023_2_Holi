@@ -18,4 +18,4 @@ WORKDIR /
 
 COPY --from=build-stage /app/app/main /main
 
-CMD ["/main"]
+ENTRYPOINT ["/main"]
