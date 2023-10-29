@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
@@ -46,6 +47,7 @@ import (
 // @schemes http
 // @BasePath /
 func main() {
+	err := godotenv.Load()
 	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
