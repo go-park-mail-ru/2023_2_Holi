@@ -30,6 +30,10 @@ import (
 	artist_postgres "2023_2_Holi/artist/repository/postgresql"
 	artist_usecase "2023_2_Holi/artist/usecase"
 
+	profile_http "2023_2_Holi/profile/delivery/http"
+	profile_postgres "2023_2_Holi/profile/repository/postgresql"
+	profile_usecase "2023_2_Holi/profile/usecase"
+
 	_ "github.com/lib/pq"
 )
 
@@ -67,16 +71,19 @@ func main() {
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
 	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres, ctx)
+	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
 	artistUsecase := artist_usecase.NewArtistUsecase(artistRepository)
+	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	artist_http.NewArtistHandler(authMiddlewareRouter, artistUsecase)
+	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

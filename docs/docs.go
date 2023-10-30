@@ -142,20 +142,20 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/genre/{genre}": {
+        "/api/v1/films/genre/{genre}": {
             "get": {
-                "description": "Get a list of movies based on the specified genre.",
+                "description": "Get a list of films based on the specified genre.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "movies"
+                    "Films"
                 ],
-                "summary": "Get movies by genre",
+                "summary": "Get films by genre",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The genre of the movies you want to retrieve.",
+                        "description": "The genre of the Films you want to retrieve.",
                         "name": "genre",
                         "in": "path",
                         "required": true
@@ -189,20 +189,108 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/movies/{id}": {
+        "/api/v1/films/{id}": {
             "get": {
-                "description": "Get content for movie page",
+                "description": "Get content for Film page",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "movies"
+                    "Films"
                 ],
-                "summary": "Get movie data by id",
+                "summary": "Get Film data by id",
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "The genre of the movies you want to retrieve.",
+                        "description": "The genre of the Films you want to retrieve.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/update": {
+            "post": {
+                "description": "update user data in db and return it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "update profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/{id}": {
+            "get": {
+                "description": "Get user data by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Get user by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The user id you want to retrieve.",
                         "name": "id",
                         "in": "path",
                         "required": true
