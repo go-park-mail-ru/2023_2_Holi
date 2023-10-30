@@ -62,8 +62,6 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 		return 0, domain.ErrBadRequest
 	}
 
-	user.DateJoined = time.Now()
-
 	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
 		return 0, domain.ErrAlreadyExists
 	}

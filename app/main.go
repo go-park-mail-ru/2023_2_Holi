@@ -71,7 +71,7 @@ func main() {
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
 	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres, ctx)
-	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres)
+	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
@@ -87,7 +87,7 @@ func main() {
 
 	mw := middleware.InitMiddleware(authUsecase)
 
-	//authMiddlewareRouter.Use(mw.IsAuth)
+	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)

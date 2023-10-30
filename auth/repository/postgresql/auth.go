@@ -16,8 +16,8 @@ const getByEmailQuery = `
 `
 
 const addUserQuery = `
-	INSERT INTO "user" (password, name, email, date_joined, image_path)
-	VALUES ($1, $2, $3, $4, $5)
+	INSERT INTO "user" (password, name, email, image_path)
+	VALUES ($1, $2, $3, $4)
 	RETURNING id
 `
 
@@ -77,7 +77,6 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 		user.Password,
 		user.Name,
 		user.Email,
-		user.DateJoined,
 		user.ImagePath)
 
 	logs.Logger.Debug("AddUser queryRow result:", result)

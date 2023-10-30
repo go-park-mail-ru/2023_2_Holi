@@ -83,7 +83,7 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	return films, nil
 }
 
-func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
+func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 	row := r.db.QueryRow(r.ctx, getFilmDataQuery, id)
 
 	logs.Logger.Debug("GetFilmData query result:", row)
@@ -103,14 +103,14 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (*domain.Film, error) {
 
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())
-		return nil, domain.ErrNotFound
+		return domain.Film{}, domain.ErrNotFound
 	}
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())
-		return nil, err
+		return domain.Film{}, err
 	}
 
-	return film, nil
+	return domain.Film{}, nil
 }
 
 func (r *filmsPostgresqlRepository) GetFilmArtists(FilmId int) ([]domain.Artist, error) {
