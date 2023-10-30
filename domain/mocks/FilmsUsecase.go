@@ -16,8 +16,8 @@ func (m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	return arguments.Get(0).([]domain.Film), arguments.Error(1)
 }
 
-func (m *FilmsUsecase) GetFilmData(id int) (*domain.Film, []domain.Artist, error) {
+func (m *FilmsUsecase) GetFilmData(id int) (*domain.Film, []domain.Cast, error) {
 	arguments := m.Called(id)
 
-	return arguments.Get(0).(*domain.Film), arguments.Get(1).([]domain.Artist), arguments.Error(2)
+	return arguments.Get(0).(*domain.Film), arguments.Get(1).([]domain.Cast), arguments.Error(2)
 }

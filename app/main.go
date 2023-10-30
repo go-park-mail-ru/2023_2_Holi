@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
@@ -26,10 +26,6 @@ import (
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
 	genre_usecase "2023_2_Holi/genre/usecase"
 
-	artist_http "2023_2_Holi/artist/delivery/http"
-	artist_postgres "2023_2_Holi/artist/repository/postgresql"
-	artist_usecase "2023_2_Holi/artist/usecase"
-
 	_ "github.com/lib/pq"
 )
 
@@ -47,7 +43,6 @@ import (
 // @schemes http
 // @BasePath /
 func main() {
-	err := godotenv.Load()
 	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
@@ -59,24 +54,23 @@ func main() {
 	redis := redis.RedisConnector()
 	defer redis.Close()
 
+	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
+	authMiddlewareRouter.Use(csrfMiddleware)
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
 	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
-	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
-	artistUsecase := artist_usecase.NewArtistUsecase(artistRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
-	artist_http.NewArtistHandler(authMiddlewareRouter, artistUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

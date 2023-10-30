@@ -12,13 +12,21 @@ type Film struct {
 	Duration       int     `json:"-"`
 }
 
+type Cast struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
 type FilmsRepository interface {
 	GetFilmsByGenre(genre string) ([]Film, error)
 	GetFilmData(id int) (*Film, error)
-	GetFilmArtists(filmId int) ([]Artist, error)
+	GetFilmCast(filmId int) ([]Cast, error)
+	GetCastPage(id int) ([]Film, error)
+	GetCastName(id int) ([]Cast, error)
 }
 
 type FilmsUsecase interface {
 	GetFilmsByGenre(genre string) ([]Film, error)
-	GetFilmData(id int) (*Film, []Artist, error)
+	GetFilmData(id int) (*Film, []Cast, error)
+	GetCastPage(id int) ([]Film, []Cast, error)
 }

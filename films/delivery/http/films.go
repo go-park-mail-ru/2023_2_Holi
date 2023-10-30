@@ -12,8 +12,8 @@ import (
 )
 
 type ApiResponse struct {
-	Status int         `json:"status"`
-	Body   interface{} `json:"body"`
+	Body interface{} `json:"body,omitempty"`
+	Err  string      `json:"err,omitempty"`
 }
 
 type FilmsHandler struct {
@@ -27,6 +27,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 
 	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetFilmsByGenre godoc
@@ -46,21 +47,12 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 
 	Films, err := h.FilmsUsecase.GetFilmsByGenre(genre)
 	if err != nil {
-		response := ApiResponse{
-			Status: domain.GetStatusCode(err),
-			Body: map[string]string{
-				"error": err.Error(),
-			},
-		}
-		json.NewEncoder(w).Encode(response)
+		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		return
 	}
-	response := ApiResponse{
-		Status: http.StatusOK,
-		Body: map[string]interface{}{
-			"films": Films,
-		},
+	response := map[string]interface{}{
+		"films": Films,
 	}
 
 	logs.Logger.Debug("Films:", Films)
@@ -95,15 +87,48 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := ApiResponse{
-		Status: http.StatusOK,
-		Body: map[string]interface{}{
-			"Film":    Film,
-			"artists": artists,
-		},
+	response := map[string]interface{}{
+		"Film":    Film,
+		"artists": artists,
 	}
 
 	logs.Logger.Debug("Film:", Film)
 	logs.Logger.Debug("artists:", artists)
+	json.NewEncoder(w).Encode(response)
+}
+
+// GetCastPage godoc
+// @Summary 		Get cast page
+// @Description 	Get a list of films based on the cast name.
+// @Tags 			Cast
+// @Param 			cast path string true "The Films of the Cast you want to retrieve."
+// @Produce 		json
+// @Success 		200 {json} domain.Films
+// @Failure			400 {json} ApiResponse
+// @Failure 		404 {json} ApiResponse
+// @Failure 		500 {json} ApiResponse
+// @Router 			api/v1/films/cast/{id} [get]
+func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	CastID := vars["id"]
+	id, err := strconv.Atoi(CastID)
+	if err != nil {
+		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		logs.LogError(logs.Logger, "Films_http", "GetCastPage", err, err.Error())
+		return
+	}
+	films, cast, err := h.FilmsUsecase.GetCastPage(id)
+	if err != nil {
+		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetCastPage", err, "Failed to get cast")
+		return
+	}
+	response := map[string]interface{}{
+		"films": films,
+		"cast":  cast,
+	}
+
+	logs.Logger.Debug("Http GetArtistPage:", films)
+	logs.Logger.Debug("Http GetArtistPage:", cast)
 	json.NewEncoder(w).Encode(response)
 }
