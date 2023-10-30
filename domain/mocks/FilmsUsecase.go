@@ -63,6 +63,8 @@ func (_m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 		}
 	}
 
+func (m *FilmsUsecase) GetFilmData(id int) (*domain.Film, []domain.Cast, error) {
+	arguments := m.Called(id)
 	if rf, ok := ret.Get(1).(func(string) error); ok {
 		r1 = rf(genre)
 	} else {
@@ -84,4 +86,5 @@ func NewFilmsUsecase(t interface {
 	t.Cleanup(func() { mock.AssertExpectations(t) })
 
 	return mock
+	return arguments.Get(0).(*domain.Film), arguments.Get(1).([]domain.Cast), arguments.Error(2)
 }
