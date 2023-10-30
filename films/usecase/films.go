@@ -39,15 +39,15 @@ func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
 	return film, artists, nil
 }
 
-func (u *filmsUsecase) GetCastPage(id int) ([]domain.Film, []domain.Cast, error) {
+func (u *filmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
 	films, err := u.filmRepo.GetCastPage(id)
 	if err != nil {
-		return nil, nil, err
+		return nil, domain.Cast{}, err
 	}
 	logs.Logger.Debug("Usecase GetCastPage:", films)
 	artist, err := u.filmRepo.GetCastName(id)
 	if err != nil {
-		return nil, nil, err
+		return nil, domain.Cast{}, err
 	}
 	logs.Logger.Debug("Usecase GetCastPage:", artist)
 	return films, artist, nil

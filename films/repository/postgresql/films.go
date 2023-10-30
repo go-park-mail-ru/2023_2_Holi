@@ -190,30 +190,23 @@ func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 	return films, nil
 }
 
-func (r *filmsPostgresqlRepository) GetCastName(FilmId int) ([]domain.Cast, error) {
-	rows, err := r.db.Query(r.ctx, getCastNameQuery, FilmId)
+func (r *filmsPostgresqlRepository) GetCastName(FilmId int) (domain.Cast, error) {
+	rows := r.db.QueryRow(r.ctx, getCastNameQuery, FilmId)
+
+	logs.Logger.Debug("GetCastName query result:", rows)
+
+	var cast domain.Cast
+	err := rows.Scan(
+		&cast.Name,
+	)
+
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return nil, domain.ErrNotFound
+		return domain.Cast{}, domain.ErrNotFound
 	}
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return nil, err
-	}
-	defer rows.Close()
-	logs.Logger.Debug("GetCastName query result:", rows)
-
-	var cast []domain.Cast
-	for rows.Next() {
-		var artist domain.Cast
-		err = rows.Scan(
-			&artist.Name,
-		)
-		if err != nil {
-			logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-			return nil, err
-		}
-		cast = append(cast, artist)
+		return domain.Cast{}, err
 	}
 
 	return cast, nil

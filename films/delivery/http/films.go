@@ -127,7 +127,7 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 		"cast":  cast,
 	}
 
-	logs.Logger.Debug("Http GetArtistPage:", films)
-	logs.Logger.Debug("Http GetArtistPage:", cast)
+	logs.Logger.Debug("Http GetCastPage:", films)
+	logs.Logger.Debug("Http GetCastPage:", cast)
 	json.NewEncoder(w).Encode(response)
 }
