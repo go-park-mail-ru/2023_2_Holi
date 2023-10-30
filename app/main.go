@@ -80,7 +80,7 @@ func main() {
 
 	mw := middleware.InitMiddleware(authUsecase)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
@@ -88,7 +88,7 @@ func main() {
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
 
-	err := http.ListenAndServe(serverPort, mainRouter)
+	err = http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}

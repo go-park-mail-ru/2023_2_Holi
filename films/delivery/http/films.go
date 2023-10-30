@@ -77,7 +77,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Failure 		400 {json} ApiResponse
 // @Failure 		404 {json} ApiResponse
 // @Failure 		500 {json} ApiResponse
-// @Router 			/api/v1/Films/{id} [get]
+// @Router 			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	FilmID := vars["id"]

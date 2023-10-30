@@ -27,7 +27,7 @@ func NewArtistHandler(router *mux.Router, au domain.ArtistUsecase) {
 		ArtistUsecase: au,
 	}
 
-	router.HandleFunc("/v1/artist/{name}/{surname}", handler.GetArtistPage).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/artist/{name}", handler.GetArtistPage).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func (h *ArtistHandler) GetArtistPage(w http.ResponseWriter, r *http.Request) {
