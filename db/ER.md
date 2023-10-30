@@ -48,9 +48,10 @@ title: Netflix
 erDiagram
     VIDEO {
         _ id PK
-        _ name "NOT NULL"
+        _ name
         _ description
-        _ preview_path "NOT NULL"
+        _ preview_path
+        _ preview_video_path "NOT NULL"
         _ release_year
         _ rating
         _ age_restriction
