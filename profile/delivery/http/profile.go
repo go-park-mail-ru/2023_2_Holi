@@ -11,11 +11,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type ApiResponse struct {
-	Status int         `json:"status"`
-	Body   interface{} `json:"body"`
-}
-
 type Result struct {
 	Body interface{} `json:"body,omitempty"`
 	Err  string      `json:"err,omitempty"`
@@ -60,16 +55,12 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "profile_http", "GetUserData", err, err.Error())
 		return
 	}
-
-	response := ApiResponse{
-		Status: http.StatusOK,
-		Body: map[string]interface{}{
-			"user": user,
-		},
-	}
-
 	logs.Logger.Debug("user:", user)
-	json.NewEncoder(w).Encode(response)
+
+	response := map[string]interface{}{
+		"user": user,
+	}
+	json.NewEncoder(w).Encode(&Result{Body: response})
 }
 
 // UpdateProfile godoc
@@ -107,13 +98,10 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	}
 	logs.Logger.Debug("Updated user:", updatedUser)
 
-	response := ApiResponse{
-		Status: http.StatusOK,
-		Body: map[string]interface{}{
-			"user": updatedUser,
-		},
+	response := map[string]interface{}{
+		"user": updatedUser,
 	}
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(&Result{Body: response})
 }
 
 func (h *ProfileHandler) CloseAndAlert(body io.ReadCloser) {
