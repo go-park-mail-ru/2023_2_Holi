@@ -25,7 +25,7 @@ func NewAuthUsecase(ar domain.AuthRepository, sr domain.SessionRepository) domai
 func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
 	expectedUser, err := u.authRepo.GetByEmail(credentials.Email)
 	if err != nil {
-		return domain.Session{}, domain.ErrNotFound
+		return domain.Session{}, err
 	}
 	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 
@@ -61,8 +61,6 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 	if cmp.Equal(user, domain.User{}) {
 		return 0, domain.ErrBadRequest
 	}
-
-	user.DateJoined = time.Now()
 
 	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
 		return 0, domain.ErrAlreadyExists

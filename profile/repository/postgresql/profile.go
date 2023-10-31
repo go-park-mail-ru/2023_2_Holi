@@ -1,72 +1,84 @@
 package profile_postgres
 
 import (
+	"context"
+	"github.com/jackc/pgx/v5"
+
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-	"database/sql"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+const getUserQuery = `
+	SELECT id, name, email, password, COALESCE(image_path, '') 
+	FROM "user" 
+	WHERE id = $1
+`
+
+const updateUserQuery = `
+	UPDATE "user"
+	SET name = $1, password = $2, email = $3, image_path = $4 
+	WHERE id = $5 
+	RETURNING id, name, email, password, COALESCE(image_path, '') 
+`
+
 type profilePostgresqlRepository struct {
-	db *sql.DB
+	db  *pgxpool.Pool
+	ctx context.Context
 }
 
-func NewProfilePostgresqlRepository(conn *sql.DB) domain.ProfileRepository {
-	return &profilePostgresqlRepository{db: conn}
+func NewProfilePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.ProfileRepository {
+	return &profilePostgresqlRepository{
+		db:  pool,
+		ctx: ctx,
+	}
 }
 
 func (r *profilePostgresqlRepository) GetUser(userID int) (domain.User, error) {
-	row, err := r.db.Query(
-		`SELECT * FROM user WHERE id = $1`, userID)
-	if err != nil {
-		logs.LogError(logs.Logger, "profile_postgres", "GetProfile", err, err.Error())
-		return domain.User{}, err
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			logs.LogError(logs.Logger, "profile_postgres", "GetProfile", err, "Failed to close query")
-		}
-	}(row)
+	row := r.db.QueryRow(r.ctx, getUserQuery, userID)
+
 	logs.Logger.Debug("GetProfile query result:", row)
 
 	var user domain.User
-	err = row.Scan(
+	err := row.Scan(
 		&user.ID,
 		&user.Password,
 		&user.Name,
 		&user.Email,
-		&user.DateJoined,
 		&user.ImagePath,
 	)
 
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "profile_postgres", "GetUser", err, err.Error())
+		return domain.User{}, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "profile_postgres", "GetUser", err, err.Error())
+		return domain.User{}, err
+	}
 	return user, nil
 }
 
 func (r *profilePostgresqlRepository) UpdateUser(newUser domain.User) (domain.User, error) {
-	row, err := r.db.Query(
-		`UPDATE users SET name = $1, password = $2, email = $3, image_path = $4 WHERE id = $5 RETURNING *`,
-		newUser.Name, newUser.Password, newUser.Email, newUser.ImagePath, newUser.ID)
-	if err != nil {
-		logs.LogError(logs.Logger, "profile_postgres", "UpdateProfile", err, err.Error())
-		return domain.User{}, err
-	}
-	defer func(rows *sql.Rows) {
-		err := rows.Close()
-		if err != nil {
-			logs.LogError(logs.Logger, "profile_postgres", "UpdateProfile", err, "Failed to close query")
-		}
-	}(row)
-	logs.Logger.Debug("UpdateProfile query result:", row)
+	row := r.db.QueryRow(r.ctx, updateUserQuery, newUser.Name, newUser.Password, newUser.Email, newUser.ImagePath, newUser.ID)
 
 	var user domain.User
-	err = row.Scan(
+	err := row.Scan(
 		&user.ID,
 		&user.Password,
 		&user.Name,
 		&user.Email,
-		&user.DateJoined,
 		&user.ImagePath,
 	)
 
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "profile_postgres", "UpdateProfile", err, err.Error())
+		return domain.User{}, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "profile_postgres", "UpdateProfile", err, err.Error())
+		return domain.User{}, err
+	}
 	return user, nil
 }

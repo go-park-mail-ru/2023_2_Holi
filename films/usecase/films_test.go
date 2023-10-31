@@ -10,18 +10,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-//
-// "errors"
-// "testing"
-
-// "github.com/bxcodec/faker"
-// "github.com/google/uuid"
-// "github.com/stretchr/testify/assert"
-// "github.com/stretchr/testify/mock"
-
-// "2023_2_Holi/domain"
-// "2023_2_Holi/domain/mocks"
-
 func TestGetFilmsByGenre(t *testing.T) {
 	//TODO: Lexa
 }
@@ -30,15 +18,15 @@ func TestGetFilmData(t *testing.T) {
 	tests := []struct {
 		name                     string
 		filmID                   int
-		setFilmsRepoExpectations func(filmsRepo *mocks.FilmsRepository, film *domain.Film, artists []domain.Artist)
+		setFilmsRepoExpectations func(filmsRepo *mocks.FilmsRepository, film *domain.Film, artists []domain.Cast)
 		good                     bool
 	}{
 		{
 			name:   "GoodCase/Common",
 			filmID: 1,
-			setFilmsRepoExpectations: func(filmsRepo *mocks.FilmsRepository, film *domain.Film, artists []domain.Artist) {
+			setFilmsRepoExpectations: func(filmsRepo *mocks.FilmsRepository, film *domain.Film, artists []domain.Cast) {
 				filmsRepo.On("GetFilmData", mock.Anything).Return(*film, nil)
-				filmsRepo.On("GetFilmArtists", mock.Anything).Return(artists, nil)
+				filmsRepo.On("GetFilmCast", mock.Anything).Return(artists, nil)
 			},
 			good: true,
 		},
@@ -50,7 +38,7 @@ func TestGetFilmData(t *testing.T) {
 
 			fr := new(mocks.FilmsRepository)
 			var film domain.Film
-			var artists []domain.Artist
+			var artists []domain.Cast
 			test.setFilmsRepoExpectations(fr, &film, artists)
 
 			filmsCase := films_usecase.NewFilmsUsecase(fr)

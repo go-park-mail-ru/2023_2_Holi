@@ -13,14 +13,47 @@ type FilmsUsecase struct {
 	mock.Mock
 }
 
+// GetCastPage provides a mock function with given fields: id
+func (_m *FilmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
+	ret := _m.Called(id)
+
+	var r0 []domain.Film
+	var r1 domain.Cast
+	var r2 error
+	if rf, ok := ret.Get(0).(func(int) ([]domain.Film, domain.Cast, error)); ok {
+		return rf(id)
+	}
+	if rf, ok := ret.Get(0).(func(int) []domain.Film); ok {
+		r0 = rf(id)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]domain.Film)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(int) domain.Cast); ok {
+		r1 = rf(id)
+	} else {
+		r1 = ret.Get(1).(domain.Cast)
+	}
+
+	if rf, ok := ret.Get(2).(func(int) error); ok {
+		r2 = rf(id)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
+}
+
 // GetFilmData provides a mock function with given fields: id
-func (_m *FilmsUsecase) GetFilmData(id int) (domain.Film, []domain.Artist, error) {
+func (_m *FilmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
 	ret := _m.Called(id)
 
 	var r0 domain.Film
-	var r1 []domain.Artist
+	var r1 []domain.Cast
 	var r2 error
-	if rf, ok := ret.Get(0).(func(int) (domain.Film, []domain.Artist, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (domain.Film, []domain.Cast, error)); ok {
 		return rf(id)
 	}
 	if rf, ok := ret.Get(0).(func(int) domain.Film); ok {
@@ -29,11 +62,11 @@ func (_m *FilmsUsecase) GetFilmData(id int) (domain.Film, []domain.Artist, error
 		r0 = ret.Get(0).(domain.Film)
 	}
 
-	if rf, ok := ret.Get(1).(func(int) []domain.Artist); ok {
+	if rf, ok := ret.Get(1).(func(int) []domain.Cast); ok {
 		r1 = rf(id)
 	} else {
 		if ret.Get(1) != nil {
-			r1 = ret.Get(1).([]domain.Artist)
+			r1 = ret.Get(1).([]domain.Cast)
 		}
 	}
 

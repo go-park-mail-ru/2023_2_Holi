@@ -1,23 +1,12 @@
 package main
 
 import (
+	"context"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/mux"
-
-	postgres "2023_2_Holi/db_connector/postgres"
-	redis "2023_2_Holi/db_connector/redis"
-	logs "2023_2_Holi/logger"
-	middleware "2023_2_Holi/middleware"
-
-	genre_http "2023_2_Holi/genre/delivery/http"
-	genre_postgres "2023_2_Holi/genre/repository/postgresql"
-	genre_usecase "2023_2_Holi/genre/usecase"
-
-	artist_http "2023_2_Holi/artist/delivery/http"
-	artist_postgres "2023_2_Holi/artist/repository/postgresql"
-	artist_usecase "2023_2_Holi/artist/usecase"
+	"github.com/joho/godotenv"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
@@ -27,6 +16,15 @@ import (
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
+
+	postgres "2023_2_Holi/db/connector/postgres"
+	redis "2023_2_Holi/db/connector/redis"
+	logs "2023_2_Holi/logger"
+	middleware "2023_2_Holi/middleware"
+
+	genre_http "2023_2_Holi/genre/delivery/http"
+	genre_postgres "2023_2_Holi/genre/repository/postgresql"
+	genre_usecase "2023_2_Holi/genre/usecase"
 
 	profile_http "2023_2_Holi/profile/delivery/http"
 	profile_postgres "2023_2_Holi/profile/repository/postgresql"
@@ -45,40 +43,41 @@ import (
 
 // @license.name AS IS (NO WARRANTY)
 
-// @host 127.0.0.1E
+// @host 127.0.0.1
 // @schemes http
 // @BasePath /
 func main() {
+	err := godotenv.Load()
+	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
 	}
 
-	postgres := postgres.PostgresConnector()
+	postgres := postgres.PostgresConnector(ctx)
 	defer postgres.Close()
 
 	redis := redis.RedisConnector()
 	defer redis.Close()
 
+	//csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
+	//authMiddlewareRouter.Use(csrfMiddleware)
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
-	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres)
-	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres)
-	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres)
-	artistRepository := artist_postgres.NewArtistPostgresqlRepository(postgres)
-	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres)
+	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
+	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
+	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
+	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
-	artistUsecase := artist_usecase.NewArtistUsecase(artistRepository)
 	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
-	artist_http.NewArtistHandler(authMiddlewareRouter, artistUsecase)
 	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
@@ -91,7 +90,7 @@ func main() {
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
 
-	err := http.ListenAndServe(serverPort, mainRouter)
+	err = http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}

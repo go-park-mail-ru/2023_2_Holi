@@ -30,8 +30,8 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase) {
 		ProfileUsecase: pu,
 	}
 
-	router.HandleFunc("/api/v1/profile/{id}", handler.GetUserData).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/api/v1/profile/update", handler.UpdateProfile).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/v1/profile/{id}", handler.GetUserData).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/profile/update", handler.UpdateProfile).Methods(http.MethodPost, http.MethodOptions)
 }
 
 // GetUserData godoc
