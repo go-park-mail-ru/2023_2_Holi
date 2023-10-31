@@ -10,7 +10,7 @@ type Credentials struct {
 }
 
 type AuthUsecase interface {
-	Login(credentials Credentials) (Session, error)
+	Login(credentials Credentials) (Session, int, error)
 	Logout(token string) error
 	Register(user User) (int, error)
 	IsAuth(token string) (bool, error)

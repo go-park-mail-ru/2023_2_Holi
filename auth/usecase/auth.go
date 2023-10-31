@@ -22,15 +22,15 @@ func NewAuthUsecase(ar domain.AuthRepository, sr domain.SessionRepository) domai
 	}
 }
 
-func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
+func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int, error) {
 	expectedUser, err := u.authRepo.GetByEmail(credentials.Email)
 	if err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, 0, err
 	}
 	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 
 	if expectedUser.Password != credentials.Password {
-		return domain.Session{}, domain.ErrWrongCredentials
+		return domain.Session{}, 0, domain.ErrWrongCredentials
 	}
 
 	session := domain.Session{
@@ -39,10 +39,10 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, err
 		UserID:    expectedUser.ID,
 	}
 	if err = u.sessionRepo.Add(session); err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, 0, err
 	}
 
-	return session, nil
+	return session, expectedUser.ID, nil
 }
 
 func (u *authUsecase) Logout(token string) error {
