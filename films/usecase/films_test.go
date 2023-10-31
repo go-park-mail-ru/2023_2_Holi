@@ -10,18 +10,6 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-//
-// "errors"
-// "testing"
-
-// "github.com/bxcodec/faker"
-// "github.com/google/uuid"
-// "github.com/stretchr/testify/assert"
-// "github.com/stretchr/testify/mock"
-
-// "2023_2_Holi/domain"
-// "2023_2_Holi/domain/mocks"
-
 func TestGetFilmsByGenre(t *testing.T) {
 	//TODO: Lexa
 }
