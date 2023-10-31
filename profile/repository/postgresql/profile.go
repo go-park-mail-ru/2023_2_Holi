@@ -43,9 +43,9 @@ func (r *profilePostgresqlRepository) GetUser(userID int) (domain.User, error) {
 	var user domain.User
 	err := row.Scan(
 		&user.ID,
-		&user.Password,
 		&user.Name,
 		&user.Email,
+		&user.Password,
 		&user.ImagePath,
 	)
 

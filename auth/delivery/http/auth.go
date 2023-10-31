@@ -40,7 +40,7 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Description  create user session and put it into cookie
 // @Tags         auth
 // @Accept       json
-// @Success      204
+// @Success      204  {json} Result
 // @Failure      400  {json} Result
 // @Failure      403  {json} Result
 // @Failure      404  {json} Result
