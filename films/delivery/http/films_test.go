@@ -70,12 +70,12 @@ func TestGetMoviesByGenre(t *testing.T) {
 func TestGetFilmData(t *testing.T) {
 	tests := []struct {
 		name                 string
-		setUCaseExpectations func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Artist, err error)
+		setUCaseExpectations func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error)
 		status               int
 	}{
 		{
 			name: "GoodCase/Common",
-			setUCaseExpectations: func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Artist, err error) {
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error) {
 				usecase.On("GetFilmData", mock.Anything).Return(*film, artists, err)
 			},
 			status: http.StatusOK,
@@ -89,7 +89,7 @@ func TestGetFilmData(t *testing.T) {
 			router := mux.NewRouter()
 			mockUsecase := new(mocks.FilmsUsecase)
 			var film domain.Film
-			var artists []domain.Artist
+			var artists []domain.Cast
 			test.setUCaseExpectations(mockUsecase, &film, artists, nil)
 
 			req, err := http.NewRequest("GET", "/api/v1/films/1", nil)
