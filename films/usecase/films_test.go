@@ -1,9 +1,8 @@
-package films_usecase_test
+package films_usecase
 
 import (
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
-	films_usecase "2023_2_Holi/films/usecase"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -41,7 +40,7 @@ func TestGetFilmData(t *testing.T) {
 			var artists []domain.Cast
 			test.setFilmsRepoExpectations(fr, &film, artists)
 
-			filmsCase := films_usecase.NewFilmsUsecase(fr)
+			filmsCase := NewFilmsUsecase(fr)
 			filmsCaseFilm, filmsCaseArtists, err := filmsCase.GetFilmData(test.filmID)
 
 			if test.good {

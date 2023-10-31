@@ -1,4 +1,4 @@
-package profile_http_test
+package profile_http
 
 import "testing"
 

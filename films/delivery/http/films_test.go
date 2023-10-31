@@ -1,4 +1,4 @@
-package films_http_test
+package films_http
 
 import (
 	"errors"
@@ -11,7 +11,6 @@ import (
 
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
-	films_http "2023_2_Holi/films/delivery/http"
 
 	"github.com/gorilla/mux"
 )
@@ -53,9 +52,9 @@ func TestGetMoviesByGenre(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			films_http.NewFilmsHandler(router, mockUsecase)
+			NewFilmsHandler(router, mockUsecase)
 
-			handler := &films_http.FilmsHandler{
+			handler := &FilmsHandler{
 				FilmsUsecase: mockUsecase,
 			}
 
@@ -97,9 +96,9 @@ func TestGetFilmData(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			films_http.NewFilmsHandler(router, mockUsecase)
+			NewFilmsHandler(router, mockUsecase)
 
-			handler := &films_http.FilmsHandler{
+			handler := &FilmsHandler{
 				FilmsUsecase: mockUsecase,
 			}
 
