@@ -38,15 +38,10 @@ func ageRes(age string) int {
 
 func dbParamsfromEnv() string {
 	host := os.Getenv("POSTGRES_HOST")
-	host = "localhost"
 	port := os.Getenv("POSTGRES_PORT")
-	port = "5432"
 	user := os.Getenv("POSTGRES_USER")
-	user = "postgres"
 	pass := os.Getenv("POSTGRES_PASSWORD")
-	pass = "1784"
 	dbname := os.Getenv("POSTGRES_DB")
-	dbname = "netflix"
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
