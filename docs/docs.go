@@ -301,7 +301,7 @@ const docTemplate = `{
                 "summary": "update profile",
                 "parameters": [
                     {
-                        "description": "some",
+                        "description": "user that must be updated",
                         "name": "body",
                         "in": "body",
                         "required": true,
@@ -434,12 +434,16 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "email",
+                "id",
                 "name",
                 "password"
             ],
             "properties": {
                 "email": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "imagePath": {
                     "type": "string"

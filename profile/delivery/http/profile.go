@@ -69,7 +69,7 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 // @Tags         profile
 // @Produce      json
 // @Accept       json
-// @Param 		 body body domain.UserRequest true "some"
+// @Param 		 body body domain.UserRequest true "user that must be updated"
 // @Success      200  {object} Result{body=object{user=domain.User}}
 // @Failure      400  {json} Result
 // @Failure      403  {json} Result

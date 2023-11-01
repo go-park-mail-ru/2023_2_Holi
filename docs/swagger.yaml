@@ -21,6 +21,8 @@ definitions:
     properties:
       email:
         type: string
+      id:
+        type: integer
       imagePath:
         type: string
       name:
@@ -29,6 +31,7 @@ definitions:
         type: string
     required:
     - email
+    - id
     - name
     - password
     type: object
@@ -261,7 +264,7 @@ paths:
       - application/json
       description: update user data in db and return it
       parameters:
-      - description: some
+      - description: user that must be updated
         in: body
         name: body
         required: true
