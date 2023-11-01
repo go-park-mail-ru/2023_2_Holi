@@ -17,6 +17,21 @@ definitions:
       password:
         type: string
     type: object
+  domain.UserRequest:
+    properties:
+      email:
+        type: string
+      imagePath:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
   profile_http.Result:
     properties:
       body: {}
@@ -245,6 +260,13 @@ paths:
       consumes:
       - application/json
       description: update user data in db and return it
+      parameters:
+      - description: some
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserRequest'
       produces:
       - application/json
       responses:

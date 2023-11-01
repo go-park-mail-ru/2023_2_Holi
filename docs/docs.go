@@ -299,6 +299,17 @@ const docTemplate = `{
                     "profile"
                 ],
                 "summary": "update profile",
+                "parameters": [
+                    {
+                        "description": "some",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -407,6 +418,28 @@ const docTemplate = `{
                     "items": {
                         "type": "integer"
                     }
+                },
+                "imagePath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 },
                 "imagePath": {
                     "type": "string"
