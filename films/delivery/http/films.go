@@ -106,7 +106,7 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 // @Failure			400 {json} ApiResponse
 // @Failure 		404 {json} ApiResponse
 // @Failure 		500 {json} ApiResponse
-// @Router 			api/v1/films/cast/{id} [get]
+// @Router 			/api/v1/films/cast/{id} [get]
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	CastID := vars["id"]
