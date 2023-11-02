@@ -37,9 +37,9 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 // @Param 			genre path string true "The genre of the Films you want to retrieve."
 // @Produce 		json
 // @Success 		200 {json} domain.Films
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
+// @Failure			400 {json} Result
+// @Failure 		404 {json} Result
+// @Failure 		500 {json} Result
 // @Router 			/api/v1/films/genre/{genre} [get]
 func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -56,10 +56,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 		"films": films,
 	}
 
-<<<<<<< HEAD
-	logs.Logger.Debug("Films:", Films)
-=======
->>>>>>> dev
+	logs.Logger.Debug("Films:", films)
 	json.NewEncoder(w).Encode(&Result{Body: response})
 }
 
@@ -70,9 +67,9 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Param 			id path int true "Id film you want to get."
 // @Produce 		json
 // @Success 		200 {json} domain.Films
-// @Failure 		400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
+// @Failure 		400 {json} Result
+// @Failure 		404 {json} Result
+// @Failure 		500 {json} Result
 // @Router 			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -107,9 +104,9 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 // @Param 			cast path string true "The Films of the Cast you want to retrieve."
 // @Produce 		json
 // @Success 		200 {json} domain.Films
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
+// @Failure			400 {json} Result
+// @Failure 		404 {json} Result
+// @Failure 		500 {json} Result
 // @Router 			/api/v1/films/cast/{id} [get]
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -131,12 +128,7 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 		"cast":  cast,
 	}
 
-<<<<<<< HEAD
-	logs.Logger.Debug("Http GetArtistPage:", films)
-	logs.Logger.Debug("Http GetArtistPage:", cast)
-=======
 	logs.Logger.Debug("Http GetCastPage:", films)
 	logs.Logger.Debug("Http GetCastPage:", cast)
->>>>>>> dev
 	json.NewEncoder(w).Encode(&Result{Body: response})
 }
