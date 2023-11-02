@@ -1,10 +1,13 @@
 package auth_usecase
 
 import (
+	"bytes"
+	"os"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/argon2"
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
@@ -29,7 +32,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int
 	}
 	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 
-	if expectedUser.Password != credentials.Password {
+	if !bytes.Equal(expectedUser.Password, hashPassword(credentials.Password)) {
 		return domain.Session{}, 0, domain.ErrWrongCredentials
 	}
 
@@ -65,6 +68,8 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
 		return 0, domain.ErrAlreadyExists
 	}
+
+	user.Password = hashPassword(user.Password)
 	if id, err := u.authRepo.AddUser(user); err != nil {
 		return 0, err
 	} else {
@@ -84,4 +89,11 @@ func (u *authUsecase) IsAuth(token string) (bool, error) {
 	}
 
 	return auth, nil
+}
+
+func hashPassword(password []byte) []byte {
+	salt := []byte(os.Getenv("SALT"))[0:8]
+	hashedPass := argon2.IDKey(password, salt, 1, 64*1024, 4, 32)
+
+	return append(salt, hashedPass...)
 }

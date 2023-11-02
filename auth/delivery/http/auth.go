@@ -64,7 +64,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("Login credentials:", credentials)
 	defer a.CloseAndAlert(r.Body)
 
-	if credentials.Password == "" || credentials.Email == "" {
+	if len(credentials.Password) == 0 || credentials.Email == "" {
 		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are empy")
 		return
@@ -156,7 +156,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Register.decode", err, "Failed to decode json from body")
 		return
 	}
-	logs.Logger.Debug("Register user:", user)
+	//logs.Logger.Debug("Register user:", user)
 	defer a.CloseAndAlert(r.Body)
 
 	user.Email = strings.TrimSpace(user.Email)
@@ -229,7 +229,7 @@ func valid(email string) bool {
 }
 
 func checkCredentials(cred domain.Credentials) error {
-	if cred.Email == "" || cred.Password == "" {
+	if cred.Email == "" || len(cred.Password) == 0 {
 		return domain.ErrWrongCredentials
 	}
 
