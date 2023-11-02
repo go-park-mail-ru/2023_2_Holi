@@ -16,7 +16,7 @@ type Film struct {
 }
 
 type Cast struct {
-	ID   int    `json:"id"`
+	ID   int    `json:"-"`
 	Name string `json:"name"`
 }
 

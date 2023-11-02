@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
@@ -47,6 +48,7 @@ func dbParamsfromEnv() string {
 }
 
 func main() {
+	err := godotenv.Load()
 	count := 0
 	genreID := 0
 	db, err := sql.Open("postgres", dbParamsfromEnv())
@@ -83,7 +85,7 @@ func main() {
 
 	for {
 		genreID++
-		if genreID == 22 {
+		if genreID == 20 {
 			break
 		}
 		row, err := reader.Read()
@@ -142,18 +144,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, err = reader.Read()
-	if err != nil {
-		log.Fatal(err)
-	}
-	_, err = reader.Read()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	for {
 		count++
-		if count == 22 {
+		if count == 20 {
 			break
 		}
 		row, err := reader.Read()

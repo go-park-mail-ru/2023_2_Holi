@@ -2,6 +2,7 @@ package profile_postgres
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v5"
 
 	"2023_2_Holi/domain"
@@ -66,9 +67,9 @@ func (r *profilePostgresqlRepository) UpdateUser(newUser domain.User) (domain.Us
 	var user domain.User
 	err := row.Scan(
 		&user.ID,
-		&user.Password,
 		&user.Name,
 		&user.Email,
+		&user.Password,
 		&user.ImagePath,
 	)
 
