@@ -2,7 +2,7 @@ package auth_usecase
 
 import (
 	"bytes"
-	"os"
+	"crypto/rand"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -32,7 +32,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int
 	}
 	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 
-	if !bytes.Equal(expectedUser.Password, hashPassword(credentials.Password)) {
+	if !checkPasswords(expectedUser.Password, credentials.Password) {
 		return domain.Session{}, 0, domain.ErrWrongCredentials
 	}
 
@@ -69,7 +69,9 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 		return 0, domain.ErrAlreadyExists
 	}
 
-	user.Password = hashPassword(user.Password)
+	salt := make([]byte, 8)
+	rand.Read(salt)
+	user.Password = hashPassword(salt, user.Password)
 	if id, err := u.authRepo.AddUser(user); err != nil {
 		return 0, err
 	} else {
@@ -91,9 +93,13 @@ func (u *authUsecase) IsAuth(token string) (bool, error) {
 	return auth, nil
 }
 
-func hashPassword(password []byte) []byte {
-	salt := []byte(os.Getenv("SALT"))[0:8]
+func hashPassword(salt []byte, password []byte) []byte {
 	hashedPass := argon2.IDKey(password, salt, 1, 64*1024, 4, 32)
-
 	return append(salt, hashedPass...)
+}
+
+func checkPasswords(passHash []byte, plainPassword []byte) bool {
+	salt := passHash[0:8]
+	userPassHash := hashPassword(salt, plainPassword)
+	return bytes.Equal(userPassHash, passHash)
 }
