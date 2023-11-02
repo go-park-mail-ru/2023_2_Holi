@@ -33,8 +33,8 @@ const getFilmDataQuery = `
 const getFilmCastQuery = `
 	SELECT name
 	FROM "cast"
-		JOIN video_film AS vf ON id = cast_id
-	WHERE vf.video_id = $1
+		JOIN video_cast AS vc ON id = cast_id
+	WHERE vc.video_id = $1
 `
 const getCastPageQuery = `
 	SELECT video.id, e.name, e.preview_path, video.rating, video.preview_video_path
