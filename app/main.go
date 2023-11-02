@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
@@ -26,6 +26,10 @@ import (
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
 	genre_usecase "2023_2_Holi/genre/usecase"
 
+	profile_http "2023_2_Holi/profile/delivery/http"
+	profile_postgres "2023_2_Holi/profile/repository/postgresql"
+	profile_usecase "2023_2_Holi/profile/usecase"
+
 	_ "github.com/lib/pq"
 )
 
@@ -43,6 +47,7 @@ import (
 // @schemes http
 // @BasePath /
 func main() {
+	err := godotenv.Load()
 	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
@@ -54,23 +59,26 @@ func main() {
 	redis := redis.RedisConnector()
 	defer redis.Close()
 
-	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
+	//csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
-	authMiddlewareRouter.Use(csrfMiddleware)
+	//authMiddlewareRouter.Use(csrfMiddleware)
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
 	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
+	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
+	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
+	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
 
 	mw := middleware.InitMiddleware(authUsecase)
 
@@ -82,7 +90,7 @@ func main() {
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
 
-	err := http.ListenAndServe(serverPort, mainRouter)
+	err = http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
 	}

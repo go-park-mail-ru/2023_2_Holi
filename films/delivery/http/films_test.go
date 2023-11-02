@@ -1,4 +1,4 @@
-package films_http_test
+package films_http
 
 import (
 	"errors"
@@ -11,7 +11,6 @@ import (
 
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
-	films_http "2023_2_Holi/films/delivery/http"
 
 	"github.com/gorilla/mux"
 )
@@ -53,13 +52,57 @@ func TestGetMoviesByGenre(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			films_http.NewFilmsHandler(router, mockUsecase)
+			NewFilmsHandler(router, mockUsecase)
 
-			handler := &films_http.FilmsHandler{
+			handler := &FilmsHandler{
 				FilmsUsecase: mockUsecase,
 			}
 
 			router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods("GET")
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, test.status, rec.Code)
+		})
+	}
+}
+
+func TestGetFilmData(t *testing.T) {
+	tests := []struct {
+		name                 string
+		setUCaseExpectations func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error)
+		status               int
+	}{
+		{
+			name: "GoodCase/Common",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error) {
+				usecase.On("GetFilmData", mock.Anything).Return(*film, artists, err)
+			},
+			status: http.StatusOK,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			//t.Parallel()
+
+			router := mux.NewRouter()
+			mockUsecase := new(mocks.FilmsUsecase)
+			var film domain.Film
+			var artists []domain.Cast
+			test.setUCaseExpectations(mockUsecase, &film, artists, nil)
+
+			req, err := http.NewRequest("GET", "/api/v1/films/1", nil)
+			assert.NoError(t, err)
+
+			rec := httptest.NewRecorder()
+
+			NewFilmsHandler(router, mockUsecase)
+
+			handler := &FilmsHandler{
+				FilmsUsecase: mockUsecase,
+			}
+
+			router.HandleFunc("/api/v1/films/{id}", handler.GetFilmData).Methods("GET")
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)

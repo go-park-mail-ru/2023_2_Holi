@@ -40,7 +40,7 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Description  create user session and put it into cookie
 // @Tags         auth
 // @Accept       json
-// @Success      204
+// @Success      204  {json} Result
 // @Failure      400  {json} Result
 // @Failure      403  {json} Result
 // @Failure      404  {json} Result
@@ -77,7 +77,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are incorrect")
 	}
 
-	session, err := a.AuthUsecase.Login(credentials)
+	session, userID, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to login")
@@ -93,7 +93,10 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	w.WriteHeader(http.StatusNoContent)
+	body := map[string]interface{}{
+		"id": userID,
+	}
+	json.NewEncoder(w).Encode(&Result{Body: body})
 }
 
 // Logout godoc
@@ -169,7 +172,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
+	session, _, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.login", err, "Failed to login")

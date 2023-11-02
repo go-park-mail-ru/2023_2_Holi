@@ -1,4 +1,4 @@
-package auth_http_test
+package auth_http
 
 import (
 	"bytes"
@@ -15,7 +15,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	_http "2023_2_Holi/auth/delivery/http"
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
 )
@@ -106,7 +105,7 @@ func TestLogin(t *testing.T) {
 			test.setUCaseExpectations(&mockSession, mockUCase)
 
 			rec := httptest.NewRecorder()
-			handler := &_http.AuthHandler{
+			handler := &AuthHandler{
 				AuthUsecase: mockUCase,
 			}
 
@@ -173,7 +172,7 @@ func TestLogout(t *testing.T) {
 			test.setUCaseExpectations(mockUCase)
 
 			rec := httptest.NewRecorder()
-			handler := &_http.AuthHandler{
+			handler := &AuthHandler{
 				AuthUsecase: mockUCase,
 			}
 
@@ -274,7 +273,7 @@ func TestRegister(t *testing.T) {
 			test.setUCaseExpectations(mockUCase, &mockSession)
 
 			rec := httptest.NewRecorder()
-			handler := &_http.AuthHandler{
+			handler := &AuthHandler{
 				AuthUsecase: mockUCase,
 			}
 
@@ -283,7 +282,7 @@ func TestRegister(t *testing.T) {
 			assert.Equal(t, test.status, rec.Code)
 			mockUCase.AssertExpectations(t)
 
-			var result *_http.Result
+			var result *Result
 			err = json.NewDecoder(rec.Result().Body).Decode(&result)
 			assert.NoError(t, err)
 

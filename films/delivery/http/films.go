@@ -45,17 +45,21 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	genre := vars["genre"]
 
-	Films, err := h.FilmsUsecase.GetFilmsByGenre(genre)
+	films, err := h.FilmsUsecase.GetFilmsByGenre(genre)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		return
 	}
+	logs.Logger.Debug("Films:", films)
 	response := map[string]interface{}{
-		"films": Films,
+		"films": films,
 	}
 
+<<<<<<< HEAD
 	logs.Logger.Debug("Films:", Films)
+=======
+>>>>>>> dev
 	json.NewEncoder(w).Encode(&Result{Body: response})
 }
 
@@ -63,36 +67,35 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Summary 		Get Film data by id
 // @Description 	Get content for Film page
 // @Tags 			Films
-// @Param 			id path int true "The genre of the Films you want to retrieve."
+// @Param 			id path int true "Id film you want to get."
 // @Produce 		json
 // @Success 		200 {json} domain.Films
 // @Failure 		400 {json} ApiResponse
 // @Failure 		404 {json} ApiResponse
 // @Failure 		500 {json} ApiResponse
-// @Router 			/api/v1/Films/{id} [get]
+// @Router 			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	FilmID := vars["id"]
-	id, err := strconv.Atoi(FilmID)
+	filmID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "Films_http", "GetFilmData", err, err.Error())
+		logs.LogError(logs.Logger, "films_http", "GetFilmData", err, "failed to read film id")
 		return
 	}
 
-	Film, artists, err := h.FilmsUsecase.GetFilmData(id)
+	film, artists, err := h.FilmsUsecase.GetFilmData(filmID)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "Films_http", "GetFilmData", err, err.Error())
+		logs.LogError(logs.Logger, "films_http", "GetFilmData", err, err.Error())
 		return
 	}
 
 	response := map[string]interface{}{
-		"Film":    Film,
+		"film":    film,
 		"artists": artists,
 	}
 
-	logs.Logger.Debug("Film:", Film)
+	logs.Logger.Debug("film:", film)
 	logs.Logger.Debug("artists:", artists)
 	json.NewEncoder(w).Encode(&Result{Body: response})
 }
@@ -107,7 +110,7 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 // @Failure			400 {json} ApiResponse
 // @Failure 		404 {json} ApiResponse
 // @Failure 		500 {json} ApiResponse
-// @Router 			api/v1/films/cast/{id} [get]
+// @Router 			/api/v1/films/cast/{id} [get]
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	CastID := vars["id"]
@@ -128,7 +131,12 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 		"cast":  cast,
 	}
 
+<<<<<<< HEAD
 	logs.Logger.Debug("Http GetArtistPage:", films)
 	logs.Logger.Debug("Http GetArtistPage:", cast)
+=======
+	logs.Logger.Debug("Http GetCastPage:", films)
+	logs.Logger.Debug("Http GetCastPage:", cast)
+>>>>>>> dev
 	json.NewEncoder(w).Encode(&Result{Body: response})
 }

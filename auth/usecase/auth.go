@@ -3,6 +3,7 @@ package auth_usecase
 import (
 	"time"
 
+	"github.com/google/go-cmp/cmp"
 	"github.com/google/uuid"
 
 	"2023_2_Holi/domain"
@@ -21,15 +22,15 @@ func NewAuthUsecase(ar domain.AuthRepository, sr domain.SessionRepository) domai
 	}
 }
 
-func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
+func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int, error) {
 	expectedUser, err := u.authRepo.GetByEmail(credentials.Email)
 	if err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, 0, err
 	}
 	logs.Logger.Debug("Usecase Login expected user:", expectedUser)
 
 	if expectedUser.Password != credentials.Password {
-		return domain.Session{}, domain.ErrWrongCredentials
+		return domain.Session{}, 0, domain.ErrWrongCredentials
 	}
 
 	session := domain.Session{
@@ -38,10 +39,10 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, err
 		UserID:    expectedUser.ID,
 	}
 	if err = u.sessionRepo.Add(session); err != nil {
-		return domain.Session{}, err
+		return domain.Session{}, 0, err
 	}
 
-	return session, nil
+	return session, expectedUser.ID, nil
 }
 
 func (u *authUsecase) Logout(token string) error {
@@ -57,11 +58,9 @@ func (u *authUsecase) Logout(token string) error {
 }
 
 func (u *authUsecase) Register(user domain.User) (int, error) {
-	if user == (domain.User{}) {
+	if cmp.Equal(user, domain.User{}) {
 		return 0, domain.ErrBadRequest
 	}
-
-	user.DateJoined = time.Now()
 
 	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
 		return 0, domain.ErrAlreadyExists

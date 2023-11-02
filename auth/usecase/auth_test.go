@@ -1,7 +1,6 @@
-package auth_usecase_test
+package auth_usecase
 
 import (
-	auth_usecase "2023_2_Holi/auth/usecase"
 	"errors"
 	"testing"
 
@@ -100,13 +99,14 @@ func TestLogin(t *testing.T) {
 			test.setAuRepoExpectations(test.creds, ar, &user)
 			test.setSessionRepoExpectations(sr)
 
-			auCase := auth_usecase.NewAuthUsecase(ar, sr)
-			session, err := auCase.Login(test.creds)
+			auCase := NewAuthUsecase(ar, sr)
+			session, id, err := auCase.Login(test.creds)
 
 			if test.good {
 				assert.Nil(t, err)
 				assert.NotEmpty(t, session)
 				assert.Equal(t, session.UserID, user.ID)
+				assert.Equal(t, id, user.ID)
 			} else {
 				assert.NotNil(t, err)
 				assert.Empty(t, session)
@@ -157,7 +157,7 @@ func TestLogout(t *testing.T) {
 			sr := new(mocks.SessionRepository)
 			test.setSessionRepoExpectations(sr)
 
-			auCase := auth_usecase.NewAuthUsecase(ar, sr)
+			auCase := NewAuthUsecase(ar, sr)
 			err := auCase.Logout(test.token)
 
 			if test.good {
@@ -244,7 +244,7 @@ func TestRegister(t *testing.T) {
 			sr := new(mocks.SessionRepository)
 			test.setUserAuthRepoExpectations(ar, test.id)
 
-			auCase := auth_usecase.NewAuthUsecase(ar, sr)
+			auCase := NewAuthUsecase(ar, sr)
 			id, err := auCase.Register(test.getUser())
 
 			if test.good {
@@ -301,7 +301,7 @@ func TestIsAuth(t *testing.T) {
 			sr := new(mocks.SessionRepository)
 			test.setSessionRepoExpectations(sr, test.auth)
 
-			auCase := auth_usecase.NewAuthUsecase(ar, sr)
+			auCase := NewAuthUsecase(ar, sr)
 			auth, err := auCase.IsAuth(test.token)
 
 			if test.good {
