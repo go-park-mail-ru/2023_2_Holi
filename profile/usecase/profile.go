@@ -51,12 +51,13 @@ const (
 func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, error) {
 	sess, _ := session.NewSession()
 	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
+
 	uploadInput := &s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
-		Key:         aws.String(directory + "/" + strconv.Itoa(userID)),
 		Body:        bytes.NewReader(imageData),
 		ACL:         aws.String("public-read"),
 		ContentType: aws.String("image/jpeg"),
+		Key:         aws.String(directory + "/" + strconv.Itoa(userID)),
 	}
 
 	if _, err := svc.PutObject(uploadInput); err != nil {
