@@ -2,7 +2,6 @@ package films_postgres
 
 import (
 	"context"
-	"errors"
 
 	"github.com/jackc/pgx/v5"
 
@@ -13,12 +12,14 @@ import (
 )
 
 const getFilmsByGenreQuery = `
-SELECT video.id, e.name, e.preview_path, video.rating
-	FROM video
-         JOIN video_cast AS vc ON video_id = vc.video_id
-         JOIN "cast" AS c ON vc.cast_id = c.id
-         JOIN episode AS e ON e.video_id = video.id
-	WHERE c.name = $1
+	SELECT DISTINCT v.id, e.name, e.preview_path, v.rating , v.preview_video_path
+	FROM video AS v
+		JOIN video_cast AS vc ON v.id = vc.video_id
+		JOIN "cast" AS c ON vc.cast_id = c.id
+		JOIN episode AS e ON e.video_id = v.id
+		JOIN video_genre AS vg ON v.id = vg.video_id
+		JOIN genre AS g ON vg.genre_id = g.id
+	WHERE g.name = $1;
 `
 
 const getFilmDataQuery = `
@@ -31,17 +32,19 @@ const getFilmDataQuery = `
 
 const getFilmCastQuery = `
 	SELECT name
-	FROM cast
-		JOIN video_film AS vf ON id = cast_id
-	WHERE vf.video_id = $1
+	FROM "cast"
+		JOIN video_cast AS vc ON id = cast_id
+	WHERE vc.video_id = $1
 `
 const getCastPageQuery = `
-	SELECT video.id, e.name, e.preview_path, video.rating
+	SELECT video.id, e.name, e.preview_path, video.rating, video.preview_video_path
 	FROM video
-			 JOIN video_cast AS vc ON video_id = vc.video_id
-			 JOIN "cast" AS c ON vc.cast_id = c.id
-			 JOIN episode AS e ON e.video_id = video.id
-	WHERE c.id = $1
+	JOIN episode AS e ON video.id = e.video_id
+	WHERE video.id IN (
+		SELECT vc.video_id
+		FROM video_cast AS vc
+		WHERE vc.cast_id = $1
+	);
 `
 
 const getCastNameQuery = `
@@ -63,6 +66,8 @@ func NewFilmsPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domai
 }
 
 func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film, error) {
+	var films []domain.Film
+
 	rows, err := r.db.Query(r.ctx, getFilmsByGenreQuery, genre)
 
 	if err != nil {
@@ -72,8 +77,6 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	defer rows.Close()
 	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
 
-	var films []domain.Film
-
 	for rows.Next() {
 		var film domain.Film
 		err = rows.Scan(
@@ -81,12 +84,8 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 			&film.Name,
 			&film.PreviewPath,
 			&film.Rating,
+			&film.PreviewVideoPath,
 		)
-
-		if errors.Is(err, pgx.ErrNoRows) {
-			logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
-			return nil, domain.ErrNotFound
-		}
 		if err != nil {
 			logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
 			return nil, err
@@ -178,6 +177,7 @@ func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 			&film.Name,
 			&film.PreviewPath,
 			&film.Rating,
+			&film.PreviewVideoPath,
 		)
 
 		if err != nil {

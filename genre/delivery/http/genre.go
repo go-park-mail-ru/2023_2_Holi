@@ -12,7 +12,7 @@ import (
 
 var logger = logs.LoggerInit()
 
-type ApiResponse struct {
+type Result struct {
 	Body interface{} `json:"body,omitempty"`
 	Err  string      `json:"err,omitempty"`
 }
@@ -53,5 +53,5 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Debug("Http GetGenres:", genres)
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(&Result{Body: response})
 }
