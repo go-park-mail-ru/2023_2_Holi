@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 )
 
-type ApiResponse struct {
+type Result struct {
 	Body interface{} `json:"body,omitempty"`
 	Err  string      `json:"err,omitempty"`
 }
@@ -56,7 +56,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logs.Logger.Debug("Films:", Films)
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(&Result{Body: response})
 }
 
 // GetFilmData godoc
@@ -94,7 +94,7 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 
 	logs.Logger.Debug("Film:", Film)
 	logs.Logger.Debug("artists:", artists)
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(&Result{Body: response})
 }
 
 // GetCastPage godoc
@@ -130,5 +130,5 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 
 	logs.Logger.Debug("Http GetArtistPage:", films)
 	logs.Logger.Debug("Http GetArtistPage:", cast)
-	json.NewEncoder(w).Encode(response)
+	json.NewEncoder(w).Encode(&Result{Body: response})
 }

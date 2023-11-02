@@ -12,12 +12,14 @@ import (
 )
 
 const getFilmsByGenreQuery = `
-SELECT video.id, e.name, e.preview_path, video.rating
-	FROM video
-         JOIN video_cast AS vc ON video_id = vc.video_id
-         JOIN "cast" AS c ON vc.cast_id = c.id
-         JOIN episode AS e ON e.video_id = video.id
-	WHERE c.name = $1
+SELECT DISTINCT v.id, e.name, e.preview_path, v.rating
+FROM video AS v
+	JOIN video_cast AS vc ON v.id = vc.video_id
+	JOIN "cast" AS c ON vc.cast_id = c.id
+	JOIN episode AS e ON e.video_id = v.id
+	JOIN video_genre AS vg ON v.id = vg.video_id
+	JOIN genre AS g ON vg.genre_id = g.id
+WHERE g.name = $1;
 `
 
 const getFilmDataQuery = `
@@ -37,10 +39,12 @@ const getFilmCastQuery = `
 const getCastPageQuery = `
 	SELECT video.id, e.name, e.preview_path, video.rating
 	FROM video
-			 JOIN video_cast AS vc ON video_id = vc.video_id
-			 JOIN "cast" AS c ON vc.cast_id = c.id
-			 JOIN episode AS e ON e.video_id = video.id
-	WHERE c.id = $1
+	JOIN episode AS e ON video.id = e.video_id
+	WHERE video.id IN (
+		SELECT vc.video_id
+		FROM video_cast AS vc
+		WHERE vc.cast_id = $1
+	);
 `
 
 const getCastNameQuery = `

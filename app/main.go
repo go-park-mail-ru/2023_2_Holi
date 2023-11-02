@@ -74,7 +74,7 @@ func main() {
 
 	mw := middleware.InitMiddleware(authUsecase)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
