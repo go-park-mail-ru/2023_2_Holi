@@ -2,7 +2,7 @@ package domain
 
 type Genre struct {
 	ID   int    `json:"-"`
-	Name string `json:"name:"`
+	Name string `json:"name"`
 }
 
 type GenreRepository interface {

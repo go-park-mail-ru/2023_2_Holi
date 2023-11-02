@@ -12,7 +12,7 @@ import (
 )
 
 const getFilmsByGenreQuery = `
-	SELECT DISTINCT v.id, e.name, e.preview_path, v.rating
+	SELECT DISTINCT v.id, e.name, e.preview_path, v.rating , v.preview_video_path
 	FROM video AS v
 		JOIN video_cast AS vc ON v.id = vc.video_id
 		JOIN "cast" AS c ON vc.cast_id = c.id
@@ -32,12 +32,12 @@ const getFilmDataQuery = `
 
 const getFilmCastQuery = `
 	SELECT name
-	FROM cast
+	FROM "cast"
 		JOIN video_film AS vf ON id = cast_id
 	WHERE vf.video_id = $1
 `
 const getCastPageQuery = `
-	SELECT video.id, e.name, e.preview_path, video.rating
+	SELECT video.id, e.name, e.preview_path, video.rating, video.preview_video_path
 	FROM video
 	JOIN episode AS e ON video.id = e.video_id
 	WHERE video.id IN (
@@ -84,6 +84,7 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 			&film.Name,
 			&film.PreviewPath,
 			&film.Rating,
+			&film.PreviewVideoPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
@@ -176,6 +177,7 @@ func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 			&film.Name,
 			&film.PreviewPath,
 			&film.Rating,
+			&film.PreviewVideoPath,
 		)
 
 		if err != nil {
