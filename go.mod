@@ -21,6 +21,11 @@ require (
 )
 
 require (
+	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+)
+
+require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
@@ -31,7 +36,11 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
+<<<<<<< HEAD
 	github.com/gorilla/securecookie v1.1.1 // indirect
+=======
+	github.com/gorilla/csrf v1.7.1
+>>>>>>> 915b70ef1a0dd0707f9f84a6ba50df6d932551a7
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
