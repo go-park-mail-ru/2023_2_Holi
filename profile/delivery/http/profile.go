@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
 
@@ -41,6 +42,7 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase) {
 // @Failure 		500 {json} ApiResponse
 // @Router 			/api/v1/profile/{id} [get]
 func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -76,6 +78,7 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {json} Result
 // @Router       /api/v1/profile/update [post]
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	var newUser domain.User
 
 	err := json.NewDecoder(r.Body).Decode(&newUser)
