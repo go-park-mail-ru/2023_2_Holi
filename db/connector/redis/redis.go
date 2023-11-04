@@ -1,4 +1,4 @@
-package redis_connector
+package redis
 
 import (
 	"context"
@@ -9,18 +9,19 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
-func RedisConnector() *redis.Client {
-	redis := redis.NewClient(&redis.Options{
+func Connect() (*redis.Client, error) {
+	r := redis.NewClient(&redis.Options{
 		Addr:     os.Getenv("REDIS_HOST") + ":" + os.Getenv("REDIS_PORT"),
 		Password: os.Getenv("REDIS_PASSWORD"),
 	})
 
-	_, err := redis.Ping(context.Background()).Result()
+	_, err := r.Ping(context.Background()).Result()
 	if err != nil {
-		logs.LogFatal(logs.Logger, "redis_connector", "redisConnector", err, "Failed to connect to redis")
+		logs.LogError(logs.Logger, "redis", "Connect", err, err.Error())
+
 	}
 	logs.Logger.Info("Connected to redis")
-	logs.Logger.Debug("redis client :", redis)
+	logs.Logger.Debug("Redis client :", r)
 
-	return redis
+	return r, nil
 }

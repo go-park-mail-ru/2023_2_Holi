@@ -57,7 +57,7 @@ func main() {
 	postgres := postgres.PostgresConnector(ctx)
 	defer postgres.Close()
 
-	redis := redis.RedisConnector()
+	redis := redis.Connect()
 	defer redis.Close()
 
 	//csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))

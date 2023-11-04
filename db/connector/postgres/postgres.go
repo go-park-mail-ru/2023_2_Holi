@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func PostgresConnector(ctx context.Context) *pgxpool.Pool {
+func PostgresConnector(ctx context.Context) (*pgxpool.Pool, error) {
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
 	user := os.Getenv("POSTGRES_USER")
@@ -17,22 +17,19 @@ func PostgresConnector(ctx context.Context) *pgxpool.Pool {
 	dbname := os.Getenv("POSTGRES_DB")
 	params := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 
-	//postgres, err := sql.Open("postgres", params)
-	//if err != nil {
-	//	logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, "Failed to connect to postgres")
-	//}
-
 	dbpool, err := pgxpool.New(ctx, params)
 	if err != nil {
-		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, "postgres doesn't listen")
+		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, err.Error())
+		return nil, err
 	}
 
 	err = dbpool.Ping(ctx)
 	if err != nil {
-		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, "postgres doesn't listen")
+		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, err.Error())
+		return nil, err
 	}
 	logs.Logger.Info("Connected to postgres")
 	logs.Logger.Debug("postgres client :", dbpool)
 
-	return dbpool
+	return dbpool, nil
 }
