@@ -1,6 +1,5 @@
+// Package domain is used for swagger auto doc
 package domain
-
-// for swagger auto doc
 
 type UserRequest struct {
 	ID        int    `json:"id" binding:"required"`

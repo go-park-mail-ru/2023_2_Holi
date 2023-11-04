@@ -2,7 +2,6 @@ package films_postgres
 
 import (
 	"context"
-
 	"github.com/jackc/pgx/v5"
 
 	"2023_2_Holi/domain"
@@ -69,7 +68,10 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	var films []domain.Film
 
 	rows, err := r.db.Query(r.ctx, getFilmsByGenreQuery, genre)
-
+	if !rows.Next() {
+		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", domain.ErrNotFound, domain.ErrNotFound.Error())
+		return nil, domain.ErrNotFound
+	}
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
 		return nil, err
