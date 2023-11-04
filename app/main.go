@@ -7,7 +7,6 @@ import (
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
-	//"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
@@ -84,7 +83,7 @@ func main() {
 
 	mw := middleware.InitMiddleware(authUsecase)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
