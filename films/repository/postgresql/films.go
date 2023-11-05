@@ -31,7 +31,7 @@ const getFilmDataQuery = `
 `
 
 const getFilmCastQuery = `
-	SELECT name
+	SELECT id, name
 	FROM "cast"
 		JOIN video_cast AS vc ON id = cast_id
 	WHERE vc.video_id = $1
@@ -105,7 +105,7 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 
 	logs.Logger.Debug("GetFilmData query result:", row)
 
-	film := new(domain.Film)
+	var film domain.Film
 	err := row.Scan(
 		&film.Name,
 		&film.Description,
@@ -127,7 +127,7 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 		return domain.Film{}, err
 	}
 
-	return domain.Film{}, nil
+	return film, nil
 }
 
 func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, error) {
@@ -147,6 +147,7 @@ func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, erro
 	for rows.Next() {
 		var artist domain.Cast
 		err = rows.Scan(
+			&artist.ID,
 			&artist.Name,
 		)
 		if err != nil {
