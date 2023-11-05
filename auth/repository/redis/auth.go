@@ -1,4 +1,4 @@
-package auth_redis
+package redis
 
 import (
 	"2023_2_Holi/domain"

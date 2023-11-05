@@ -1,4 +1,4 @@
-package auth_http
+package http
 
 import (
 	"encoding/json"
@@ -53,6 +53,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "User is already logged in")
+		return
 	}
 
 	var credentials domain.Credentials
@@ -77,6 +78,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	if err = checkCredentials(credentials); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are incorrect")
+		return
 	}
 
 	session, userID, err := a.AuthUsecase.Login(credentials)
@@ -151,6 +153,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
+		return
 	}
 
 	var user domain.User
@@ -167,6 +170,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.credentials", err, "creds are invalid")
+		return
 	}
 
 	var id int

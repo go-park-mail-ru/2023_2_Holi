@@ -1,4 +1,4 @@
-package films_usecase
+package usecase
 
 import (
 	"2023_2_Holi/domain"
@@ -52,4 +52,3 @@ func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
 
 	return film, artists, nil
 }
-

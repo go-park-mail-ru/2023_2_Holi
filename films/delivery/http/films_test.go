@@ -1,4 +1,4 @@
-package films_http
+package http
 
 import (
 	"errors"

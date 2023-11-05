@@ -1,1 +1,1 @@
-package profile_usecase_test
+package usecase_test

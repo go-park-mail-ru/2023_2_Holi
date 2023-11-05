@@ -16,6 +16,6 @@ FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
 WORKDIR /
 
-COPY --from=build-stage /app/app/main /main
+COPY --from=build-stage /netflix/app/main /main
 
 ENTRYPOINT ["/main"]

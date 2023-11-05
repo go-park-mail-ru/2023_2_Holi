@@ -1,4 +1,4 @@
-package films_postgres
+package postgres
 
 import "testing"
 
