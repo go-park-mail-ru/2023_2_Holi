@@ -6,44 +6,49 @@ import (
 	"os"
 
 	"github.com/gorilla/mux"
+	//"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
-	postgres "2023_2_Holi/db/connector/postgres"
-	redis "2023_2_Holi/db/connector/redis"
+
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
+
+	"2023_2_Holi/db/connector/postgres"
+	"2023_2_Holi/db/connector/redis"
+	logs "2023_2_Holi/logger"
+	"2023_2_Holi/middleware"
+
 	genre_http "2023_2_Holi/genre/delivery/http"
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
 	genre_usecase "2023_2_Holi/genre/usecase"
-	logs "2023_2_Holi/logger"
-	"2023_2_Holi/middleware"
+
 	profile_http "2023_2_Holi/profile/delivery/http"
 	profile_postgres "2023_2_Holi/profile/repository/postgresql"
 	profile_usecase "2023_2_Holi/profile/usecase"
+
+	_ "github.com/lib/pq"
 )
 
-func StartServer() error {
+func StartServer() {
 	err := godotenv.Load()
 	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
 	}
 
-	pc := postgres.PostgresConnector(ctx)
+	pc := postgres.Connect(ctx)
 	defer pc.Close()
 
 	rc := redis.Connect()
 	defer rc.Close()
 
-	//csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
-	//authMiddlewareRouter.Use(csrfMiddleware)
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(rc)
 	authRepository := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
@@ -64,6 +69,7 @@ func StartServer() error {
 	mw := middleware.InitMiddleware(authUsecase)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(csrf.Protect([]byte("32-byte-long-auth-key")))
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
@@ -74,8 +80,6 @@ func StartServer() error {
 	err = http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "main", "main", err, err.Error())
-		return err
 	}
 	logs.Logger.Info("server stopped")
-	return nil
 }

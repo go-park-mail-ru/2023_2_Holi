@@ -1,4 +1,4 @@
-package postgres_connector
+package postgres
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func PostgresConnector(ctx context.Context) (*pgxpool.Pool, error) {
+func Connect(ctx context.Context) *pgxpool.Pool {
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
 	user := os.Getenv("POSTGRES_USER")
@@ -19,17 +19,15 @@ func PostgresConnector(ctx context.Context) (*pgxpool.Pool, error) {
 
 	dbpool, err := pgxpool.New(ctx, params)
 	if err != nil {
-		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, err.Error())
-		return nil, err
+		logs.LogFatal(logs.Logger, "postgres_connector", "Connect", err, err.Error())
 	}
 
 	err = dbpool.Ping(ctx)
 	if err != nil {
-		logs.LogFatal(logs.Logger, "postgres_connector", "PostgresConnector", err, err.Error())
-		return nil, err
+		logs.LogFatal(logs.Logger, "postgres_connector", "Connect", err, err.Error())
 	}
 	logs.Logger.Info("Connected to postgres")
 	logs.Logger.Debug("postgres client :", dbpool)
 
-	return dbpool, nil
+	return dbpool
 }
