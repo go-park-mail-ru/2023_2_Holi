@@ -1,4 +1,4 @@
-package profile_postgres
+package postgres
 
 import (
 	"context"

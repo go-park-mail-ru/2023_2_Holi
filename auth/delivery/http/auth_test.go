@@ -1,4 +1,4 @@
-package auth_http
+package http
 
 import (
 	"bytes"

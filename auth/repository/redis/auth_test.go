@@ -1,4 +1,4 @@
-package auth_redis
+package redis
 
 import (
 	"testing"

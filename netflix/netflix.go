@@ -69,10 +69,10 @@ func StartServer() {
 	mw := middleware.InitMiddleware(authUsecase)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
-	//authMiddlewareRouter.Use(csrf.Protect([]byte("32-byte-long-auth-key")))
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
+	//mainRouter.Use(csrf.Protect([]byte("32-byte-long-auth-key")))
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)

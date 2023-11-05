@@ -1,4 +1,4 @@
-package genre_http
+package http
 
 import (
 	"encoding/json"
