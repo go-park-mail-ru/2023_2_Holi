@@ -105,7 +105,7 @@ erDiagram
         _ id PK
         _ name
         _ email "NOT NULL UNIQUE"
-        _ password "NOT NULL"
+        _ password "NOT NULL UNIQUE"
         _ image_path
         _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
         _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"

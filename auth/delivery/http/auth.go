@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
@@ -40,13 +41,14 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Description  create user session and put it into cookie
 // @Tags         auth
 // @Accept       json
-// @Success      204
+// @Success      204  {json} Result
 // @Failure      400  {json} Result
 // @Failure      403  {json} Result
 // @Failure      404  {json} Result
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
@@ -64,7 +66,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("Login credentials:", credentials)
 	defer a.CloseAndAlert(r.Body)
 
-	if credentials.Password == "" || credentials.Email == "" {
+	if len(credentials.Password) == 0 || credentials.Email == "" {
 		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are empy")
 		return
@@ -77,7 +79,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are incorrect")
 	}
 
-	session, err := a.AuthUsecase.Login(credentials)
+	session, userID, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to login")
@@ -93,7 +95,10 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	w.WriteHeader(http.StatusNoContent)
+	body := map[string]interface{}{
+		"id": userID,
+	}
+	json.NewEncoder(w).Encode(&Result{Body: body})
 }
 
 // Logout godoc
@@ -107,6 +112,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
 	logs.Logger.Debug("Logout: session token:", c)
@@ -140,6 +146,7 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
@@ -153,7 +160,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Register.decode", err, "Failed to decode json from body")
 		return
 	}
-	logs.Logger.Debug("Register user:", user)
+	//logs.Logger.Debug("Register user:", user)
 	defer a.CloseAndAlert(r.Body)
 
 	user.Email = strings.TrimSpace(user.Email)
@@ -169,7 +176,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	session, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
+	session, _, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.login", err, "Failed to login")
@@ -226,7 +233,7 @@ func valid(email string) bool {
 }
 
 func checkCredentials(cred domain.Credentials) error {
-	if cred.Email == "" || cred.Password == "" {
+	if cred.Email == "" || len(cred.Password) == 0 {
 		return domain.ErrWrongCredentials
 	}
 

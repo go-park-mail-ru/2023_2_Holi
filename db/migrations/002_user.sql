@@ -2,8 +2,8 @@ CREATE TABLE "user"
 (
     id         SERIAL PRIMARY KEY,
     name       TEXT,
-    email      TEXT NOT NULL UNIQUE,
-    password   TEXT NOT NULL,
+    email      TEXT  NOT NULL UNIQUE,
+    password   BYTEA NOT NULL UNIQUE,
     image_path TEXT,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP

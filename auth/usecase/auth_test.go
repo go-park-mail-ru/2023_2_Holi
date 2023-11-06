@@ -100,12 +100,13 @@ func TestLogin(t *testing.T) {
 			test.setSessionRepoExpectations(sr)
 
 			auCase := NewAuthUsecase(ar, sr)
-			session, err := auCase.Login(test.creds)
+			session, id, err := auCase.Login(test.creds)
 
 			if test.good {
 				assert.Nil(t, err)
 				assert.NotEmpty(t, session)
 				assert.Equal(t, session.UserID, user.ID)
+				assert.Equal(t, id, user.ID)
 			} else {
 				assert.NotNil(t, err)
 				assert.Empty(t, session)

@@ -4,6 +4,7 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 	"context"
+
 	"github.com/jackc/pgx/v5"
 )
 
@@ -62,7 +63,7 @@ func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error)
 }
 
 func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
-	if user.Email == "" || user.Password == "" {
+	if user.Email == "" || len(user.Password) == 0 {
 		return 0, domain.ErrBadRequest
 	}
 

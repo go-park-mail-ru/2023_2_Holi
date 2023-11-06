@@ -25,6 +25,20 @@ func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	return films, nil
 }
 
+func (u *filmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
+	films, err := u.filmRepo.GetCastPage(id)
+	if err != nil {
+		return nil, domain.Cast{}, err
+	}
+	logs.Logger.Debug("Usecase GetCastPage:", films)
+	artist, err := u.filmRepo.GetCastName(id)
+	if err != nil {
+		return nil, domain.Cast{}, err
+	}
+	logs.Logger.Debug("Usecase GetCastPage:", artist)
+	return films, artist, nil
+}
+
 func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
 	film, err := u.filmRepo.GetFilmData(id)
 	if err != nil {
@@ -39,16 +53,3 @@ func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
 	return film, artists, nil
 }
 
-func (u *filmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
-	films, err := u.filmRepo.GetCastPage(id)
-	if err != nil {
-		return nil, domain.Cast{}, err
-	}
-	logs.Logger.Debug("Usecase GetCastPage:", films)
-	artist, err := u.filmRepo.GetCastName(id)
-	if err != nil {
-		return nil, domain.Cast{}, err
-	}
-	logs.Logger.Debug("Usecase GetCastPage:", artist)
-	return films, artist, nil
-}

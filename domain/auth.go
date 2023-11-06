@@ -5,12 +5,12 @@ import (
 )
 
 type Credentials struct {
-	Password string `json:"password"`
+	Password []byte `json:"password"`
 	Email    string `json:"email"`
 }
 
 type AuthUsecase interface {
-	Login(credentials Credentials) (Session, error)
+	Login(credentials Credentials) (Session, int, error)
 	Logout(token string) error
 	Register(user User) (int, error)
 	IsAuth(token string) (bool, error)
