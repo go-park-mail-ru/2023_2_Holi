@@ -7,8 +7,6 @@ import (
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const getUserQuery = `
@@ -25,11 +23,11 @@ const updateUserQuery = `
 `
 
 type profilePostgresqlRepository struct {
-	db  *pgxpool.Pool
+	db  domain.PgxPoolIface
 	ctx context.Context
 }
 
-func NewProfilePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.ProfileRepository {
+func NewProfilePostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.ProfileRepository {
 	return &profilePostgresqlRepository{
 		db:  pool,
 		ctx: ctx,
