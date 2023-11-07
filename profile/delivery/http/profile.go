@@ -4,10 +4,11 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 	"encoding/json"
-	"github.com/microcosm-cc/bluemonday"
 	"io"
 	"net/http"
 	"strconv"
+
+	"github.com/microcosm-cc/bluemonday"
 
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
@@ -94,6 +95,11 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if len(newUser.ImageData) != 0 {
 		newUser.ImagePath, err = h.ProfileUsecase.UploadImage(newUser.ID, newUser.ImageData)
+		if err != nil {
+			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+			logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to upload user image")
+			return
+		}
 	}
 
 	updatedUser, err := h.ProfileUsecase.UpdateUser(newUser)
