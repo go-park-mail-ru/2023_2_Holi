@@ -38,13 +38,13 @@ require (
 	github.com/go-openapi/swag v0.19.15 // indirect
 	github.com/gorilla/securecookie v1.1.1 // indirect
 	github.com/gorilla/csrf v1.7.1
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	golang.org/x/net v0.17.0 // indirect

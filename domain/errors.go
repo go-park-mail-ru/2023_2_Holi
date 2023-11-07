@@ -20,6 +20,8 @@ func GetStatusCode(err error) int {
 	}
 
 	switch err {
+	case ErrAlreadyExists:
+		return http.StatusForbidden
 	case ErrInternalServerError:
 		return http.StatusInternalServerError
 	case ErrNotFound:
