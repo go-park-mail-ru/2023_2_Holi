@@ -12,6 +12,7 @@ import (
 
 	"github.com/bxcodec/faker"
 	"github.com/gorilla/mux"
+	"github.com/microcosm-cc/bluemonday"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -62,7 +63,7 @@ func TestGetUserData(t *testing.T) {
 
 			rec := httptest.NewRecorder()
 
-			NewProfileHandler(router, mockUsecase)
+			NewProfileHandler(router, mockUsecase, bluemonday.UGCPolicy())
 
 			handler := &ProfileHandler{
 				ProfileUsecase: mockUsecase,
@@ -200,7 +201,7 @@ func TestUpdateProfile(t *testing.T) {
 			assert.Equal(t, test.status, rec.Code)
 			mockUCase.AssertExpectations(t)
 
-			var result *Result
+			var result *domain.Response
 			err = json.NewDecoder(rec.Result().Body).Decode(&result)
 			assert.NoError(t, err)
 
