@@ -5,18 +5,18 @@ import "github.com/jackc/pgx/v5/pgtype"
 type Film struct {
 	ID               int             `json:"id"`
 	Name             string          `json:"name"`
-	Description      string          `json:"-"`
+	Description      string          `json:"description"`
 	PreviewPath      string          `json:"previewPath"`
-	MediaPath        string          `json:"-"`
-	ReleaseYear      int             `json:"-"`
+	MediaPath        string          `json:"mediaPath"`
+	ReleaseYear      int             `json:"releaseYear"`
 	Rating           float64         `json:"rating"`
-	AgeRestriction   int             `json:"-"`
-	Duration         pgtype.Interval `json:"-"`
+	AgeRestriction   int             `json:"ageRestriction"`
+	Duration         pgtype.Interval `json:"duration"`
 	PreviewVideoPath string          `json:"previewVideoPath"`
 }
 
 type Cast struct {
-	ID   int    `json:"-"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 

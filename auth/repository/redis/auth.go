@@ -1,8 +1,9 @@
-package auth_redis
+package redis
 
 import (
 	"2023_2_Holi/domain"
 	"context"
+	"errors"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -17,8 +18,11 @@ func NewSessionRedisRepository(client *redis.Client) domain.SessionRepository {
 }
 
 func (s *sessionRedisRepository) Add(session domain.Session) error {
+	if session.Token == "" {
+		return errors.New("empty token")
+	}
 	duration := session.ExpiresAt.Sub(time.Now())
-	err := s.client.Set(context.Background(), session.Token, session.UserID, duration).Err()
+	err := s.client.Set(context.TODO(), session.Token, session.UserID, duration).Err()
 	if err != nil {
 		return err
 	}
@@ -26,6 +30,9 @@ func (s *sessionRedisRepository) Add(session domain.Session) error {
 }
 
 func (s *sessionRedisRepository) DeleteByToken(token string) error {
+	if token == "" {
+		return errors.New("empty token")
+	}
 	err := s.client.Del(context.Background(), token).Err()
 	if err != nil {
 		return err
@@ -34,6 +41,9 @@ func (s *sessionRedisRepository) DeleteByToken(token string) error {
 }
 
 func (s *sessionRedisRepository) SessionExists(token string) (bool, error) {
+	if token == "" {
+		return false, errors.New("empty token")
+	}
 	exists, err := s.client.Exists(context.Background(), token).Result()
 	if err != nil {
 		return false, err

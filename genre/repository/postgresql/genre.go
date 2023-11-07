@@ -1,4 +1,4 @@
-package genre_postgres
+package postgres
 
 import (
 	"context"

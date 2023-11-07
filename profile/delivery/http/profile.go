@@ -1,4 +1,4 @@
-package profile_http
+package http
 
 import (
 	"2023_2_Holi/domain"

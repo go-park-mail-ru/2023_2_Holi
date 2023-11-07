@@ -1,4 +1,4 @@
-package films_http
+package http
 
 import (
 	"errors"
@@ -91,15 +91,32 @@ func TestGetMoviesByGenre(t *testing.T) {
 func TestGetFilmData(t *testing.T) {
 	tests := []struct {
 		name                 string
+		id                   string
 		setUCaseExpectations func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error)
 		status               int
 	}{
 		{
 			name: "GoodCase/Common",
+			id:   "1",
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error) {
 				usecase.On("GetFilmData", mock.Anything).Return(*film, artists, err)
 			},
 			status: http.StatusOK,
+		},
+		{
+			name: "BadCase/EmptyID",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error) {
+				usecase.On("GetFilmData", mock.Anything).Return(*film, artists, err)
+			},
+			status: http.StatusNotFound,
+		},
+		{
+			name: "BadCase/WrongIDFormat",
+			id:   "ID",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase, film *domain.Film, artists []domain.Cast, err error) {
+				usecase.On("GetFilmData", mock.Anything).Return(*film, artists, err)
+			},
+			status: http.StatusBadRequest,
 		},
 	}
 
@@ -113,7 +130,7 @@ func TestGetFilmData(t *testing.T) {
 			var artists []domain.Cast
 			test.setUCaseExpectations(mockUsecase, &film, artists, nil)
 
-			req, err := http.NewRequest("GET", "/api/v1/films/1", nil)
+			req, err := http.NewRequest("GET", "/api/v1/films/"+test.id, nil)
 			assert.NoError(t, err)
 
 			rec := httptest.NewRecorder()

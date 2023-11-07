@@ -1,4 +1,4 @@
-package main
+package netflix
 
 import (
 	"context"
@@ -18,10 +18,10 @@ import (
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
 
-	postgres "2023_2_Holi/db/connector/postgres"
-	redis "2023_2_Holi/db/connector/redis"
+	"2023_2_Holi/db/connector/postgres"
+	"2023_2_Holi/db/connector/redis"
 	logs "2023_2_Holi/logger"
-	middleware "2023_2_Holi/middleware"
+	"2023_2_Holi/middleware"
 
 	genre_http "2023_2_Holi/genre/delivery/http"
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
@@ -31,46 +31,30 @@ import (
 	profile_postgres "2023_2_Holi/profile/repository/postgresql"
 	profile_usecase "2023_2_Holi/profile/usecase"
 
-	http_ "2023_2_Holi/csrf/delivery/http"
-
 	_ "github.com/lib/pq"
 )
 
-// @title Netfilx API
-// @version 1.0
-// @description API of the nelfix project by holi
-
-// @contact.name Alex Chinaev
-// @contact.url https://vk.com/l.chinaev
-// @contact.email ax.chinaev@yandex.ru
-
-// @license.name AS IS (NO WARRANTY)
-
-// @host 127.0.0.1
-// @schemes http
-// @BasePath /
-func main() {
+func StartServer() {
 	err := godotenv.Load()
 	ctx := context.Background()
 	accessLogger := middleware.AccessLogger{
 		LogrusLogger: logs.Logger,
 	}
 
-	postgres := postgres.PostgresConnector(ctx)
-	defer postgres.Close()
+	pc := postgres.Connect(ctx)
+	defer pc.Close()
 
-	redis := redis.RedisConnector()
-	defer redis.Close()
+	rc := redis.Connect()
+	defer rc.Close()
 
-	csrfMiddleware := csrf.Protect([]byte("qwnbjb13jbhb12j3bjbbj"), csrf.Secure(false), csrf.HttpOnly(false), csrf.Path("/"))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
-	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
-	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
-	filmRepository := films_postgres.NewFilmsPostgresqlRepository(postgres, ctx)
-	genreRepository := genre_postgres.GenrePostgresqlRepository(postgres, ctx)
-	profileRepository := profile_postgres.NewProfilePostgresqlRepository(postgres, ctx)
+	sessionRepository := auth_redis.NewSessionRedisRepository(rc)
+	authRepository := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
+	filmRepository := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
+	genreRepository := genre_postgres.GenrePostgresqlRepository(pc, ctx)
+	profileRepository := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
@@ -81,7 +65,6 @@ func main() {
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
-	http_.NewCsrfHandler(mainRouter)
 
 	mw := middleware.InitMiddleware(authUsecase)
 
@@ -89,14 +72,14 @@ func main() {
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
-	mainRouter.Use(csrfMiddleware)
+	mainRouter.Use(csrf.Protect([]byte("32-byte-long-auth-key"), csrf.Secure(false), csrf.HttpOnly(false), csrf.Path("/")))
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
 
 	err = http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
-		logs.LogFatal(logs.Logger, "main", "main", err, "Failed to start server")
+		logs.LogFatal(logs.Logger, "main", "main", err, err.Error())
 	}
 	logs.Logger.Info("server stopped")
 }

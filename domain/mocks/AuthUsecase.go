@@ -38,12 +38,13 @@ func (_m *AuthUsecase) IsAuth(token string) (bool, error) {
 }
 
 // Login provides a mock function with given fields: credentials
-func (_m *AuthUsecase) Login(credentials domain.Credentials) (domain.Session, error) {
+func (_m *AuthUsecase) Login(credentials domain.Credentials) (domain.Session, int, error) {
 	ret := _m.Called(credentials)
 
 	var r0 domain.Session
-	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.Credentials) (domain.Session, error)); ok {
+	var r1 int
+	var r2 error
+	if rf, ok := ret.Get(0).(func(domain.Credentials) (domain.Session, int, error)); ok {
 		return rf(credentials)
 	}
 	if rf, ok := ret.Get(0).(func(domain.Credentials) domain.Session); ok {
@@ -52,13 +53,19 @@ func (_m *AuthUsecase) Login(credentials domain.Credentials) (domain.Session, er
 		r0 = ret.Get(0).(domain.Session)
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.Credentials) error); ok {
+	if rf, ok := ret.Get(1).(func(domain.Credentials) int); ok {
 		r1 = rf(credentials)
 	} else {
-		r1 = ret.Error(1)
+		r1 = ret.Get(1).(int)
 	}
 
-	return r0, r1
+	if rf, ok := ret.Get(2).(func(domain.Credentials) error); ok {
+		r2 = rf(credentials)
+	} else {
+		r2 = ret.Error(2)
+	}
+
+	return r0, r1, r2
 }
 
 // Logout provides a mock function with given fields: token
