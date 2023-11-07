@@ -67,19 +67,12 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("Login credentials:", credentials)
 	defer a.CloseAndAlert(r.Body)
 
-	if len(credentials.Password) == 0 || credentials.Email == "" {
-		http.Error(w, `{"err":"`+domain.ErrWrongCredentials.Error()+`"}`, http.StatusForbidden)
-		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are empy")
-		return
-	}
-
-	credentials.Email = strings.TrimSpace(credentials.Email)
-
 	if err = checkCredentials(credentials); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are incorrect")
 		return
 	}
+	credentials.Email = strings.TrimSpace(credentials.Email)
 
 	session, userID, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
