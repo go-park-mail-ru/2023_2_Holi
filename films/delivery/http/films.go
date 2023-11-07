@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 
@@ -11,11 +10,6 @@ import (
 	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
-
-type Result struct {
-	Body interface{} `json:"body,omitempty"`
-	Err  string      `json:"err,omitempty"`
-}
 
 type FilmsHandler struct {
 	FilmsUsecase domain.FilmsUsecase
@@ -49,17 +43,19 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 
 	films, err := h.FilmsUsecase.GetFilmsByGenre(genre)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		return
 	}
-	logs.Logger.Debug("Films:", films)
-	response := map[string]interface{}{
-		"films": films,
-	}
 
-	logs.Logger.Debug("Films:", films)
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	logs.Logger.Debug("films:", films)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"films": films,
+		},
+		http.StatusOK,
+	)
 }
 
 // GetFilmData godoc
@@ -78,26 +74,28 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filmID, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "films_http", "GetFilmData", err, "failed to read film id")
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
 		return
 	}
 
 	film, artists, err := h.FilmsUsecase.GetFilmData(filmID)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "films_http", "GetFilmData", err, err.Error())
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
 		return
-	}
-
-	response := map[string]interface{}{
-		"film":    film,
-		"artists": artists,
 	}
 
 	logs.Logger.Debug("film:", film)
 	logs.Logger.Debug("artists:", artists)
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"film":    film,
+			"artists": artists,
+		},
+		http.StatusOK,
+	)
 }
 
 // GetCastPage godoc
@@ -116,22 +114,25 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "films_http", "GetCastPage", err, err.Error())
 		return
 	}
 	films, cast, err := h.FilmsUsecase.GetCastPage(id)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetCastPage", err, "Failed to get cast")
 		return
-	}
-	response := map[string]interface{}{
-		"films": films,
-		"cast":  cast,
 	}
 
 	logs.Logger.Debug("Http GetCastPage:", films)
 	logs.Logger.Debug("Http GetCastPage:", cast)
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"films": films,
+			"cast":  cast,
+		},
+		http.StatusOK,
+	)
 }

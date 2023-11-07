@@ -15,11 +15,6 @@ import (
 	logs "2023_2_Holi/logger"
 )
 
-type Result struct {
-	Body interface{} `json:"body,omitempty"`
-	Err  string      `json:"err,omitempty"`
-}
-
 type AuthHandler struct {
 	AuthUsecase domain.AuthUsecase
 }
@@ -51,7 +46,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
-		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
+		domain.WriteError(w, "you must be unauthorised", http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "User is already logged in")
 		return
 	}
@@ -60,7 +55,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewDecoder(r.Body).Decode(&credentials)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to decode json from body")
 		return
 	}
@@ -68,7 +63,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	defer a.CloseAndAlert(r.Body)
 
 	if err = checkCredentials(credentials); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Credentials are incorrect")
 		return
 	}
@@ -76,7 +71,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	session, userID, err := a.AuthUsecase.Login(credentials)
 	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to login")
 		return
 	}
@@ -90,10 +85,13 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	body := map[string]interface{}{
-		"id": userID,
-	}
-	json.NewEncoder(w).Encode(&Result{Body: body})
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"id": userID,
+		},
+		http.StatusOK,
+	)
 }
 
 // Logout godoc
@@ -144,16 +142,15 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
-		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
+		domain.WriteError(w, "you must be unauthorised", http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
-		json.
 		return
 	}
 
 	var user domain.User
 	err = json.NewDecoder(r.Body).Decode(&user)
 	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+		domain.WriteError(w, "you must be unauthorised", http.StatusBadRequest)
 		logs.LogError(logs.Logger, "auth_http", "Register.decode", err, "Failed to decode json from body")
 		return
 	}
@@ -162,21 +159,21 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 
 	user.Email = strings.TrimSpace(user.Email)
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.credentials", err, "creds are invalid")
 		return
 	}
 
 	var id int
 	if id, err = a.AuthUsecase.Register(user); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.register", err, "Failed to register")
 		return
 	}
 
 	session, _, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.login", err, "Failed to login")
 		return
 	}
@@ -188,10 +185,13 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
-	body := map[string]interface{}{
-		"id": id,
-	}
-	json.NewEncoder(w).Encode(&Result{Body: body})
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"id": id,
+		},
+		http.StatusOK,
+	)
 }
 
 func (a *AuthHandler) auth(r *http.Request) (bool, error) {

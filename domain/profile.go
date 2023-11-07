@@ -1,5 +1,9 @@
 package domain
 
+import (
+	"github.com/microcosm-cc/bluemonday"
+)
+
 type User struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
@@ -7,6 +11,13 @@ type User struct {
 	Email     string `json:"email"`
 	ImagePath string `json:"imagePath"`
 	ImageData []byte `json:"imageData"`
+}
+
+func SanitizeUser(u User, s *bluemonday.Policy) User {
+	u.Name = s.Sanitize(u.Name)
+	u.Email = s.Sanitize(u.Email)
+	u.ImagePath = s.Sanitize(u.ImagePath)
+	return u
 }
 
 type ProfileUsecase interface {

@@ -2,6 +2,7 @@ package netflix
 
 import (
 	"context"
+	"github.com/microcosm-cc/bluemonday"
 	"net/http"
 	"os"
 
@@ -60,11 +61,12 @@ func StartServer() {
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
 	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
+	sanitizer := bluemonday.UGCPolicy()
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
-	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
+	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase, sanitizer)
 
 	mw := middleware.InitMiddleware(authUsecase)
 
