@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/google/uuid"
 
@@ -217,7 +218,7 @@ func TestLogin(t *testing.T) {
 				test.setAuth(req, mockUCase, &mockSession)
 			}
 			rec := httptest.NewRecorder()
-			NewAuthHandler(mux.NewRouter(), mux.NewRouter(), mockUCase)
+			NewAuthHandler(mux.NewRouter(), mux.NewRouter(), mockUCase, nil)
 			handler := &AuthHandler{
 				AuthUsecase: mockUCase,
 			}

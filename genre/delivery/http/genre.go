@@ -7,7 +7,6 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
 
@@ -44,7 +43,6 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 
 	genres, err := h.GenreUsecase.GetGenres()
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetGenres", err, "Failed to get genres")

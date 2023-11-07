@@ -21,19 +21,19 @@ type Result struct {
 
 type AuthHandler struct {
 	AuthUsecase domain.AuthUsecase
+	Token       *domain.HashToken
 }
 
-func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.AuthUsecase) {
+func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.AuthUsecase, t *domain.HashToken) {
 	handler := &AuthHandler{
 		AuthUsecase: u,
+		Token:       t,
 	}
 
 	mainRouter.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
 	mainRouter.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
 
-	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNoContent)
-	}).Methods(http.MethodPost, http.MethodOptions)
+	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }).Methods(http.MethodPost, http.MethodOptions)
 	authMwRouter.HandleFunc("/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
 }
 
@@ -49,6 +49,12 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	_, err := a.Token.Check("uuid.NewString()", r.Header.Get("csrf-token"))
+	if err != nil {
+		http.Error(w, `{"err":"invalid csrf token"}`, http.StatusForbidden)
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "User is already logged in")
+		return
+	}
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
@@ -140,6 +146,14 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
+	logs.Logger.Info("csrf-token value: ", r.Header.Get("X-CSRF-TOKEN"))
+	_, err := a.Token.Check("uuid.NewString()", r.Header.Get("csrf-token"))
+	logs.Logger.Info("err afther check: ", err)
+	if err != nil {
+		http.Error(w, `{"err":"invalid csrf token"}`, http.StatusForbidden)
+		logs.LogError(logs.Logger, "auth_http", "Login", err, "User is already logged in")
+		return
+	}
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
