@@ -1,13 +1,15 @@
-package auth_postgres
+package postgres
 
 import (
 	"context"
 	"errors"
-	"github.com/jackc/pgx/v5"
-	"github.com/stretchr/testify/require"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
+	"github.com/stretchr/testify/require"
+
 	"2023_2_Holi/domain"
+
 	"github.com/pashagolub/pgxmock/v3"
 )
 
@@ -40,7 +42,7 @@ func TestGetByEmail(t *testing.T) {
 			user: domain.User{
 				ID:       1,
 				Email:    "uvybini@mail.ru",
-				Password: "2343_frefviunoipcvmvirhufuivyubriurfnreiubvcneuribverxrchgvjbk",
+				Password: []byte{123},
 			},
 			good: true,
 		},
@@ -107,7 +109,7 @@ func TestAddUser(t *testing.T) {
 			user: domain.User{
 				ID:        1,
 				Email:     "uvybini@mail.ru",
-				Password:  "2343_frefviunoipcvmvirhufuivyubriurfnreiubvcneuribverxrchgvjbk",
+				Password:  []byte{123},
 				ImagePath: "https://fs.kinomania.ru/image/file/film_poster/c/36/c36d4557f6955b864e70fd55a02505f1.228.313.jpeg",
 			},
 			good: true,
@@ -121,7 +123,7 @@ func TestAddUser(t *testing.T) {
 			user: domain.User{
 				ID:        1,
 				Email:     "SELECT",
-				Password:  "2343_frefviunoipcvmvirhufuivyubriurfnreiubvcneuribverxrchgvjbk",
+				Password:  []byte{123},
 				ImagePath: "https://fs.kinomania.ru/image/file/film_poster/c/36/c36d4557f6955b864e70fd55a02505f1.228.313.jpeg",
 			},
 			err: errors.New("some error"),

@@ -1,4 +1,4 @@
-package films_usecase
+package usecase
 
 import (
 	"2023_2_Holi/domain"

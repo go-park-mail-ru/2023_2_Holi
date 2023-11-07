@@ -1,4 +1,4 @@
-package films_http
+package http
 
 import (
 	"encoding/json"
@@ -114,11 +114,10 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
-	CastID := vars["id"]
-	id, err := strconv.Atoi(CastID)
+	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "Films_http", "GetCastPage", err, err.Error())
+		logs.LogError(logs.Logger, "films_http", "GetCastPage", err, err.Error())
 		return
 	}
 	films, cast, err := h.FilmsUsecase.GetCastPage(id)

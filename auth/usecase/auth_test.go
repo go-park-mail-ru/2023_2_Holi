@@ -1,6 +1,7 @@
-package auth_usecase
+package usecase
 
 import (
+	"crypto/rand"
 	"errors"
 	"testing"
 
@@ -8,12 +9,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"golang.org/x/crypto/argon2"
 
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/mocks"
 )
 
 func TestLogin(t *testing.T) {
+	salt := make([]byte, 8)
+	rand.Read(salt)
+
 	tests := []struct {
 		name                       string
 		creds                      domain.Credentials
@@ -25,12 +30,13 @@ func TestLogin(t *testing.T) {
 			name: "GoodCase/Common",
 			creds: domain.Credentials{
 				Email:    "uvybini@mail.ru",
-				Password: "xrchgvjbk",
+				Password: []byte{123},
 			},
 			setAuRepoExpectations: func(creds domain.Credentials, auRepo *mocks.AuthRepository, user *domain.User) {
 				faker.FakeData(user)
 				user.Email = creds.Email
-				user.Password = creds.Password
+				hashedPass := argon2.IDKey([]byte{123}, salt, 1, 64*1024, 4, 32)
+				user.Password = append(salt, hashedPass...)
 				auRepo.On("GetByEmail", mock.Anything).Return(*user, nil)
 			},
 			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
@@ -42,12 +48,13 @@ func TestLogin(t *testing.T) {
 			name: "BadCase/UserNotFound",
 			creds: domain.Credentials{
 				Email:    "uvybini@mail.ru",
-				Password: "xrchgvjbk",
+				Password: []byte{123},
 			},
 			setAuRepoExpectations: func(creds domain.Credentials, auRepo *mocks.AuthRepository, user *domain.User) {
 				faker.FakeData(user)
 				user.Email = creds.Email
-				user.Password = creds.Password
+				hashedPass := argon2.IDKey([]byte{123}, salt, 1, 64*1024, 4, 32)
+				user.Password = append(salt, hashedPass...)
 				auRepo.On("GetByEmail", mock.Anything).Return(*user, errors.New("some db error"))
 			},
 			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
@@ -58,12 +65,13 @@ func TestLogin(t *testing.T) {
 			name: "BadCase/PasswordDoesntMatch",
 			creds: domain.Credentials{
 				Email:    "uvybini@mail.ru",
-				Password: "xrchgvjbk",
+				Password: []byte{123},
 			},
 			setAuRepoExpectations: func(creds domain.Credentials, auRepo *mocks.AuthRepository, user *domain.User) {
 				faker.FakeData(user)
 				user.Email = creds.Email
-				user.Password = "ougunorgn"
+				hashedPass := argon2.IDKey([]byte{100}, salt, 1, 64*1024, 4, 32)
+				user.Password = append(salt, hashedPass...)
 				auRepo.On("GetByEmail", mock.Anything).Return(*user, nil)
 			},
 			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
@@ -74,13 +82,14 @@ func TestLogin(t *testing.T) {
 			name: "BadCase/InvalidUserId",
 			creds: domain.Credentials{
 				Email:    "uvybini@mail.ru",
-				Password: "xrchgvjbk",
+				Password: []byte{123},
 			},
 			setAuRepoExpectations: func(creds domain.Credentials, auRepo *mocks.AuthRepository, user *domain.User) {
 				faker.FakeData(user)
 				user.ID = 0
 				user.Email = creds.Email
-				user.Password = creds.Password
+				hashedPass := argon2.IDKey([]byte{100}, salt, 1, 64*1024, 4, 32)
+				user.Password = append(salt, hashedPass...)
 				auRepo.On("GetByEmail", mock.Anything).Return(*user, nil)
 			},
 			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository) {
@@ -225,7 +234,7 @@ func TestRegister(t *testing.T) {
 				var user domain.User
 				faker.FakeData(&user)
 				user.Email = ""
-				user.Password = ""
+				user.Password = []byte{}
 				return user
 			},
 			id: 0,
