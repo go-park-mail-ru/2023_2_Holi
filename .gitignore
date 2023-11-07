@@ -20,3 +20,4 @@
 .ide*
 .env
 coverage.out.tmp
+*.conf
