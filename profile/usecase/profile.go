@@ -4,7 +4,10 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 	"bytes"
+	"crypto/rand"
 	"strconv"
+
+	auth_usecase "2023_2_Holi/auth/usecase"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -32,6 +35,19 @@ func (u *profileUseCase) GetUserData(userID int) (domain.User, error) {
 }
 
 func (u *profileUseCase) UpdateUser(newUser domain.User) (domain.User, error) {
+	if len(newUser.Password) != 0 {
+		salt := make([]byte, 8)
+		rand.Read(salt)
+		newUser.Password = auth_usecase.HashPassword(salt, newUser.Password)
+	}
+
+	oldUser, err := u.profileRepo.GetUser(newUser.ID)
+	if err != nil {
+		logs.LogError(logs.Logger, "profile_usecase", "UpdateUser", err, err.Error())
+		return domain.User{}, err
+	}
+
+	newUser = getOldFields(newUser, oldUser)
 	updatedUser, err := u.profileRepo.UpdateUser(newUser)
 	if err != nil {
 		logs.LogError(logs.Logger, "profile_usecase", "UpdateUser", err, err.Error())
@@ -65,4 +81,20 @@ func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, erro
 	imagePath := "https://" + bucketName + ".hb." + defaultRegion + ".vkcs.cloud/" + directory + "/" + strconv.Itoa(userID)
 
 	return imagePath, nil
+}
+
+func getOldFields(newUser domain.User, oldUser domain.User) domain.User {
+	if newUser.Name == "" {
+		newUser.Name = oldUser.Name
+	}
+	if newUser.Email == "" {
+		newUser.Email = oldUser.Email
+	}
+	if newUser.ImagePath == "" {
+		newUser.ImagePath = oldUser.ImagePath
+	}
+	if string(newUser.Password) == "" {
+		newUser.Password = oldUser.Password
+	}
+	return newUser
 }
