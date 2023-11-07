@@ -5,7 +5,11 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gorilla/mux"
+
 	//"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
 
@@ -34,6 +38,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
+const (
+	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
+	defaultRegion         = "ru-msk"
+)
+
 func StartServer() {
 	err := godotenv.Load()
 	ctx := context.Background()
@@ -59,7 +68,10 @@ func StartServer() {
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
-	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
+
+	sess, _ := session.NewSession()
+	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
+	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository, svc)
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)

@@ -7,16 +7,17 @@ import (
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3iface"
 )
 
 type profileUseCase struct {
 	profileRepo domain.ProfileRepository
+	svc         s3iface.S3API
 }
 
-func NewProfileUsecase(pr domain.ProfileRepository) domain.ProfileUsecase {
-	return &profileUseCase{profileRepo: pr}
+func NewProfileUsecase(pr domain.ProfileRepository, svc s3iface.S3API) domain.ProfileUsecase {
+	return &profileUseCase{profileRepo: pr, svc: svc}
 }
 
 func (u *profileUseCase) GetUserData(userID int) (domain.User, error) {
@@ -49,9 +50,6 @@ const (
 )
 
 func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, error) {
-	sess, _ := session.NewSession()
-	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
-
 	uploadInput := &s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
 		Body:        bytes.NewReader(imageData),
@@ -60,7 +58,7 @@ func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, erro
 		Key:         aws.String(directory + "/" + strconv.Itoa(userID)),
 	}
 
-	if _, err := svc.PutObject(uploadInput); err != nil {
+	if _, err := u.svc.PutObject(uploadInput); err != nil {
 		logs.LogError(logs.Logger, "profile_usecase", "UploadImage", err, "Failed to upload image")
 		return "", err
 	}
