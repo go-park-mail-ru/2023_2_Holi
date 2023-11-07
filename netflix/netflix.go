@@ -2,13 +2,17 @@ package netflix
 
 import (
 	"context"
-	"github.com/microcosm-cc/bluemonday"
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gorilla/mux"
+
 	//"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
+	"github.com/microcosm-cc/bluemonday"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
@@ -33,6 +37,11 @@ import (
 	profile_usecase "2023_2_Holi/profile/usecase"
 
 	_ "github.com/lib/pq"
+)
+
+const (
+	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
+	defaultRegion         = "ru-msk"
 )
 
 func StartServer() {
@@ -60,7 +69,10 @@ func StartServer() {
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
-	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
+
+	sess, _ := session.NewSession()
+	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
+	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository, svc)
 	sanitizer := bluemonday.UGCPolicy()
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
