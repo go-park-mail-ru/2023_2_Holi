@@ -41,7 +41,7 @@ func TestGetUserData(t *testing.T) {
 			setProfileRepoExpectations: func(userID int, prRepo *mocks.ProfileRepository, user *domain.User) {
 				faker.FakeData(user)
 				user.ID = userID
-				prRepo.On("GetUser", mock.Anything).Return(*user, errors.New("User not found"))
+				prRepo.On("GetUser", mock.Anything).Return(*user, errors.New("user not found"))
 			},
 		},
 	}
@@ -110,7 +110,7 @@ func TestUpdateUser(t *testing.T) {
 				Email: "max@mail.ru",
 			},
 			setProfileRepoExpectations: func(user *domain.User, prRepo *mocks.ProfileRepository, newUser *domain.User, oldUser *domain.User) {
-				prRepo.On("GetUser", mock.Anything).Return(*oldUser, errors.New("User not found"))
+				prRepo.On("GetUser", mock.Anything).Return(*oldUser, errors.New("user not found"))
 			},
 		},
 		{

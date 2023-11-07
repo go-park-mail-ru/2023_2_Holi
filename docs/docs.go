@@ -32,35 +32,76 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "login user",
-                "responses": {
-                    "204": {
-                        "description": "No Content",
+                "parameters": [
+                    {
+                        "description": "user credentials",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "json"
+                            "$ref": "#/definitions/domain.Credentials"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -80,25 +121,45 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -117,29 +178,65 @@ const docTemplate = `{
                     "auth"
                 ],
                 "summary": "register user",
+                "parameters": [
+                    {
+                        "description": "user credentials",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Credentials"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "id": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                }
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -316,7 +413,7 @@ const docTemplate = `{
                         "schema": {
                             "allOf": [
                                 {
-                                    "$ref": "#/definitions/profile_http.Result"
+                                    "$ref": "#/definitions/domain.Response"
                                 },
                                 {
                                     "type": "object",
@@ -401,9 +498,81 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/v1/genres": {
+            "get": {
+                "description": "Get a list of genres.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "genres"
+                ],
+                "summary": "Get genres",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Genre"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "domain.Credentials": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "domain.Genre": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Response": {
+            "type": "object",
+            "properties": {
+                "body": {},
+                "err": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.User": {
             "type": "object",
             "properties": {
@@ -426,7 +595,10 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
                 }
             }
         },
@@ -452,15 +624,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "profile_http.Result": {
-            "type": "object",
-            "properties": {
-                "body": {},
-                "err": {
                     "type": "string"
                 }
             }

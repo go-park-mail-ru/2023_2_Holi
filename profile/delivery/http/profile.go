@@ -74,10 +74,10 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 // @Produce      json
 // @Accept       json
 // @Param 		 body body domain.UserRequest true "user that must be updated"
-// @Success      200  {object} Result{body=object{user=domain.User}}
-// @Failure      400  {json} Result
-// @Failure      403  {json} Result
-// @Failure      500  {json} Result
+// @Success      200  {object} domain.Response{body=object{user=domain.User}}
+// @Failure      400  {json} domain.Response
+// @Failure      403  {json} domain.Response
+// @Failure      500  {json} domain.Response
 // @Router       /api/v1/profile/update [post]
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))

@@ -11,11 +11,11 @@ type Response struct {
 }
 
 func WriteError(w http.ResponseWriter, errString string, status int) {
-	json.NewEncoder(w).Encode(&Response{Err: errString})
 	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(&Response{Err: errString})
 }
 
 func WriteResponse(w http.ResponseWriter, result map[string]interface{}, status int) {
-	json.NewEncoder(w).Encode(&Response{Body: result})
 	w.WriteHeader(status)
+	json.NewEncoder(w).Encode(&Response{Body: result})
 }

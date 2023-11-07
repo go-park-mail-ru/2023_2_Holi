@@ -36,14 +36,14 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Description  create user session and put it into cookie
 // @Tags         auth
 // @Accept       json
-// @Success      204  {json} Result
-// @Failure      400  {json} Result
-// @Failure      403  {json} Result
-// @Failure      404  {json} Result
-// @Failure      500  {json} Result
+// @Param 		 body body domain.Credentials true "user credentials"
+// @Success      200  {object} object{body=object{id=int}}
+// @Failure      400  {object} object{err=string}
+// @Failure      403  {object} object{err=string}
+// @Failure      404  {object} object{err=string}
+// @Failure      500  {object} object{err=string}
 // @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
 		domain.WriteError(w, "you must be unauthorised", http.StatusForbidden)
@@ -99,10 +99,10 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Description  delete current session and nullify cookie
 // @Tags         auth
 // @Success      204
-// @Failure      400  {json} Result
-// @Failure      403  {json Result
-// @Failure      404  {json} Result
-// @Failure      500  {json} Result
+// @Failure      400  {object} object{err=string}
+// @Failure      403  {object} object{err=string}
+// @Failure      404  {object} object{err=string}
+// @Failure      500  {object} object{err=string}
 // @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
@@ -133,13 +133,13 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Tags         auth
 // @Produce      json
 // @Accept       json
-// @Success      200  {json} Result
-// @Failure      400  {json} Result
-// @Failure      403  {json} Result
-// @Failure      500  {json} Result
+// @Param 		 body body domain.Credentials true "user credentials"
+// @Success      200  {object} object{body=object{id=int}}
+// @Failure      400  {object} object{err=string}
+// @Failure      403  {object} object{err=string}
+// @Failure      500  {object} object{err=string}
 // @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
 		domain.WriteError(w, "you must be unauthorised", http.StatusForbidden)

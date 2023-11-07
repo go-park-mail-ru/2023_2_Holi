@@ -29,10 +29,10 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 // @Description Get a list of genres.
 // @Tags genres
 // @Produce json
-// @Success 		200 {array} Genre
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
+// @Success 		200 {array} domain.Genre
+// @Failure			400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
 // @Router /v1/genres [get]
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	genres, err := h.GenreUsecase.GetGenres()

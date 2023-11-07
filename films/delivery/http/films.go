@@ -31,10 +31,10 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 // @Tags 			Films
 // @Param 			genre path string true "The genre of the Films you want to retrieve."
 // @Produce 		json
-// @Success 		200 {json} domain.Films
-// @Failure			400 {json} Result
-// @Failure 		404 {json} Result
-// @Failure 		500 {json} Result
+// @Success         200  {object} object{body=object{film=domain.Film}}
+// @Failure         400  {object} object{err=string}
+// @Failure         404  {object} object{err=string}
+// @Failure         500  {object} object{err=string}
 // @Router 			/api/v1/films/genre/{genre} [get]
 func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
@@ -65,9 +65,9 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Param 			id path int true "Id film you want to get."
 // @Produce 		json
 // @Success 		200 {json} domain.Films
-// @Failure 		400 {json} Result
-// @Failure 		404 {json} Result
-// @Failure 		500 {json} Result
+// @Failure 		400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
 // @Router 			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
@@ -105,9 +105,9 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 // @Param 			cast path string true "The Films of the Cast you want to retrieve."
 // @Produce 		json
 // @Success 		200 {json} domain.Films
-// @Failure			400 {json} Result
-// @Failure 		404 {json} Result
-// @Failure 		500 {json} Result
+// @Failure			400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
 // @Router 			/api/v1/films/cast/{id} [get]
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))

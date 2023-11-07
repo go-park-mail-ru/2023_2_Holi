@@ -508,7 +508,7 @@ func TestRegister(t *testing.T) {
 			assert.Equal(t, test.status, rec.Code)
 			mockUCase.AssertExpectations(t)
 
-			var result *Result
+			var result *domain.Response
 			err = json.NewDecoder(rec.Result().Body).Decode(&result)
 			assert.NoError(t, err)
 
