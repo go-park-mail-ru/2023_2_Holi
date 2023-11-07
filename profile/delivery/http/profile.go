@@ -83,7 +83,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
+		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
 		logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to decode json from body")
 		return
 	}
@@ -92,6 +92,11 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if len(newUser.ImageData) != 0 {
 		newUser.ImagePath, err = h.ProfileUsecase.UploadImage(newUser.ID, newUser.ImageData)
+		if err != nil {
+			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+			logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to upload user image")
+			return
+		}
 	}
 
 	updatedUser, err := h.ProfileUsecase.UpdateUser(newUser)
