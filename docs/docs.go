@@ -34,30 +34,33 @@ const docTemplate = `{
                 "summary": "login user",
                 "responses": {
                     "204": {
-                        "description": "No Content"
+                        "description": "No Content",
+                        "schema": {
+                            "type": "json"
+                        }
                     },
                     "400": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "403": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Forbidden",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "404": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "500": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     }
                 }
@@ -75,27 +78,27 @@ const docTemplate = `{
                         "description": "No Content"
                     },
                     "400": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "403": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Forbidden",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "404": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Not Found",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     },
                     "500": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
                         }
                     }
                 }
@@ -118,19 +121,282 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/http.Result"
+                            "type": "json"
                         }
                     },
                     "400": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "json"
                         }
                     },
                     "500": {
-                        "description": "{\"error\":\"\u003cerror message\u003e\"}",
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "string"
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/films/cast/{id}": {
+            "get": {
+                "description": "Get a list of films based on the cast name.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Cast"
+                ],
+                "summary": "Get cast page",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The Films of the Cast you want to retrieve.",
+                        "name": "cast",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/films/genre/{genre}": {
+            "get": {
+                "description": "Get a list of films based on the specified genre.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Get films by genre",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The genre of the Films you want to retrieve.",
+                        "name": "genre",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/films/{id}": {
+            "get": {
+                "description": "Get content for Film page",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Films"
+                ],
+                "summary": "Get Film data by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Id film you want to get.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/update": {
+            "post": {
+                "description": "update user data in db and return it",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "update profile",
+                "parameters": [
+                    {
+                        "description": "user that must be updated",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.UserRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/profile_http.Result"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "body": {
+                                            "type": "object",
+                                            "properties": {
+                                                "user": {
+                                                    "$ref": "#/definitions/domain.User"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/profile/{id}": {
+            "get": {
+                "description": "Get user data by id",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "profile"
+                ],
+                "summary": "Get user by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The user id you want to retrieve.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
                         }
                     }
                 }
@@ -138,7 +404,59 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "http.Result": {
+        "domain.User": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imageData": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                },
+                "imagePath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.UserRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "id",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "imagePath": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "profile_http.Result": {
             "type": "object",
             "properties": {
                 "body": {},
@@ -153,9 +471,9 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
-	Host:             "127.0.0.1E",
+	Host:             "127.0.0.1",
 	BasePath:         "/",
-	Schemes:          []string{"Zhttp"},
+	Schemes:          []string{"http"},
 	Title:            "Netfilx API",
 	Description:      "API of the nelfix project by holi",
 	InfoInstanceName: "swagger",

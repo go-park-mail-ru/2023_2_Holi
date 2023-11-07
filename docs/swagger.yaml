@@ -1,12 +1,47 @@
 basePath: /
 definitions:
-  http.Result:
+  domain.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      imageData:
+        items:
+          type: integer
+        type: array
+      imagePath:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  domain.UserRequest:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      imagePath:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - id
+    - name
+    - password
+    type: object
+  profile_http.Result:
     properties:
       body: {}
       err:
         type: string
     type: object
-host: 127.0.0.1E
+host: 127.0.0.1
 info:
   contact:
     email: ax.chinaev@yandex.ru
@@ -26,22 +61,24 @@ paths:
       responses:
         "204":
           description: No Content
+          schema:
+            type: json
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "403":
-          description: '{"error":"<error message>"}'
+          description: Forbidden
           schema:
-            type: string
+            type: json
         "404":
-          description: '{"error":"<error message>"}'
+          description: Not Found
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: login user
       tags:
       - auth
@@ -52,21 +89,21 @@ paths:
         "204":
           description: No Content
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
         "403":
-          description: '{"error":"<error message>"}'
+          description: Forbidden
           schema:
-            type: string
+            type: json
         "404":
-          description: '{"error":"<error message>"}'
+          description: Not Found
           schema:
-            type: string
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: logout user
       tags:
       - auth
@@ -81,18 +118,188 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/http.Result'
+            type: json
         "400":
-          description: '{"error":"<error message>"}'
+          description: Bad Request
           schema:
-            type: string
+            type: json
+        "403":
+          description: Forbidden
+          schema:
+            type: json
         "500":
-          description: '{"error":"<error message>"}'
+          description: Internal Server Error
           schema:
-            type: string
+            type: json
       summary: register user
       tags:
       - auth
+  /api/v1/films/{id}:
+    get:
+      description: Get content for Film page
+      parameters:
+      - description: Id film you want to get.
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get Film data by id
+      tags:
+      - Films
+  /api/v1/films/cast/{id}:
+    get:
+      description: Get a list of films based on the cast name.
+      parameters:
+      - description: The Films of the Cast you want to retrieve.
+        in: path
+        name: cast
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get cast page
+      tags:
+      - Cast
+  /api/v1/films/genre/{genre}:
+    get:
+      description: Get a list of films based on the specified genre.
+      parameters:
+      - description: The genre of the Films you want to retrieve.
+        in: path
+        name: genre
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get films by genre
+      tags:
+      - Films
+  /api/v1/profile/{id}:
+    get:
+      description: Get user data by id
+      parameters:
+      - description: The user id you want to retrieve.
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get user by id
+      tags:
+      - profile
+  /api/v1/profile/update:
+    post:
+      consumes:
+      - application/json
+      description: update user data in db and return it
+      parameters:
+      - description: user that must be updated
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/profile_http.Result'
+            - properties:
+                body:
+                  properties:
+                    user:
+                      $ref: '#/definitions/domain.User'
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "403":
+          description: Forbidden
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: update profile
+      tags:
+      - profile
 schemes:
-- Zhttp
+- http
 swagger: "2.0"
