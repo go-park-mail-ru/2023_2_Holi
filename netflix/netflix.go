@@ -12,6 +12,7 @@ import (
 
 	//"github.com/gorilla/csrf"
 	"github.com/joho/godotenv"
+	"github.com/microcosm-cc/bluemonday"
 
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
@@ -72,11 +73,12 @@ func StartServer() {
 	sess, _ := session.NewSession()
 	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
 	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository, svc)
+	sanitizer := bluemonday.UGCPolicy()
 
 	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
-	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
+	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase, sanitizer)
 
 	mw := middleware.InitMiddleware(authUsecase)
 

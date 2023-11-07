@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"2023_2_Holi/domain"
@@ -12,11 +11,6 @@ import (
 )
 
 var logger = logs.LoggerInit()
-
-type Result struct {
-	Body interface{} `json:"body,omitempty"`
-	Err  string      `json:"err,omitempty"`
-}
 
 type GenreHandler struct {
 	GenreUsecase domain.GenreUsecase
@@ -40,20 +34,21 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 // @Failure 		404 {json} ApiResponse
 // @Failure 		500 {json} ApiResponse
 // @Router /v1/genres [get]
-
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
-
 	genres, err := h.GenreUsecase.GetGenres()
 	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "GetGenres", err, "Failed to get genres")
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
 		return
-	}
-	response := map[string]interface{}{
-		"genres": genres,
 	}
 
 	logger.Debug("Http GetGenres:", genres)
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"genres": genres,
+		},
+		http.StatusOK,
+	)
 }
