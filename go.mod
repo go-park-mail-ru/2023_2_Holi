@@ -3,13 +3,14 @@ module 2023_2_Holi
 go 1.21.1
 
 require (
-	github.com/aws/aws-sdk-go v1.47.3
+	github.com/aws/aws-sdk-go v1.47.4
 	github.com/bxcodec/faker v2.0.1+incompatible
+	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/google/go-cmp v0.6.0
 	github.com/google/uuid v1.4.0
-	github.com/gorilla/csrf v1.7.1
-	github.com/gorilla/mux v1.8.0
-	github.com/jackc/pgx/v5 v5.4.3
+	github.com/gorilla/csrf v1.7.2
+	github.com/gorilla/mux v1.8.1
+	github.com/jackc/pgx/v5 v5.5.0
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/pashagolub/pgxmock/v3 v3.2.0
@@ -31,9 +32,7 @@ require (
 	github.com/go-openapi/jsonreference v0.19.6 // indirect
 	github.com/go-openapi/spec v0.20.4 // indirect
 	github.com/go-openapi/swag v0.19.15 // indirect
-	github.com/gorilla/securecookie v1.1.1 // indirect
-	github.com/gorilla/csrf v1.7.1
-	github.com/go-redis/redismock/v9 v9.2.0
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
