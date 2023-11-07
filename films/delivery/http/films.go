@@ -43,7 +43,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 // @Failure 		500 {json} Result
 // @Router 			/api/v1/films/genre/{genre} [get]
 func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
+	//w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
 	genre := vars["genre"]
 

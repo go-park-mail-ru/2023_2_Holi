@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 
-	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
@@ -30,6 +29,8 @@ import (
 	profile_http "2023_2_Holi/profile/delivery/http"
 	profile_postgres "2023_2_Holi/profile/repository/postgresql"
 	profile_usecase "2023_2_Holi/profile/usecase"
+
+	http_ "2023_2_Holi/csrf/delivery/http"
 
 	_ "github.com/lib/pq"
 )
@@ -60,10 +61,9 @@ func main() {
 	redis := redis.RedisConnector()
 	defer redis.Close()
 
-	csrfMiddleware := csrf.Protect([]byte("32-byte-long-auth-key"))
+	csrfMiddleware := csrf.Protect([]byte("qwnbjb13jbhb12j3bjbbj"), csrf.Secure(false), csrf.HttpOnly(false))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
-	authMiddlewareRouter.Use(csrfMiddleware)
 
 	sessionRepository := auth_redis.NewSessionRedisRepository(redis)
 	authRepository := auth_postgres.NewAuthPostgresqlRepository(postgres, ctx)
@@ -76,17 +76,19 @@ func main() {
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
 	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
-	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
+	//auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
+	http_.NewCsrfHandler(mainRouter)
 
 	mw := middleware.InitMiddleware(authUsecase)
 
-	//authMiddlewareRouter.Use(mw.IsAuth)
+	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
+	mainRouter.Use(csrfMiddleware)
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)

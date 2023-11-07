@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
@@ -32,7 +31,9 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 	mainRouter.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
 	mainRouter.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
 
-	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }).Methods(http.MethodPost, http.MethodOptions)
+	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNoContent)
+	}).Methods(http.MethodPost, http.MethodOptions)
 	authMwRouter.HandleFunc("/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
 }
 
@@ -48,7 +49,6 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
@@ -112,7 +112,6 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
 	logs.Logger.Debug("Logout: session token:", c)
@@ -146,11 +145,11 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {json} Result
 // @Router       /api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	auth, err := a.auth(r)
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
+		return
 	}
 
 	var user domain.User
@@ -167,6 +166,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
 		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.credentials", err, "creds are invalid")
+		return
 	}
 
 	var id int

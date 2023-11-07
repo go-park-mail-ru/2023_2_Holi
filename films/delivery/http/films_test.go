@@ -35,7 +35,29 @@ func TestGetMoviesByGenre(t *testing.T) {
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
 				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{}, errors.New("error"))
 			},
+			status: http.StatusInternalServerError,
+		},
+		{
+			name: "GoodCase/NonEmptyFilms",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return([]domain.Film{{ID: 1, Name: "Film 1"}, {ID: 2, Name: "Film 2"}}, nil)
+			},
 			status: http.StatusOK,
+			good:   true,
+		},
+		{
+			name: "ErrorCase/UsecaseError",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return(nil, errors.New("error from usecase"))
+			},
+			status: http.StatusInternalServerError,
+		},
+		{
+			name: "ErrorCase/InvalidRequest",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetFilmsByGenre", mock.Anything).Return(nil, errors.New("invalid request"))
+			},
+			status: http.StatusInternalServerError,
 		},
 	}
 
@@ -103,6 +125,67 @@ func TestGetFilmData(t *testing.T) {
 			}
 
 			router.HandleFunc("/api/v1/films/{id}", handler.GetFilmData).Methods("GET")
+			router.ServeHTTP(rec, req)
+
+			assert.Equal(t, test.status, rec.Code)
+		})
+	}
+}
+
+func TestGetCastPage(t *testing.T) {
+	tests := []struct {
+		name                 string
+		setUCaseExpectations func(usecase *mocks.FilmsUsecase)
+		status               int
+	}{
+		{
+			name: "GoodCase/Common",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, nil)
+			},
+			status: http.StatusOK,
+		},
+		{
+			name: "GoodCase/EmptyResults",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, errors.New("error"))
+			},
+			status: http.StatusNotFound,
+		},
+		{
+			name: "ErrorCase/UsecaseError",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, errors.New("error"))
+			},
+			status: http.StatusInternalServerError,
+		},
+		{
+			name: "ErrorCase/InvalidRequest",
+			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, errors.New("invalid request"))
+			},
+			status: http.StatusBadRequest,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			router := mux.NewRouter()
+			mockUsecase := new(mocks.FilmsUsecase)
+			test.setUCaseExpectations(mockUsecase)
+
+			req, err := http.NewRequest("GET", "/api/v1/films/cast/1", nil)
+			assert.NoError(t, err)
+
+			rec := httptest.NewRecorder()
+
+			NewFilmsHandler(router, mockUsecase)
+
+			handler := &FilmsHandler{
+				FilmsUsecase: mockUsecase,
+			}
+
+			router.HandleFunc("/api/v1/films/cast/{id}", handler.GetCastPage).Methods("GET")
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
