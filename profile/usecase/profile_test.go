@@ -76,7 +76,7 @@ func TestUpdateUser(t *testing.T) {
 		name                       string
 		oldUser                    domain.User
 		newUser                    domain.User
-		setProfileRepoExpectations func(newUser *domain.User, prRepo *mocks.ProfileRepository, user *domain.User)
+		setProfileRepoExpectations func(user *domain.User, prRepo *mocks.ProfileRepository, newUser *domain.User, oldUser *domain.User)
 		good                       bool
 	}{
 		{
@@ -91,8 +91,9 @@ func TestUpdateUser(t *testing.T) {
 				Name:  "Max",
 				Email: "max@mail.ru",
 			},
-			setProfileRepoExpectations: func(newUser *domain.User, prRepo *mocks.ProfileRepository, user *domain.User) {
-				prRepo.On("UpdateUser", mock.Anything).Return(*user, nil)
+			setProfileRepoExpectations: func(user *domain.User, prRepo *mocks.ProfileRepository, newUser *domain.User, oldUser *domain.User) {
+				prRepo.On("GetUser", mock.Anything).Return(*oldUser, nil)
+				prRepo.On("UpdateUser", mock.Anything).Return(*newUser, nil)
 			},
 			good: true,
 		},
@@ -108,8 +109,25 @@ func TestUpdateUser(t *testing.T) {
 				Name:  "Max",
 				Email: "max@mail.ru",
 			},
-			setProfileRepoExpectations: func(newUser *domain.User, prRepo *mocks.ProfileRepository, user *domain.User) {
-				prRepo.On("UpdateUser", mock.Anything).Return(*user, errors.New("User not found"))
+			setProfileRepoExpectations: func(user *domain.User, prRepo *mocks.ProfileRepository, newUser *domain.User, oldUser *domain.User) {
+				prRepo.On("GetUser", mock.Anything).Return(*oldUser, errors.New("User not found"))
+			},
+		},
+		{
+			name: "BadCase/FailedToUpdate",
+			oldUser: domain.User{
+				ID:    1,
+				Name:  "Alex",
+				Email: "alex@mail.ru",
+			},
+			newUser: domain.User{
+				ID:    2,
+				Name:  "Max",
+				Email: "max@mail.ru",
+			},
+			setProfileRepoExpectations: func(user *domain.User, prRepo *mocks.ProfileRepository, newUser *domain.User, oldUser *domain.User) {
+				prRepo.On("GetUser", mock.Anything).Return(*oldUser, nil)
+				prRepo.On("UpdateUser", mock.Anything).Return(*newUser, errors.New("failed to update"))
 			},
 		},
 	}
@@ -119,20 +137,21 @@ func TestUpdateUser(t *testing.T) {
 			//t.Parallel()
 
 			pr := new(mocks.ProfileRepository)
-			user := test.oldUser
-			test.setProfileRepoExpectations(&test.newUser, pr, &user)
+			newUser := test.newUser
+			oldUser := test.oldUser
+			test.setProfileRepoExpectations(&test.newUser, pr, &newUser, &oldUser)
 
 			mockSvc := &mocks.MockS3Client{}
 			profileUcase := NewProfileUsecase(pr, mockSvc)
-			newUser, err := profileUcase.UpdateUser(test.newUser)
+			updatedUser, err := profileUcase.UpdateUser(test.newUser)
 
 			if test.good {
 				assert.Nil(t, err)
-				assert.NotEmpty(t, user)
-				assert.Equal(t, newUser, user)
+				assert.NotEmpty(t, newUser)
+				assert.Equal(t, newUser, updatedUser)
 			} else {
 				assert.NotNil(t, err)
-				assert.Empty(t, newUser)
+				assert.Empty(t, updatedUser)
 			}
 
 			pr.AssertExpectations(t)
