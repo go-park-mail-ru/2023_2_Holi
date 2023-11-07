@@ -120,7 +120,7 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("Logout: session token:", c)
 
 	if err = a.AuthUsecase.Logout(sessionToken); err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusInternalServerError)
+		domain.WriteError(w, err.Error(), http.StatusInternalServerError)
 		logs.LogError(logs.Logger, "auth_http", "Logout", err, "Failed to logout")
 		return
 	}
@@ -153,6 +153,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	if auth == true {
 		http.Error(w, `{"err":"you must be unauthorised"}`, http.StatusForbidden)
 		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
+		json.
 		return
 	}
 
