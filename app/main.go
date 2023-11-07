@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 
+	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
@@ -76,7 +77,7 @@ func main() {
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
 	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
-	//auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
+	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)
