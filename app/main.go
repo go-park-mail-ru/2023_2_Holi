@@ -62,7 +62,7 @@ func main() {
 	redis := redis.RedisConnector()
 	defer redis.Close()
 
-	csrfMiddleware := csrf.Protect([]byte("qwnbjb13jbhb12j3bjbbj"), csrf.Secure(false), csrf.HttpOnly(false))
+	csrfMiddleware := csrf.Protect([]byte("qwnbjb13jbhb12j3bjbbj"), csrf.Secure(false), csrf.HttpOnly(false), csrf.Path("/"))
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
