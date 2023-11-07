@@ -31,7 +31,8 @@ func TestLogin(t *testing.T) {
 			name: "GoodCase/Common",
 			getBody: func() []byte {
 				var creds domain.Credentials
-				faker.FakeData(&creds)
+				faker.FakeData(&creds.Password)
+				// creds.Password = []byte{123}
 				creds.Email = "ferfg@fsf.ru"
 				jsonBody, _ := json.Marshal(creds)
 				return jsonBody
