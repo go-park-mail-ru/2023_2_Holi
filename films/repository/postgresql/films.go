@@ -7,8 +7,6 @@ import (
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 const getFilmsByGenreQuery = `
@@ -54,11 +52,11 @@ const getCastNameQuery = `
 `
 
 type filmsPostgresqlRepository struct {
-	db  *pgxpool.Pool
+	db  domain.PgxPoolIface
 	ctx context.Context
 }
 
-func NewFilmsPostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.FilmsRepository {
+func NewFilmsPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.FilmsRepository {
 	return &filmsPostgresqlRepository{
 		db:  pool,
 		ctx: ctx,
@@ -119,7 +117,7 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 	)
 
 	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, err.Error())
+		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, "No rows")
 		return domain.Film{}, domain.ErrNotFound
 	}
 	if err != nil {
