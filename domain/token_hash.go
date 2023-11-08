@@ -31,29 +31,53 @@ func (tk *HashToken) Create(uString string, tokenExpTime int64) (string, error) 
 	return token, nil
 }
 
-func (tk *HashToken) Check(uString string, inputToken string) (bool, error) {
-	tokenData := strings.Split(inputToken, ":")
+func (tk *HashToken) Check(headerToken string, cookieToken string) (bool, error) {
+	headerData, tokenExp, err := splitToken(headerToken)
+	if err != nil {
+		return false, err
+	}
+
+	headerMAC, err := checkTokenData(headerData, tokenExp)
+	if err != nil {
+		return false, err
+	}
+
+	cookieData, tokenExp, err := splitToken(headerToken)
+	if err != nil {
+		return false, err
+	}
+
+	cookieMAC, err := checkTokenData(cookieData, tokenExp)
+	if err != nil {
+		return false, err
+	}
+
+	return hmac.Equal(headerMAC, cookieMAC), nil
+}
+
+func splitToken(token string) (string, int64, error) {
+	tokenData := strings.Split(token, ":")
 	if len(tokenData) != 2 {
-		return false, fmt.Errorf("bad token data")
+		return "", 0, fmt.Errorf("bad token data")
 	}
 
 	tokenExp, err := strconv.ParseInt(tokenData[1], 10, 64)
 	if err != nil {
-		return false, fmt.Errorf("bad token time")
+		return "", 0, err
 	}
 
-	if tokenExp < time.Now().Unix() {
-		return false, fmt.Errorf("token expired")
+	return tokenData[0], tokenExp, nil
+}
+
+func checkTokenData(data string, exp int64) ([]byte, error) {
+	if exp < time.Now().Unix() {
+		return []byte{}, fmt.Errorf("token expired")
 	}
 
-	h := hmac.New(sha256.New, []byte(tk.Secret))
-	data := fmt.Sprintf("%s:%d", uString, tokenExp)
-	h.Write([]byte(data))
-	expectedMAC := h.Sum(nil)
-	messageMAC, err := hex.DecodeString(tokenData[0])
+	mac, err := hex.DecodeString(data)
 	if err != nil {
-		return false, fmt.Errorf("cand hex decode token")
+		return []byte{}, err
 	}
 
-	return hmac.Equal(messageMAC, expectedMAC), nil
+	return mac, nil
 }

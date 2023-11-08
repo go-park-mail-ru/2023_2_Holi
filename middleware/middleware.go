@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 
 	"2023_2_Holi/domain"
@@ -33,10 +32,25 @@ func (m *Middleware) CORS(next http.Handler) http.Handler {
 func (m *Middleware) CSRFProtection(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			csrfToken := r.Header.Get("X-CSRF-TOKEN")
-			validCSRFToken, err := m.Token.Check(uuid.NewString(), csrfToken)
-			if err != nil || !validCSRFToken {
-				http.Error(w, `{"err":"invalid CSRF token"}`, http.StatusForbidden)
+			headerCsrfToken := r.Header.Get("X-CSRF-TOKEN")
+			cookieCsrfToken, err := r.Cookie("csrf-token")
+			if err != nil {
+				if err == http.ErrNoCookie {
+					domain.WriteError(w, err.Error(), http.StatusUnauthorized)
+					return
+				}
+
+				http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+				return
+			}
+
+			validCSRFToken, err := m.Token.Check(headerCsrfToken, cookieCsrfToken.Value)
+			if err != nil {
+				domain.WriteError(w, err.Error(), http.StatusForbidden)
+				return
+			}
+			if !validCSRFToken {
+				domain.WriteError(w, "invalid CSRF token", http.StatusForbidden)
 				return
 			}
 		}

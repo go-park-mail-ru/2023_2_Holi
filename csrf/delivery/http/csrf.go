@@ -22,8 +22,8 @@ func NewCsrfHandler(mainRouter *mux.Router, t *domain.HashToken) {
 	mainRouter.HandleFunc("/api/v1/csrf", func(w http.ResponseWriter, r *http.Request) {
 		token, err := handler.Token.Create(uuid.NewString(), time.Now().Add(24*time.Hour).Unix())
 		if err != nil {
-			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-			logs.LogError(logs.Logger, "csrf token", "creation error:", err, "Failed to create")
+			domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+			logs.LogError(logs.Logger, "csrf token", "creation error:", err, err.Error())
 			return
 		}
 
@@ -33,5 +33,4 @@ func NewCsrfHandler(mainRouter *mux.Router, t *domain.HashToken) {
 			Path:  "/",
 		})
 	}).Methods(http.MethodGet, http.MethodOptions)
-
 }
