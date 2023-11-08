@@ -75,7 +75,7 @@ func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, erro
 	}
 
 	if _, err := u.svc.PutObject(uploadInput); err != nil {
-		logs.LogError(logs.Logger, "profile_usecase", "UploadImage", err, "Failed to upload image")
+		logs.LogError(logs.Logger, "usecase", "UploadImage", err, "Failed to upload image")
 		return "", err
 	}
 	imagePath := "https://" + bucketName + ".hb." + defaultRegion + ".vkcs.cloud/" + directory + "/" + strconv.Itoa(userID)
