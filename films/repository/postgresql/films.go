@@ -64,19 +64,15 @@ func NewFilmsPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context)
 }
 
 func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film, error) {
-	var films []domain.Film
-
 	rows, err := r.db.Query(r.ctx, getFilmsByGenreQuery, genre)
-	if !rows.Next() {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmByGenre", domain.ErrNotFound, domain.ErrNotFound.Error())
-		return nil, domain.ErrNotFound
-	}
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
 		return nil, err
 	}
 	defer rows.Close()
 	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
+
+	var films []domain.Film
 
 	for rows.Next() {
 		var film domain.Film
@@ -87,12 +83,17 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 			&film.Rating,
 			&film.PreviewVideoPath,
 		)
+
 		if err != nil {
-			logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
 			return nil, err
 		}
 
 		films = append(films, film)
+	}
+
+	logs.Logger.Info("lenth", len(films))
+	if len(films) == 0 {
+		return nil, domain.ErrNotFound
 	}
 
 	return films, nil
@@ -130,10 +131,6 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 
 func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, error) {
 	rows, err := r.db.Query(r.ctx, getFilmCastQuery, FilmId)
-	if !rows.Next() {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", domain.ErrNotFound, domain.ErrNotFound.Error())
-		return nil, domain.ErrNotFound
-	}
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
 		return nil, err
@@ -154,16 +151,15 @@ func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, erro
 		}
 		artists = append(artists, artist)
 	}
+	if len(artists) == 0 {
+		return nil, domain.ErrNotFound
+	}
 
 	return artists, nil
 }
 
 func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 	rows, err := r.db.Query(r.ctx, getCastPageQuery, id)
-	if !rows.Next() {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastPage", domain.ErrNotFound, domain.ErrNotFound.Error())
-		return nil, domain.ErrNotFound
-	}
 	if err != nil {
 		logs.LogError(logs.Logger, "cast_postgres", "GetCastPage", err, err.Error())
 		return nil, err
@@ -187,6 +183,9 @@ func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 		}
 
 		films = append(films, film)
+	}
+	if len(films) == 0 {
+		return nil, domain.ErrNotFound
 	}
 
 	return films, nil

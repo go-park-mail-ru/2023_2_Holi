@@ -167,7 +167,7 @@ func TestGetCastPage(t *testing.T) {
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
 				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, domain.Cast{}, errors.New("error"))
 			},
-			status: http.StatusNotFound,
+			status: http.StatusInternalServerError,
 		},
 		{
 			name: "ErrorCase/UsecaseError",
@@ -181,7 +181,7 @@ func TestGetCastPage(t *testing.T) {
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
 				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, domain.Cast{}, domain.ErrInternalServerError)
 			},
-			status: http.StatusBadRequest,
+			status: http.StatusInternalServerError,
 		},
 	}
 
