@@ -218,7 +218,7 @@ func TestLogin(t *testing.T) {
 				test.setAuth(req, mockUCase, &mockSession)
 			}
 			rec := httptest.NewRecorder()
-			NewAuthHandler(mux.NewRouter(), mux.NewRouter(), mockUCase, nil)
+			NewAuthHandler(mux.NewRouter(), mux.NewRouter(), mockUCase)
 			handler := &AuthHandler{
 				AuthUsecase: mockUCase,
 			}

@@ -65,7 +65,7 @@ func StartServer() {
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
 	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository)
 
-	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase, tokens)
+	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase)

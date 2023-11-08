@@ -34,7 +34,7 @@ func (tk *HashToken) Create(uString string, tokenExpTime int64) (string, error) 
 func (tk *HashToken) Check(uString string, inputToken string) (bool, error) {
 	tokenData := strings.Split(inputToken, ":")
 	if len(tokenData) != 2 {
-		return false, fmt.Errorf("bad token data" + inputToken)
+		return false, fmt.Errorf("bad token data")
 	}
 
 	tokenExp, err := strconv.ParseInt(tokenData[1], 10, 64)
