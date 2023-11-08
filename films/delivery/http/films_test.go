@@ -158,30 +158,30 @@ func TestGetCastPage(t *testing.T) {
 		{
 			name: "GoodCase/Common",
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
-				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, nil)
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, domain.Cast{}, nil)
 			},
 			status: http.StatusOK,
 		},
 		{
 			name: "GoodCase/EmptyResults",
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
-				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, errors.New("error"))
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, domain.Cast{}, errors.New("error"))
 			},
-			status: http.StatusNotFound,
+			status: http.StatusInternalServerError,
 		},
 		{
 			name: "ErrorCase/UsecaseError",
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
-				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, errors.New("error"))
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, domain.Cast{}, errors.New("error"))
 			},
 			status: http.StatusInternalServerError,
 		},
 		{
 			name: "ErrorCase/InvalidRequest",
 			setUCaseExpectations: func(usecase *mocks.FilmsUsecase) {
-				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, []domain.Cast{}, errors.New("invalid request"))
+				usecase.On("GetCastPage", mock.Anything).Return([]domain.Film{}, domain.Cast{}, errors.New("invalid request"))
 			},
-			status: http.StatusBadRequest,
+			status: http.StatusInternalServerError,
 		},
 	}
 

@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 )
@@ -17,11 +15,11 @@ const getGenresQuery = `
 `
 
 type genrePostgresRepo struct {
-	db  *pgxpool.Pool
+	db  domain.PgxPoolIface
 	ctx context.Context
 }
 
-func GenrePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.GenreRepository {
+func GenrePostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.GenreRepository {
 	return &genrePostgresRepo{
 		db:  pool,
 		ctx: ctx,
@@ -30,10 +28,6 @@ func GenrePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.G
 
 func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
 	rows, err := r.db.Query(r.ctx, getGenresQuery)
-	if !rows.Next() {
-		logs.LogError(logs.Logger, "genre_postgresql", "GetGenres", domain.ErrNotFound, domain.ErrNotFound.Error())
-		return nil, domain.ErrNotFound
-	}
 	if err != nil {
 		logs.LogError(logs.Logger, "genre_postgres", "GetGenres", err, err.Error())
 		return nil, err
@@ -53,6 +47,10 @@ func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
 		}
 
 		genres = append(genres, genre)
+	}
+	logs.Logger.Info("lenth", len(genres))
+	if len(genres) == 0 {
+		return nil, domain.ErrNotFound
 	}
 
 	return genres, nil

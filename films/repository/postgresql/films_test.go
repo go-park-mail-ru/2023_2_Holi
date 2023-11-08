@@ -17,8 +17,88 @@ const getByIDFilmData = `
 		JOIN episode AS e ON video.id = video_id
 `
 
+const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating , v.preview_video_path 
+FROM video AS v 
+JOIN video_cast AS vc ON v.id = vc.video_id 
+JOIN "cast" AS c ON vc.cast_id = c.id 
+JOIN episode AS e ON e.video_id = v.id 
+JOIN video_genre AS vg ON v.id = vg.video_id 
+JOIN genre AS g ON vg.genre_id = g.id 
+WHERE g.name = \$1\;
+`
+
 func TestGetFilmsByGenre(t *testing.T) {
-	//TODO Lexa
+	tests := []struct {
+		name  string
+		genre string
+		films []domain.Film
+		good  bool
+		err   error
+	}{
+		{
+			name:  "GoodCase/Common",
+			genre: "Action",
+			films: []domain.Film{
+				{
+					ID:               1,
+					Name:             "Film1",
+					PreviewPath:      "/path/to/preview1",
+					Rating:           8.0,
+					PreviewVideoPath: "/path/to/preview/video1",
+				},
+				{
+					ID:               2,
+					Name:             "Film2",
+					PreviewPath:      "/path/to/preview2",
+					Rating:           7.5,
+					PreviewVideoPath: "/path/to/preview/video2",
+				},
+			},
+			good: true,
+		},
+		// {
+		// 	name:  "GoodCase/EmptyResult",
+		// 	genre: "Comedy",
+		// 	films: []domain.Film{},
+		// 	good:  true,
+		// },
+	}
+
+	mockDB, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mockDB.Close()
+	r := NewFilmsPostgresqlRepository(mockDB, context.Background())
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating", "preview_video_path"})
+
+			for _, film := range test.films {
+				rows.AddRow(film.ID, film.Name, film.PreviewPath, film.Rating, film.PreviewVideoPath)
+			}
+
+			eq := mockDB.ExpectQuery(getFilmsByGenreQueryTest).WithArgs(test.genre)
+
+			if test.good {
+				eq.WillReturnRows(rows)
+			} else {
+				eq.WillReturnError(test.err)
+			}
+
+			films, err := r.GetFilmsByGenre(test.genre)
+			if test.good {
+				require.Nil(t, err)
+				require.Len(t, films, len(test.films))
+				require.ElementsMatch(t, films, test.films)
+			} else {
+				require.Equal(t, domain.ErrNotFound, err)
+				require.Empty(t, films)
+			}
+		})
+	}
 }
 
 func TestGetFilmData(t *testing.T) {
@@ -102,8 +182,4 @@ func TestGetFilmData(t *testing.T) {
 		})
 
 	}
-}
-
-func TestGetFilmCast(t *testing.T) {
-
 }
