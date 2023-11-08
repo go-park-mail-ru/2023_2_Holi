@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	logs "2023_2_Holi/logger"
 	"net/http"
 	"time"
 
@@ -37,6 +38,7 @@ func (m *Middleware) CSRFProtection(next http.Handler) http.Handler {
 			if err != nil {
 				if err == http.ErrNoCookie {
 					domain.WriteError(w, err.Error(), http.StatusUnauthorized)
+					logs.LogError(logs.Logger, "middleware", "CSRFProtection", err, err.Error())
 					return
 				}
 
