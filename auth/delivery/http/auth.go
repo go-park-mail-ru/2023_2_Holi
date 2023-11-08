@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
@@ -105,7 +104,6 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 // @Failure      500  {object} object{err=string}
 // @Router       /api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
 	logs.Logger.Debug("Logout: session token:", c)

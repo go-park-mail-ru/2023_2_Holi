@@ -7,7 +7,6 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
 
@@ -37,7 +36,6 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 // @Failure         500  {object} object{err=string}
 // @Router 			/api/v1/films/genre/{genre} [get]
 func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
 	genre := vars["genre"]
 
@@ -70,7 +68,6 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Failure 		500 {json} domain.Response
 // @Router 			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
 	filmID, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -110,7 +107,6 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 // @Failure 		500 {json} domain.Response
 // @Router 			/api/v1/films/cast/{id} [get]
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {

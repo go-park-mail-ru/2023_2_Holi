@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
 
 	"2023_2_Holi/domain"
@@ -11,6 +12,7 @@ import (
 
 type Middleware struct {
 	AuthUsecase domain.AuthUsecase
+	Token       *domain.HashToken
 }
 
 func (m *Middleware) CORS(next http.Handler) http.Handler {
@@ -19,12 +21,27 @@ func (m *Middleware) CORS(next http.Handler) http.Handler {
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 		if r.Method == http.MethodOptions {
-			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, User-Agent, X-CSRF-Token")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type, User-Agent, X-CSRF-TOKEN")
 			w.Header().Set("Access-Control-Max-Age", "86400")
 			w.WriteHeader(http.StatusOK)
 		} else {
 			next.ServeHTTP(w, r)
 		}
+	})
+}
+
+func (m *Middleware) CSRFProtection(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodPost {
+			csrfToken := r.Header.Get("X-CSRF-TOKEN")
+			validCSRFToken, err := m.Token.Check(uuid.NewString(), csrfToken)
+			if err != nil || !validCSRFToken {
+				http.Error(w, `{"err":"invalid CSRF token"}`, http.StatusForbidden)
+				return
+			}
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }
 

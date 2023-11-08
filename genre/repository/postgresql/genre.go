@@ -3,8 +3,6 @@ package postgres
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
-
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"2023_2_Holi/domain"
@@ -32,8 +30,8 @@ func GenrePostgresqlRepository(pool *pgxpool.Pool, ctx context.Context) domain.G
 
 func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
 	rows, err := r.db.Query(r.ctx, getGenresQuery)
-	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "genre_postgres", "GetGenres", err, err.Error())
+	if !rows.Next() {
+		logs.LogError(logs.Logger, "genre_postgresql", "GetGenres", domain.ErrNotFound, domain.ErrNotFound.Error())
 		return nil, domain.ErrNotFound
 	}
 	if err != nil {

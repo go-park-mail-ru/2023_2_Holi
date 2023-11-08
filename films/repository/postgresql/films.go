@@ -68,7 +68,7 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 
 	rows, err := r.db.Query(r.ctx, getFilmsByGenreQuery, genre)
 	if !rows.Next() {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", domain.ErrNotFound, domain.ErrNotFound.Error())
+		logs.LogError(logs.Logger, "films_postgresql", "GetFilmByGenre", domain.ErrNotFound, domain.ErrNotFound.Error())
 		return nil, domain.ErrNotFound
 	}
 	if err != nil {
@@ -130,8 +130,8 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 
 func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, error) {
 	rows, err := r.db.Query(r.ctx, getFilmCastQuery, FilmId)
-	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
+	if !rows.Next() {
+		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", domain.ErrNotFound, domain.ErrNotFound.Error())
 		return nil, domain.ErrNotFound
 	}
 	if err != nil {
@@ -160,8 +160,8 @@ func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, erro
 
 func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 	rows, err := r.db.Query(r.ctx, getCastPageQuery, id)
-	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "cast_postgres", "GetCastPage", err, err.Error())
+	if !rows.Next() {
+		logs.LogError(logs.Logger, "films_postgresql", "GetCastPage", domain.ErrNotFound, domain.ErrNotFound.Error())
 		return nil, domain.ErrNotFound
 	}
 	if err != nil {
