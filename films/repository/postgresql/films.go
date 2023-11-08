@@ -160,10 +160,6 @@ func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, erro
 
 func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
 	rows, err := r.db.Query(r.ctx, getCastPageQuery, id)
-	if !rows.Next() {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastPage", domain.ErrNotFound, domain.ErrNotFound.Error())
-		return nil, domain.ErrNotFound
-	}
 	if err != nil {
 		logs.LogError(logs.Logger, "cast_postgres", "GetCastPage", err, err.Error())
 		return nil, err
