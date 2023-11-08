@@ -10,7 +10,7 @@ var Logger = LoggerInit()
 
 func LoggerInit() *logrus.Logger {
 	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{})
+	logger.SetFormatter(&logrus.JSONFormatter{})
 
 	logLevel := os.Getenv("LOG_LEVEL")
 	switch logLevel {
