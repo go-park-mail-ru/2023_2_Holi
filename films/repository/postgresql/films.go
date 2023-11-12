@@ -51,6 +51,14 @@ const getCastNameQuery = `
 		WHERE "cast".id = $1
 `
 
+const getTopRateQuery = `	
+	SELECT video.name,video.description, video.preview_video_path, e.media_path
+	FROM video
+	JOIN episode AS e ON video.id = e.video_id
+	ORDER BY rating DESC
+	LIMIT 1
+`
+
 type filmsPostgresqlRepository struct {
 	db  domain.PgxPoolIface
 	ctx context.Context
@@ -211,4 +219,29 @@ func (r *filmsPostgresqlRepository) GetCastName(FilmId int) (domain.Cast, error)
 	}
 
 	return cast, nil
+}
+
+func (r *filmsPostgresqlRepository) GetTopRate() (domain.Film, error) {
+	rows := r.db.QueryRow(r.ctx, getCastNameQuery)
+
+	logs.Logger.Debug("GetCastName query result:", rows)
+
+	var film domain.Film
+	err := rows.Scan(
+		&film.Name,
+		&film.Description,
+		&film.PreviewVideoPath,
+		&film.MediaPath,
+	)
+
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+		return domain.Film{}, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+		return domain.Film{}, err
+	}
+
+	return film, nil
 }

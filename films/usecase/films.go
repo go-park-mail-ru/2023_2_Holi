@@ -52,3 +52,13 @@ func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
 
 	return film, artists, nil
 }
+
+func (u *filmsUsecase) GetTopRate() (domain.Film, error) {
+	genres, err := u.filmRepo.GetTopRate()
+	if err != nil {
+		return domain.Film{}, err
+	}
+	//logger.Debug("Usecase GetGenres:", genres)
+
+	return genres, nil
+}
