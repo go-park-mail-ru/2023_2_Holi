@@ -234,14 +234,14 @@ func (r *filmsPostgresqlRepository) GetTopRate() (domain.Film, error) {
 		&film.MediaPath,
 	)
 
-	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return domain.Film{}, domain.ErrNotFound
-	}
-	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return domain.Film{}, err
-	}
+	// if err == pgx.ErrNoRows {
+	// 	logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+	// 	return domain.Film{}, domain.ErrNotFound
+	// }
+	// if err != nil {
+	// 	logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+	// 	return domain.Film{}, err
+	// }
 
 	return film, nil
 }

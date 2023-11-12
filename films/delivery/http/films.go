@@ -22,7 +22,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/films/topRate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetFilmsByGenre godoc
