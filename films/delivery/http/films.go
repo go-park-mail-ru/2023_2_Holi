@@ -22,6 +22,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetFilmsByGenre godoc
@@ -128,6 +129,24 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 		map[string]interface{}{
 			"films": films,
 			"cast":  cast,
+		},
+		http.StatusOK,
+	)
+}
+
+func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
+	film, err := h.FilmsUsecase.GetTopRate()
+	if err != nil {
+		//domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		//logs.LogError(logs.Logger, "http", "GetCastPage", err, "Failed to get cast")
+		return
+	}
+
+	//logs.Logger.Debug("Http GetCastPage:", film)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"film": film,
 		},
 		http.StatusOK,
 	)
