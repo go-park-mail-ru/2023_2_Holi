@@ -2,6 +2,7 @@ package netflix
 
 import (
 	"context"
+	"embed"
 	"net/http"
 	"os"
 
@@ -45,6 +46,8 @@ const (
 	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
 	defaultRegion         = "ru-msk"
 )
+
+var static embed.FS
 
 func StartServer() {
 	err := godotenv.Load()
@@ -92,6 +95,10 @@ func StartServer() {
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 	mainRouter.Use(mw.CSRFProtection)
+
+	// contentStatic, _ := fs.Sub(static, "bundle")
+	// mainRouter.PathPrefix("/").Handler(http.FileServer(http.FS(contentStatic)))
+	// mainRouter.PathPrefix("/").Handler(http.FileServer(rice.MustFindBox("bundle").HTTPBox()))
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
