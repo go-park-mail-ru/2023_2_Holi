@@ -26,10 +26,12 @@ type FilmsRepository interface {
 	GetFilmCast(filmId int) ([]Cast, error)
 	GetCastPage(id int) ([]Film, error)
 	GetCastName(id int) (Cast, error)
+	GetTopRate() (Film, error)
 }
 
 type FilmsUsecase interface {
 	GetFilmsByGenre(genre string) ([]Film, error)
 	GetFilmData(id int) (Film, []Cast, error)
 	GetCastPage(id int) ([]Film, Cast, error)
+	GetTopRate() (Film, error)
 }
