@@ -95,10 +95,7 @@ func StartServer() {
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 	mainRouter.Use(mw.CSRFProtection)
-
-	// contentStatic, _ := fs.Sub(static, "bundle")
-	// mainRouter.PathPrefix("/").Handler(http.FileServer(http.FS(contentStatic)))
-	// mainRouter.PathPrefix("/").Handler(http.FileServer(rice.MustFindBox("bundle").HTTPBox()))
+	mainRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("/app/bundle")))
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
