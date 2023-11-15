@@ -90,12 +90,13 @@ func StartServer() {
 
 	mw := middleware.InitMiddleware(authUsecase)
 
-	//authMiddlewareRouter.Use(mw.IsAuth)
+	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 	mainRouter.Use(mw.CSRFProtection)
-	mainRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("/app/bundle")))
+
+	// mainRouter.PathPrefix("/").Handler(http.FileServer(http.Dir("/app/bundle")))
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
