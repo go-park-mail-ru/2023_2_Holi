@@ -9,8 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var logger = logs.LoggerInit()
-
 type GenreHandler struct {
 	GenreUsecase domain.GenreUsecase
 }
@@ -41,7 +39,7 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger.Debug("Http GetGenres:", genres)
+	logs.Logger.Debug("Http GetGenres:", genres)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
