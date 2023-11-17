@@ -20,7 +20,7 @@ const DeleteFromFavouritesQuery = `
 `
 
 const GetAllSeriesQuery = `
-	SELECT v.name, v.description,
+	SELECT v.id, v.name, v.description,
 		v.preview_path, v.preview_video_path, v.release_year, v.rating, v.age_restriction, v.seasons_count
 	FROM video v
 		JOIN favourite f ON video_id = v.id
