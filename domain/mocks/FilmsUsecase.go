@@ -105,6 +105,30 @@ func (_m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Video, error) {
 	return r0, r1
 }
 
+// GetTopRate provides a mock function with given fields:
+func (_m *FilmsUsecase) GetTopRate() (domain.Video, error) {
+	ret := _m.Called()
+
+	var r0 domain.Video
+	var r1 error
+	if rf, ok := ret.Get(0).(func() (domain.Video, error)); ok {
+		return rf()
+	}
+	if rf, ok := ret.Get(0).(func() domain.Video); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(domain.Video)
+	}
+
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewFilmsUsecase creates a new instance of FilmsUsecase. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewFilmsUsecase(t interface {
