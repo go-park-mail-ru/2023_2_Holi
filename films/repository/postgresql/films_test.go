@@ -31,14 +31,14 @@ func TestGetFilmsByGenre(t *testing.T) {
 	tests := []struct {
 		name  string
 		genre string
-		films []domain.Film
+		films []domain.Video
 		good  bool
 		err   error
 	}{
 		{
 			name:  "GoodCase/Common",
 			genre: "Action",
-			films: []domain.Film{
+			films: []domain.Video{
 				{
 					ID:               1,
 					Name:             "Film1",
@@ -59,7 +59,7 @@ func TestGetFilmsByGenre(t *testing.T) {
 		// {
 		// 	name:  "GoodCase/EmptyResult",
 		// 	genre: "Comedy",
-		// 	films: []domain.Film{},
+		// 	films: []domain.Video{},
 		// 	good:  true,
 		// },
 	}
@@ -105,16 +105,16 @@ func TestGetFilmData(t *testing.T) {
 	tests := []struct {
 		name string
 		id   int
-		film domain.Film
+		film domain.Video
 		good bool
 		err  error
 	}{
 		{
 			name: "GoodCase/Common",
 			id:   1,
-			film: domain.Film{
-				Name:             "Film Name",
-				Description:      "Film Description",
+			film: domain.Video{
+				Name:             "Video Name",
+				Description:      "Video Description",
 				Duration:         pgtype.Interval{},
 				PreviewPath:      "/path/to/preview",
 				MediaPath:        "/path/to/media",
@@ -133,7 +133,7 @@ func TestGetFilmData(t *testing.T) {
 		// {
 		// 	name: "BadCase/NoFilm",
 		// 	id:   1,
-		// 	film: domain.Film{
+		// 	film: domain.Video{
 		// 		ID:   10,
 		// 		Name: "Avatar",
 		// 	},

@@ -14,20 +14,20 @@ type FilmsUsecase struct {
 }
 
 // GetCastPage provides a mock function with given fields: id
-func (_m *FilmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
+func (_m *FilmsUsecase) GetCastPage(id int) ([]domain.Video, domain.Cast, error) {
 	ret := _m.Called(id)
 
-	var r0 []domain.Film
+	var r0 []domain.Video
 	var r1 domain.Cast
 	var r2 error
-	if rf, ok := ret.Get(0).(func(int) ([]domain.Film, domain.Cast, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) ([]domain.Video, domain.Cast, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(int) []domain.Film); ok {
+	if rf, ok := ret.Get(0).(func(int) []domain.Video); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Film)
+			r0 = ret.Get(0).([]domain.Video)
 		}
 	}
 
@@ -47,19 +47,19 @@ func (_m *FilmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) 
 }
 
 // GetFilmData provides a mock function with given fields: id
-func (_m *FilmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
+func (_m *FilmsUsecase) GetFilmData(id int) (domain.Video, []domain.Cast, error) {
 	ret := _m.Called(id)
 
-	var r0 domain.Film
+	var r0 domain.Video
 	var r1 []domain.Cast
 	var r2 error
-	if rf, ok := ret.Get(0).(func(int) (domain.Film, []domain.Cast, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) (domain.Video, []domain.Cast, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(int) domain.Film); ok {
+	if rf, ok := ret.Get(0).(func(int) domain.Video); ok {
 		r0 = rf(id)
 	} else {
-		r0 = ret.Get(0).(domain.Film)
+		r0 = ret.Get(0).(domain.Video)
 	}
 
 	if rf, ok := ret.Get(1).(func(int) []domain.Cast); ok {
@@ -80,19 +80,19 @@ func (_m *FilmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) 
 }
 
 // GetFilmsByGenre provides a mock function with given fields: genre
-func (_m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
+func (_m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Video, error) {
 	ret := _m.Called(genre)
 
-	var r0 []domain.Film
+	var r0 []domain.Video
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]domain.Film, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) ([]domain.Video, error)); ok {
 		return rf(genre)
 	}
-	if rf, ok := ret.Get(0).(func(string) []domain.Film); ok {
+	if rf, ok := ret.Get(0).(func(string) []domain.Video); ok {
 		r0 = rf(genre)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]domain.Film)
+			r0 = ret.Get(0).([]domain.Video)
 		}
 	}
 

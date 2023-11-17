@@ -66,24 +66,24 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 		c, err := r.Cookie("session_token")
 		if err != nil {
 			if err == http.ErrNoCookie {
-				http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusUnauthorized)
+				domain.WriteError(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
 
-			http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+			domain.WriteError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if c.Expires.After(time.Now()) {
-			http.Error(w, `{"err":"cookie is expired"}`, http.StatusUnauthorized)
+			domain.WriteError(w, "cookie is expired", http.StatusUnauthorized)
 		}
 		sessionToken := c.Value
 		exists, err := m.AuthUsecase.IsAuth(sessionToken)
 		if err != nil {
-			http.Error(w, `{"err":"`+domain.ErrInternalServerError.Error()+`"}`, http.StatusInternalServerError)
+			domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 			return
 		}
 		if !exists {
-			http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+			domain.WriteError(w, domain.ErrUnauthorized.Error(), http.StatusUnauthorized)
 			return
 		}
 
