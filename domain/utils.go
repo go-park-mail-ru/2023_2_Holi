@@ -1,7 +1,7 @@
 package domain
 
 type UtilsRepository interface {
-	GetIdBy(token string) (int, error)
+	GetIdFromStorage(token string) (int, error)
 }
 
 type UtilsUsecase interface {

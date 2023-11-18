@@ -22,8 +22,6 @@ func GetStatusCode(err error) int {
 	}
 
 	switch err {
-	case ErrAlreadyExists:
-		return http.StatusForbidden
 	case ErrWrongCredentials:
 		return http.StatusForbidden
 
@@ -37,6 +35,8 @@ func GetStatusCode(err error) int {
 	case ErrOutOfRange:
 		return http.StatusNotFound
 
+	case ErrAlreadyExists:
+		return http.StatusConflict
 	case ErrInternalServerError:
 		return http.StatusInternalServerError
 	case ErrUnauthorized:

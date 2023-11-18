@@ -3,65 +3,60 @@ package postgres
 import (
 	"2023_2_Holi/domain"
 	"context"
-	"testing"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"errors"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
+	"testing"
 )
 
-const getByIDFilmData = `
-	SELECT e.name, e.description, e.duration,
-		e.preview_path, e.media_path, preview_video_path, release_year, rating, age_restriction
-	FROM video
-		JOIN episode AS e ON video.id = video_id
+const userID = 1
+
+const testAddToFavouritesQuery = `
+	INSERT INTO favourite \(video_id, user_id\)
+	VALUES \(\$1, \$2\)
 `
 
-const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating , v.preview_video_path 
-FROM video AS v 
-JOIN video_cast AS vc ON v.id = vc.video_id 
-JOIN "cast" AS c ON vc.cast_id = c.id 
-JOIN episode AS e ON e.video_id = v.id 
-JOIN video_genre AS vg ON v.id = vg.video_id 
-JOIN genre AS g ON vg.genre_id = g.id 
-WHERE g.name = \$1\;
+const testDeleteFromFavouritesQuery = `
+	DELETE FROM favourite
+	WHERE video_id = \$1 AND user_id = \$2
 `
 
-func TestGetFilmsByGenre(t *testing.T) {
+const testSelectAllQuery = `
+	SELECT v.id, v.name, v.description,
+		v.preview_path, v.preview_video_path, v.release_year, v.rating, v.age_restriction
+	FROM video AS v
+		JOIN favourite AS f ON video_id = v.id
+	WHERE f.user_id = \$1
+`
+
+func TestInsert(t *testing.T) {
 	tests := []struct {
-		name  string
-		genre string
-		films []domain.Video
-		good  bool
-		err   error
+		name    string
+		videoID int
+		err     error
+		good    bool
 	}{
 		{
-			name:  "GoodCase/Common",
-			genre: "Action",
-			films: []domain.Video{
-				{
-					ID:               1,
-					Name:             "Film1",
-					PreviewPath:      "/path/to/preview1",
-					Rating:           8.0,
-					PreviewVideoPath: "/path/to/preview/video1",
-				},
-				{
-					ID:               2,
-					Name:             "Film2",
-					PreviewPath:      "/path/to/preview2",
-					Rating:           7.5,
-					PreviewVideoPath: "/path/to/preview/video2",
-				},
-			},
-			good: true,
+			name:    "GoodCase/Common",
+			videoID: 1,
+			good:    true,
 		},
-		// {
-		// 	name:  "GoodCase/EmptyResult",
-		// 	genre: "Comedy",
-		// 	films: []domain.Video{},
-		// 	good:  true,
-		// },
+		{
+			name:    "BadCase/NegativeVideoID",
+			err:     &pgconn.PgError{Code: "23503"},
+			videoID: -1,
+		},
+		{
+			name:    "BadCase/OutOfRangeVideoID",
+			err:     &pgconn.PgError{Code: "23503"},
+			videoID: 123456789,
+		},
+		{
+			name:    "BadCase/ZeroVideoID",
+			err:     &pgconn.PgError{Code: "23503"},
+			videoID: 0,
+		},
 	}
 
 	mockDB, err := pgxmock.NewPool()
@@ -69,110 +64,22 @@ func TestGetFilmsByGenre(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer mockDB.Close()
-	r := NewVideoPostgresqlRepository(mockDB, context.Background())
+
+	r := NewFavouritesPostgresqlRepository(mockDB, context.Background())
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-
-			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating", "preview_video_path"})
-
-			for _, film := range test.films {
-				rows.AddRow(film.ID, film.Name, film.PreviewPath, film.Rating, film.PreviewVideoPath)
-			}
-
-			eq := mockDB.ExpectQuery(getFilmsByGenreQueryTest).WithArgs(test.genre)
-
+			eq := mockDB.ExpectExec(testAddToFavouritesQuery).
+				WithArgs(test.videoID, userID)
 			if test.good {
-				eq.WillReturnRows(rows)
+				eq.WillReturnResult(pgxmock.NewResult("", 1))
 			} else {
 				eq.WillReturnError(test.err)
 			}
 
-			films, err := r.GetFilmsByGenre(test.genre)
+			err = r.Insert(test.videoID, userID)
 			if test.good {
 				require.Nil(t, err)
-				require.Len(t, films, len(test.films))
-				require.ElementsMatch(t, films, test.films)
-			} else {
-				require.Equal(t, domain.ErrNotFound, err)
-				require.Empty(t, films)
-			}
-		})
-	}
-}
-
-func TestGetFilmData(t *testing.T) {
-	tests := []struct {
-		name string
-		id   int
-		film domain.Video
-		good bool
-		err  error
-	}{
-		{
-			name: "GoodCase/Common",
-			id:   1,
-			film: domain.Video{
-				Name:             "Video Name",
-				Description:      "Video Description",
-				Duration:         pgtype.Interval{},
-				PreviewPath:      "/path/to/preview",
-				MediaPath:        "/path/to/media",
-				PreviewVideoPath: "/path/to/preview/video",
-				ReleaseYear:      2021,
-				Rating:           8.5,
-				AgeRestriction:   16,
-			},
-			good: true,
-		},
-		// {
-		// 	name: "BadCase/NegativeID",
-		// 	id:   -1,
-		// 	err:  pgx.ErrNoRows,
-		// },
-		// {
-		// 	name: "BadCase/NoFilm",
-		// 	id:   1,
-		// 	film: domain.Video{
-		// 		ID:   10,
-		// 		Name: "Avatar",
-		// 	},
-		// 	err: pgx.ErrNoRows,
-		// },
-	}
-
-	mockDB, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer mockDB.Close()
-	r := NewVideoPostgresqlRepository(mockDB, context.Background())
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-
-			row := mockDB.NewRows([]string{"id", "name", "duration", "preview_path", "media_path",
-				"preview_video_path", "release_year", "rating", "age_restriction"}).
-				AddRow(test.film.Name, test.film.Description, test.film.Duration, test.film.PreviewPath,
-					test.film.MediaPath, test.film.PreviewVideoPath, test.film.ReleaseYear, test.film.Rating,
-					test.film.AgeRestriction)
-
-			eq := mockDB.ExpectQuery(getFilmDataQuery).WithArgs(test.id)
-
-			if test.good {
-				eq.WillReturnRows(row)
-			} else {
-				eq.WillReturnError(test.err)
-			}
-
-			film, err := r.GetFilmData(test.id)
-			if test.good {
-				require.Nil(t, err)
-				require.Equal(t, film, test.film)
 			} else {
 				require.NotNil(t, err)
 			}
@@ -180,6 +87,142 @@ func TestGetFilmData(t *testing.T) {
 			err = mockDB.ExpectationsWereMet()
 			require.Nil(t, err)
 		})
+	}
+}
 
+func TestDelete(t *testing.T) {
+	tests := []struct {
+		name    string
+		videoID int
+		result  pgconn.CommandTag
+		good    bool
+	}{
+		{
+			name:    "GoodCase/Common",
+			videoID: 1,
+			result:  pgxmock.NewResult("", 1),
+			good:    true,
+		},
+		{
+			name:    "BadCase/NegativeVideoID",
+			result:  pgxmock.NewResult("", 0),
+			videoID: -1,
+		},
+		{
+			name:    "BadCase/OutOfRangeVideoID",
+			result:  pgxmock.NewResult("", 0),
+			videoID: 123456789,
+		},
+		{
+			name:    "BadCase/ZeroVideoID",
+			result:  pgxmock.NewResult("", 0),
+			videoID: 0,
+		},
+	}
+
+	mockDB, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mockDB.Close()
+
+	r := NewFavouritesPostgresqlRepository(mockDB, context.Background())
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			mockDB.ExpectExec(testDeleteFromFavouritesQuery).
+				WithArgs(test.videoID, userID).
+				WillReturnResult(test.result)
+
+			err = r.Delete(test.videoID, userID)
+			if test.good {
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+			}
+
+			err = mockDB.ExpectationsWereMet()
+			require.Nil(t, err)
+		})
+	}
+}
+
+func TestSelectAll(t *testing.T) {
+	tests := []struct {
+		name   string
+		videos []domain.Video
+		good   bool
+	}{
+		{
+			name: "GoodCase/Common",
+			videos: []domain.Video{
+				domain.Video{
+					ID:               1,
+					Name:             "some",
+					Description:      "desc",
+					PreviewPath:      "path",
+					PreviewVideoPath: "video_path",
+					ReleaseYear:      2007,
+					Rating:           9.5,
+					AgeRestriction:   13,
+				},
+				domain.Video{
+					ID:               2,
+					Name:             "some",
+					Description:      "desc",
+					PreviewPath:      "path",
+					PreviewVideoPath: "video_path",
+					ReleaseYear:      2007,
+					Rating:           9.5,
+					AgeRestriction:   13,
+				},
+			},
+			good: true,
+		},
+		{
+			name:   "GoodCase/EmptyFavourites",
+			videos: make([]domain.Video, 2, 2),
+			good:   true,
+		},
+	}
+
+	mockDB, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mockDB.Close()
+
+	r := NewFavouritesPostgresqlRepository(mockDB, context.Background())
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			rows := mockDB.NewRows([]string{"id", "name", "description", "preview_path",
+				"preview_video_path", "release_year", "rating", "age_restriction"}).
+				AddRow(test.videos[0].ID, test.videos[0].Name, test.videos[0].Description,
+					test.videos[0].PreviewPath, test.videos[0].PreviewVideoPath, test.videos[0].ReleaseYear,
+					test.videos[0].Rating, test.videos[0].AgeRestriction).
+				AddRow(test.videos[1].ID, test.videos[1].Name, test.videos[1].Description,
+					test.videos[1].PreviewPath, test.videos[1].PreviewVideoPath, test.videos[1].ReleaseYear,
+					test.videos[1].Rating, test.videos[1].AgeRestriction)
+
+			eq := mockDB.ExpectQuery(testSelectAllQuery).
+				WithArgs(userID)
+			if test.good {
+				eq.WillReturnRows(rows)
+			} else {
+				eq.WillReturnError(errors.New("some"))
+			}
+
+			videos, err := r.SelectAll(userID)
+			if test.good {
+				require.Equal(t, test.videos, videos)
+				require.Nil(t, err)
+			} else {
+				require.NotNil(t, err)
+			}
+
+			err = mockDB.ExpectationsWereMet()
+			require.Nil(t, err)
+		})
 	}
 }

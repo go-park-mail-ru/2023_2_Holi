@@ -7,11 +7,11 @@ type Video struct {
 	Name             string          `json:"name"`
 	Description      string          `json:"description"`
 	PreviewPath      string          `json:"previewPath"`
-	MediaPath        string          `json:"mediaPath"`
+	MediaPath        string          `json:"mediaPath,omitempty"`
 	ReleaseYear      int             `json:"releaseYear"`
 	Rating           float64         `json:"rating"`
 	AgeRestriction   int             `json:"ageRestriction"`
-	Duration         pgtype.Interval `json:"duration"`
+	Duration         pgtype.Interval `json:"-"`
 	PreviewVideoPath string          `json:"previewVideoPath"`
-	SeasonsCount     string          `json:"seasonsCount,omitempty"`
+	SeasonsCount     int             `json:"seasonsCount,omitempty"`
 }

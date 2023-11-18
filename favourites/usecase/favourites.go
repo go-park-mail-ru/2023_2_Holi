@@ -16,7 +16,7 @@ func NewFavouritesUsecase(fr domain.FavouritesRepository) domain.FavouritesUseca
 }
 
 func (u *FavouritesUsecase) Add(videoID, userID int) error {
-	err := u.favouritesRepo.Add(videoID, userID)
+	err := u.favouritesRepo.Insert(videoID, userID)
 	if err != nil {
 		logs.LogError(logs.Logger, "usecase", "Add", err, err.Error())
 		return err
@@ -25,10 +25,10 @@ func (u *FavouritesUsecase) Add(videoID, userID int) error {
 	return nil
 }
 
-func (u *FavouritesUsecase) Delete(videoID, userID int) error {
+func (u *FavouritesUsecase) Remove(videoID, userID int) error {
 	err := u.favouritesRepo.Delete(videoID, userID)
 	if err != nil {
-		logs.LogError(logs.Logger, "usecase", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "usecase", "Remove", err, err.Error())
 		return err
 	}
 
@@ -36,9 +36,9 @@ func (u *FavouritesUsecase) Delete(videoID, userID int) error {
 }
 
 func (u *FavouritesUsecase) GetAll(userID int) ([]domain.Video, error) {
-	videos, err := u.favouritesRepo.GetAll(userID)
+	videos, err := u.favouritesRepo.SelectAll(userID)
 	if err != nil {
-		logs.LogError(logs.Logger, "usecase", "GetAll", err, err.Error())
+		logs.LogError(logs.Logger, "usecase", "SelectAll", err, err.Error())
 		return []domain.Video{}, err
 	}
 

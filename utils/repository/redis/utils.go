@@ -18,7 +18,7 @@ func NewUtilsRedisRepository(c *redis.Client) domain.UtilsRepository {
 	}
 }
 
-func (s *utilsRedisRepository) GetIdBy(token string) (int, error) {
+func (s *utilsRedisRepository) GetIdFromStorage(token string) (int, error) {
 	if token == "" {
 		return 0, domain.ErrInvalidToken
 	}

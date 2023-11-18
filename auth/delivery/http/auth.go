@@ -31,6 +31,7 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 }
 
 // Login godoc
+//
 //	@Summary		login user
 //	@Description	create user session and put it into cookie
 //	@Tags			auth
@@ -94,6 +95,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 // Logout godoc
+//
 //	@Summary		logout user
 //	@Description	delete current session and nullify cookie
 //	@Tags			auth
@@ -126,6 +128,7 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 // Register godoc
+//
 //	@Summary		register user
 //	@Description	add new user to db and return it id
 //	@Tags			auth
@@ -213,7 +216,7 @@ func (a *AuthHandler) auth(r *http.Request) (bool, error) {
 		return false, domain.ErrUnauthorized
 	}
 
-	return true, nil
+	return true, domain.ErrAlreadyExists
 }
 
 func (a *AuthHandler) CloseAndAlert(body io.ReadCloser) {

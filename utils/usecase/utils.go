@@ -16,7 +16,7 @@ func NewUtilsUsecase(ur domain.UtilsRepository) domain.UtilsUsecase {
 }
 
 func (u *utilsUsecase) GetIdBy(token string) (int, error) {
-	id, err := u.utilsRepo.GetIdBy(token)
+	id, err := u.utilsRepo.GetIdFromStorage(token)
 	if err != nil {
 		return 0, err
 	}

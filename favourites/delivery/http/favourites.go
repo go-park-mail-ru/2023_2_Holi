@@ -22,7 +22,7 @@ func NewFavouritesHandler(router *mux.Router, fu domain.FavouritesUsecase, uu do
 
 	router.HandleFunc("/v1/video/favourites/{id}", handler.AddToFavourites).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/v1/video/favourites", handler.GetAllFavourites).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/video/favourites/{id}", handler.DeleteFromFavourites).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/v1/video/favourites/{id}", handler.RemoveFromFavourites).Methods(http.MethodDelete, http.MethodOptions)
 }
 
 // AddToFavourites godoc
@@ -64,7 +64,7 @@ func (h *FavouritesHandler) AddToFavourites(w http.ResponseWriter, r *http.Reque
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// DeleteFromFavourites godoc
+// RemoveFromFavourites godoc
 //
 //	@Summary		Deletes a video from favourites.
 //	@Description	Deletes a film or a whole series from favourites by id.
@@ -76,28 +76,28 @@ func (h *FavouritesHandler) AddToFavourites(w http.ResponseWriter, r *http.Reque
 //	@Failure		404	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/video/favourites/{id} [delete]
-func (h *FavouritesHandler) DeleteFromFavourites(w http.ResponseWriter, r *http.Request) {
+func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	videoID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "http", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
 		return
 	}
-	logs.Logger.Debug("DeleteFromFavourites path param id: ", videoID)
+	logs.Logger.Debug("RemoveFromFavourites path param id: ", videoID)
 
 	c, _ := r.Cookie("session_token")
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
 	}
-	logs.Logger.Debug("DeleteFromFavourites user id: ", userID)
+	logs.Logger.Debug("RemoveFromFavourites user id: ", userID)
 
-	err = h.FavouritesUsecase.Delete(videoID, userID)
+	err = h.FavouritesUsecase.Remove(videoID, userID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
 		return
 	}
 
@@ -118,14 +118,14 @@ func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Requ
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
 	}
 	logs.Logger.Debug("GetAllFavourites user id: ", userID)
 
 	videos, err := h.FavouritesUsecase.GetAll(userID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
 		return
 	}
 
