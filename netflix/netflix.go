@@ -2,6 +2,7 @@ package netflix
 
 import (
 	"context"
+	"embed"
 	"net/http"
 	"os"
 
@@ -36,6 +37,10 @@ import (
 	profile_postgres "2023_2_Holi/profile/repository/postgresql"
 	profile_usecase "2023_2_Holi/profile/usecase"
 
+	search_http "2023_2_Holi/search/delivery/http"
+	search_postgres "2023_2_Holi/search/repository/postgresql"
+	search_usecase "2023_2_Holi/search/usecase"
+
 	csrf_http "2023_2_Holi/csrf/delivery/http"
 
 	_ "github.com/lib/pq"
@@ -45,6 +50,8 @@ const (
 	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
 	defaultRegion         = "ru-msk"
 )
+
+var static embed.FS
 
 func StartServer() {
 	err := godotenv.Load()
@@ -69,10 +76,12 @@ func StartServer() {
 	filmRepository := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	genreRepository := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	profileRepository := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
+	searchRepository := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
 
 	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
 	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
 	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
+	searchUsecase := search_usecase.NewSearchUsecase(searchRepository)
 
 	sess, _ := session.NewSession()
 	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
@@ -83,6 +92,7 @@ func StartServer() {
 	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
 	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
 	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase, sanitizer)
+	search_http.NewSearchHandler(authMiddlewareRouter, searchUsecase)
 	csrf_http.NewCsrfHandler(mainRouter, tokens)
 
 	mw := middleware.InitMiddleware(authUsecase)

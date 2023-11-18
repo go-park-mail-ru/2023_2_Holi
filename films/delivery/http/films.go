@@ -137,12 +137,12 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
 	film, err := h.FilmsUsecase.GetTopRate()
 	if err != nil {
-		//domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		//logs.LogError(logs.Logger, "http", "GetCastPage", err, "Failed to get cast")
+		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetTopRate", err, "Failed to get top")
 		return
 	}
 
-	//logs.Logger.Debug("Http GetCastPage:", film)
+	logs.Logger.Debug("Http GetTopRate:", film)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
