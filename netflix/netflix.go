@@ -2,6 +2,7 @@ package netflix
 
 import (
 	"context"
+	"embed"
 	"net/http"
 	"os"
 
@@ -31,6 +32,10 @@ import (
 	profile_postgres "2023_2_Holi/profile/repository/postgresql"
 	profile_usecase "2023_2_Holi/profile/usecase"
 
+	search_http "2023_2_Holi/search/delivery/http"
+	search_postgres "2023_2_Holi/search/repository/postgresql"
+	search_usecase "2023_2_Holi/search/usecase"
+
 	utils_redis "2023_2_Holi/utils/repository/redis"
 	utils_usecase "2023_2_Holi/utils/usecase"
 
@@ -53,6 +58,8 @@ const (
 	defaultRegion         = "ru-msk"
 )
 
+var static embed.FS
+
 func StartServer() {
 	err := godotenv.Load()
 	ctx := context.Background()
@@ -71,6 +78,7 @@ func StartServer() {
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
+	srr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
 	sr := auth_redis.NewSessionRedisRepository(rc)
 	ur := utils_redis.NewUtilsRedisRepository(rc)
 	ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
@@ -84,6 +92,7 @@ func StartServer() {
 	gu := genre_usecase.NewGenreUsecase(gr)
 	uu := utils_usecase.NewUtilsUsecase(ur)
 	fvu := favourites_usecase.NewFavouritesUsecase(fvr)
+	su := search_usecase.NewSearchUsecase(srr)
 
 	sess, _ := session.NewSession()
 	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
@@ -95,6 +104,7 @@ func StartServer() {
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
+	search_http.NewSearchHandler(authMiddlewareRouter, su)
 	csrf_http.NewCsrfHandler(mainRouter, tokens)
 	favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
 

@@ -137,8 +137,8 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Video, error) {
 	return film, nil
 }
 
-func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, error) {
-	rows, err := r.db.Query(r.ctx, getFilmCastQuery, FilmId)
+func (r *filmsPostgresqlRepository) GetFilmCast(filmId int) ([]domain.Cast, error) {
+	rows, err := r.db.Query(r.ctx, getFilmCastQuery, filmId)
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
 		return nil, err
