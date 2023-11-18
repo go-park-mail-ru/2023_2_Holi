@@ -2,7 +2,6 @@ package redis
 
 import (
 	"2023_2_Holi/domain"
-	"errors"
 	"testing"
 	"time"
 
@@ -38,7 +37,7 @@ func TestAdd(t *testing.T) {
 		{
 			name:    "BadCase/EmptyToken",
 			session: domain.Session{},
-			err:     errors.New("empty token"),
+			err:     domain.ErrInvalidToken,
 		},
 	}
 	db, mock := redismock.NewClientMock()
@@ -85,7 +84,7 @@ func TestDeleteByToken(t *testing.T) {
 		{
 			name:  "BadCase/EmptyToken",
 			token: "",
-			err:   errors.New("empty token"),
+			err:   domain.ErrInvalidToken,
 		},
 	}
 	db, mock := redismock.NewClientMock()
@@ -132,7 +131,7 @@ func TestSessionExists(t *testing.T) {
 		{
 			name:  "BadCase/EmptyToken",
 			token: "",
-			err:   errors.New("empty token"),
+			err:   domain.ErrInvalidToken,
 		},
 	}
 	db, mock := redismock.NewClientMock()

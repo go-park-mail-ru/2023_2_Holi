@@ -29,16 +29,16 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase, s *bluemond
 }
 
 // GetUserData godoc
-// @Summary 		Get user by id
-// @Description 	Get user data by id
-// @Tags 			profile
-// @Param 			id path int true "The user id you want to retrieve."
-// @Produce 		json
-// @Success 		200 {json} domain.User
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
-// @Router 			/api/v1/profile/{id} [get]
+//	@Summary		Get user by id
+//	@Description	Get user data by id
+//	@Tags			profile
+//	@Param			id	path	int	true	"The user id you want to retrieve."
+//	@Produce		json
+//	@Success		200	{json}	domain.User
+//	@Failure		400	{json}	ApiResponse
+//	@Failure		404	{json}	ApiResponse
+//	@Failure		500	{json}	ApiResponse
+//	@Router			/api/v1/profile/{id} [get]
 func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := strconv.Atoi(vars["id"])
@@ -67,17 +67,17 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateProfile godoc
-// @Summary      update profile
-// @Description  update user data in db and return it
-// @Tags         profile
-// @Produce      json
-// @Accept       json
-// @Param 		 body body domain.UserRequest true "user that must be updated"
-// @Success      200  {object} domain.Response{body=object{user=domain.User}}
-// @Failure      400  {json} domain.Response
-// @Failure      403  {json} domain.Response
-// @Failure      500  {json} domain.Response
-// @Router       /api/v1/profile/update [post]
+//	@Summary		update profile
+//	@Description	update user data in db and return it
+//	@Tags			profile
+//	@Produce		json
+//	@Accept			json
+//	@Param			body	body		domain.UserRequest	true	"user that must be updated"
+//	@Success		200		{object}	domain.Response{body=object{user=domain.User}}
+//	@Failure		400		{json}		domain.Response
+//	@Failure		403		{json}		domain.Response
+//	@Failure		500		{json}		domain.Response
+//	@Router			/api/v1/profile/update [post]
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var newUser domain.User
 
