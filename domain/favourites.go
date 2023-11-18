@@ -1,13 +1,13 @@
 package domain
 
 type FavouritesRepository interface {
-	Insert(videoID, userID int) error
-	Delete(videoID, userID int) error
-	SelectAll(userID int) ([]Video, error)
+	InsertIntoFavourites(videoID, userID int) error
+	DeleteFromFavourites(videoID, userID int) error
+	SelectAllFavourites(userID int) ([]Video, error)
 }
 
 type FavouritesUsecase interface {
-	Add(videoID, userID int) error
-	Remove(videoID, userID int) error
-	GetAll(userID int) ([]Video, error)
+	AddToFavourites(videoID, userID int) error
+	RemoveFromFavourites(videoID, userID int) error
+	GetAllFavourites(userID int) ([]Video, error)
 }

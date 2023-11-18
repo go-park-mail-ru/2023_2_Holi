@@ -23,7 +23,9 @@ func GetStatusCode(err error) int {
 
 	switch err {
 	case ErrWrongCredentials:
-		return http.StatusForbidden
+		return http.StatusBadRequest
+	case ErrUnauthorized:
+		return http.StatusUnauthorized
 
 	case ErrInvalidToken:
 		return http.StatusBadRequest
@@ -39,8 +41,6 @@ func GetStatusCode(err error) int {
 		return http.StatusConflict
 	case ErrInternalServerError:
 		return http.StatusInternalServerError
-	case ErrUnauthorized:
-		return http.StatusUnauthorized
 
 	default:
 		return http.StatusInternalServerError

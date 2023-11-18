@@ -54,7 +54,7 @@ func (h *FavouritesHandler) AddToFavourites(w http.ResponseWriter, r *http.Reque
 	}
 	logs.Logger.Debug("AddToFavourites user id: ", userID)
 
-	err = h.FavouritesUsecase.Add(videoID, userID)
+	err = h.FavouritesUsecase.AddToFavourites(videoID, userID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
@@ -81,7 +81,7 @@ func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.
 	videoID, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
+		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 		return
 	}
 	logs.Logger.Debug("RemoveFromFavourites path param id: ", videoID)
@@ -90,14 +90,14 @@ func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
+		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 	}
 	logs.Logger.Debug("RemoveFromFavourites user id: ", userID)
 
-	err = h.FavouritesUsecase.Remove(videoID, userID)
+	err = h.FavouritesUsecase.RemoveFromFavourites(videoID, userID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
+		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 		return
 	}
 
@@ -118,14 +118,14 @@ func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Requ
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
+		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 	}
 	logs.Logger.Debug("GetAllFavourites user id: ", userID)
 
-	videos, err := h.FavouritesUsecase.GetAll(userID)
+	videos, err := h.FavouritesUsecase.GetAllFavourites(userID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "Remove", err, err.Error())
+		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 		return
 	}
 

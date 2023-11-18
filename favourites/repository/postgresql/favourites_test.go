@@ -30,7 +30,7 @@ const testSelectAllQuery = `
 	WHERE f.user_id = \$1
 `
 
-func TestInsert(t *testing.T) {
+func TestInsertIntoFavourites(t *testing.T) {
 	tests := []struct {
 		name    string
 		videoID int
@@ -57,6 +57,11 @@ func TestInsert(t *testing.T) {
 			err:     &pgconn.PgError{Code: "23503"},
 			videoID: 0,
 		},
+		{
+			name:    "BadCase/AlreadyExistedVideo",
+			err:     &pgconn.PgError{Code: "23505"},
+			videoID: 4,
+		},
 	}
 
 	mockDB, err := pgxmock.NewPool()
@@ -77,7 +82,7 @@ func TestInsert(t *testing.T) {
 				eq.WillReturnError(test.err)
 			}
 
-			err = r.Insert(test.videoID, userID)
+			err = r.InsertIntoFavourites(test.videoID, userID)
 			if test.good {
 				require.Nil(t, err)
 			} else {
@@ -90,7 +95,7 @@ func TestInsert(t *testing.T) {
 	}
 }
 
-func TestDelete(t *testing.T) {
+func TestDeleteFromFavourites(t *testing.T) {
 	tests := []struct {
 		name    string
 		videoID int
@@ -134,7 +139,7 @@ func TestDelete(t *testing.T) {
 				WithArgs(test.videoID, userID).
 				WillReturnResult(test.result)
 
-			err = r.Delete(test.videoID, userID)
+			err = r.DeleteFromFavourites(test.videoID, userID)
 			if test.good {
 				require.Nil(t, err)
 			} else {
@@ -147,7 +152,7 @@ func TestDelete(t *testing.T) {
 	}
 }
 
-func TestSelectAll(t *testing.T) {
+func TestSelectAllFavourites(t *testing.T) {
 	tests := []struct {
 		name   string
 		videos []domain.Video
@@ -213,7 +218,7 @@ func TestSelectAll(t *testing.T) {
 				eq.WillReturnError(errors.New("some"))
 			}
 
-			videos, err := r.SelectAll(userID)
+			videos, err := r.SelectAllFavourites(userID)
 			if test.good {
 				require.Equal(t, test.videos, videos)
 				require.Nil(t, err)

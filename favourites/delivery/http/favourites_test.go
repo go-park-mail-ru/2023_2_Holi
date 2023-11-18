@@ -26,7 +26,7 @@ func TestAddToFavourites(t *testing.T) {
 			name: "GoodCase/Common",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("Add", mock.Anything, mock.Anything).Return(nil)
+				fvu.On("AddToFavourites", mock.Anything, mock.Anything).Return(nil)
 			},
 			videoID: "1",
 			status:  http.StatusNoContent,
@@ -47,7 +47,7 @@ func TestAddToFavourites(t *testing.T) {
 			name: "BadCase/OutOfRangeVideoId",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("Add", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvu.On("AddToFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "1234563456789",
 			status:  http.StatusNotFound,
@@ -56,7 +56,7 @@ func TestAddToFavourites(t *testing.T) {
 			name: "BadCase/NegativeVideoId",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("Add", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvu.On("AddToFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "-3",
 			status:  http.StatusNotFound,
@@ -109,7 +109,7 @@ func TestRemoveFromFavourites(t *testing.T) {
 			name: "GoodCase/Common",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("Remove", mock.Anything, mock.Anything).Return(nil)
+				fvu.On("RemoveFromFavourites", mock.Anything, mock.Anything).Return(nil)
 			},
 			videoID: "1",
 			status:  http.StatusNoContent,
@@ -130,7 +130,7 @@ func TestRemoveFromFavourites(t *testing.T) {
 			name: "BadCase/OutOfRangeVideoId",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("Remove", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvu.On("RemoveFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "1234563456789",
 			status:  http.StatusNotFound,
@@ -139,7 +139,7 @@ func TestRemoveFromFavourites(t *testing.T) {
 			name: "BadCase/NegativeVideoId",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("Remove", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvu.On("RemoveFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "-3",
 			status:  http.StatusNotFound,
@@ -192,7 +192,7 @@ func TestGetAllFavourites(t *testing.T) {
 			name: "GoodCase/Common",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase, videos []domain.Video) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("GetAll", mock.Anything).Return(videos, nil)
+				fvu.On("GetAllFavourites", mock.Anything).Return(videos, nil)
 			},
 			videos: []domain.Video{
 				domain.Video{
@@ -222,7 +222,7 @@ func TestGetAllFavourites(t *testing.T) {
 			name: "GoodCase/EmptyFavourites",
 			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase, videos []domain.Video) {
 				uu.On("GetIdBy", mock.Anything).Return(1, nil)
-				fvu.On("GetAll", mock.Anything).Return(videos, nil)
+				fvu.On("GetAllFavourites", mock.Anything).Return(videos, nil)
 			},
 			videos: []domain.Video{},
 			status: http.StatusOK,

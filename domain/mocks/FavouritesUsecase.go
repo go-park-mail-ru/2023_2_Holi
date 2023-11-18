@@ -13,8 +13,8 @@ type FavouritesUsecase struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: videoID, userID
-func (_m *FavouritesUsecase) Add(videoID int, userID int) error {
+// AddToFavourites provides a mock function with given fields: videoID, userID
+func (_m *FavouritesUsecase) AddToFavourites(videoID int, userID int) error {
 	ret := _m.Called(videoID, userID)
 
 	var r0 error
@@ -27,8 +27,8 @@ func (_m *FavouritesUsecase) Add(videoID int, userID int) error {
 	return r0
 }
 
-// GetAll provides a mock function with given fields: userID
-func (_m *FavouritesUsecase) GetAll(userID int) ([]domain.Video, error) {
+// GetAllFavourites provides a mock function with given fields: userID
+func (_m *FavouritesUsecase) GetAllFavourites(userID int) ([]domain.Video, error) {
 	ret := _m.Called(userID)
 
 	var r0 []domain.Video
@@ -53,8 +53,8 @@ func (_m *FavouritesUsecase) GetAll(userID int) ([]domain.Video, error) {
 	return r0, r1
 }
 
-// Remove provides a mock function with given fields: videoID, userID
-func (_m *FavouritesUsecase) Remove(videoID int, userID int) error {
+// RemoveFromFavourites provides a mock function with given fields: videoID, userID
+func (_m *FavouritesUsecase) RemoveFromFavourites(videoID int, userID int) error {
 	ret := _m.Called(videoID, userID)
 
 	var r0 error

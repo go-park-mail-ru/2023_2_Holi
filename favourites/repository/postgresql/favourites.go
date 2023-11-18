@@ -39,10 +39,10 @@ func NewFavouritesPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Con
 	}
 }
 
-func (r *favouritesUsecasePostgresqlRepository) Insert(videoID, userID int) error {
+func (r *favouritesUsecasePostgresqlRepository) InsertIntoFavourites(videoID, userID int) error {
 	_, err := r.db.Exec(r.ctx, addToFavouritesQuery, videoID, userID)
 	if err != nil {
-		logs.LogError(logs.Logger, "postgresql", "Insert", err, err.Error())
+		logs.LogError(logs.Logger, "postgresql", "InsertIntoFavourites", err, err.Error())
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
 			return domain.ErrOutOfRange
@@ -57,29 +57,29 @@ func (r *favouritesUsecasePostgresqlRepository) Insert(videoID, userID int) erro
 	return nil
 }
 
-func (r *favouritesUsecasePostgresqlRepository) Delete(videoID, userID int) error {
+func (r *favouritesUsecasePostgresqlRepository) DeleteFromFavourites(videoID, userID int) error {
 	res, err := r.db.Exec(r.ctx, DeleteFromFavouritesQuery, videoID, userID)
 	if err != nil {
-		logs.LogError(logs.Logger, "postgresql", "Delete", err, err.Error())
+		logs.LogError(logs.Logger, "postgresql", "DeleteFromFavourites", err, err.Error())
 		return err
 	}
 
 	if res.RowsAffected() == 0 {
-		logs.LogError(logs.Logger, "postgresql", "Delete", domain.ErrOutOfRange, domain.ErrOutOfRange.Error())
+		logs.LogError(logs.Logger, "postgresql", "DeleteFromFavourites", domain.ErrOutOfRange, domain.ErrOutOfRange.Error())
 		return domain.ErrOutOfRange
 	}
 
 	return nil
 }
 
-func (r *favouritesUsecasePostgresqlRepository) SelectAll(userID int) ([]domain.Video, error) {
+func (r *favouritesUsecasePostgresqlRepository) SelectAllFavourites(userID int) ([]domain.Video, error) {
 	rows, err := r.db.Query(r.ctx, SelectAllQuery, userID)
 	if err != nil {
-		logs.LogError(logs.Logger, "postgresql", "SelectAll", err, err.Error())
+		logs.LogError(logs.Logger, "postgresql", "SelectAllFavourites", err, err.Error())
 		return nil, err
 	}
 	defer rows.Close()
-	logs.Logger.Debug("SelectAll query result:", rows)
+	logs.Logger.Debug("SelectAllFavourites query result:", rows)
 
 	var videos []domain.Video
 
@@ -102,7 +102,7 @@ func (r *favouritesUsecasePostgresqlRepository) SelectAll(userID int) ([]domain.
 
 		videos = append(videos, video)
 	}
-	logs.Logger.Debug("SelectAll videos:", videos)
+	logs.Logger.Debug("SelectAllFavourites videos:", videos)
 
 	return videos, nil
 }

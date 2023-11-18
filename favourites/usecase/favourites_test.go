@@ -10,7 +10,7 @@ import (
 
 const userID = 1
 
-func TestAdd(t *testing.T) {
+func TestAddToFavourites(t *testing.T) {
 	tests := []struct {
 		name            string
 		setExpectations func(fvr *mocks.FavouritesRepository)
@@ -20,7 +20,7 @@ func TestAdd(t *testing.T) {
 		{
 			name: "GoodCase/Common",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Insert", mock.Anything, mock.Anything).Return(nil)
+				fvr.On("InsertIntoFavourites", mock.Anything, mock.Anything).Return(nil)
 			},
 			videoID: 1,
 			good:    true,
@@ -28,21 +28,21 @@ func TestAdd(t *testing.T) {
 		{
 			name: "BadCase/OutOfRangeVideoId",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Insert", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvr.On("InsertIntoFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: 12345634567,
 		},
 		{
 			name: "BadCase/NegativeVideoId",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Insert", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvr.On("InsertIntoFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: -3,
 		},
 		{
 			name: "BadCase/ZeroVideoId",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Insert", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvr.On("InsertIntoFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: 0,
 		},
@@ -56,7 +56,7 @@ func TestAdd(t *testing.T) {
 			test.setExpectations(fvr)
 
 			fu := NewFavouritesUsecase(fvr)
-			err := fu.Add(test.videoID, userID)
+			err := fu.AddToFavourites(test.videoID, userID)
 
 			if test.good {
 				assert.Nil(t, err)
@@ -69,7 +69,7 @@ func TestAdd(t *testing.T) {
 	}
 }
 
-func TestRemove(t *testing.T) {
+func TestRemoveFromFavourites(t *testing.T) {
 	tests := []struct {
 		name            string
 		setExpectations func(fvr *mocks.FavouritesRepository)
@@ -79,7 +79,7 @@ func TestRemove(t *testing.T) {
 		{
 			name: "GoodCase/Common",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Delete", mock.Anything, mock.Anything).Return(nil)
+				fvr.On("DeleteFromFavourites", mock.Anything, mock.Anything).Return(nil)
 			},
 			videoID: 1,
 			good:    true,
@@ -87,21 +87,21 @@ func TestRemove(t *testing.T) {
 		{
 			name: "BadCase/OutOfRangeVideoId",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Delete", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvr.On("DeleteFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: 12345634567,
 		},
 		{
 			name: "BadCase/NegativeVideoId",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Delete", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvr.On("DeleteFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: -3,
 		},
 		{
 			name: "BadCase/ZeroVideoId",
 			setExpectations: func(fvr *mocks.FavouritesRepository) {
-				fvr.On("Delete", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
+				fvr.On("DeleteFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: 0,
 		},
@@ -115,7 +115,7 @@ func TestRemove(t *testing.T) {
 			test.setExpectations(fvr)
 
 			fu := NewFavouritesUsecase(fvr)
-			err := fu.Remove(test.videoID, userID)
+			err := fu.RemoveFromFavourites(test.videoID, userID)
 
 			if test.good {
 				assert.Nil(t, err)
@@ -128,7 +128,7 @@ func TestRemove(t *testing.T) {
 	}
 }
 
-func TestGetAll(t *testing.T) {
+func TestGetAllFavourites(t *testing.T) {
 	tests := []struct {
 		name            string
 		setExpectations func(fvr *mocks.FavouritesRepository, vs []domain.Video)
@@ -138,7 +138,7 @@ func TestGetAll(t *testing.T) {
 		{
 			name: "GoodCase/Common",
 			setExpectations: func(fvr *mocks.FavouritesRepository, vs []domain.Video) {
-				fvr.On("SelectAll", mock.Anything).Return(vs, nil)
+				fvr.On("SelectAllFavourites", mock.Anything).Return(vs, nil)
 			},
 			videos: []domain.Video{
 				domain.Video{
@@ -170,7 +170,7 @@ func TestGetAll(t *testing.T) {
 		{
 			name: "GoodCase/Common",
 			setExpectations: func(fvr *mocks.FavouritesRepository, vs []domain.Video) {
-				fvr.On("SelectAll", mock.Anything).Return(vs, nil)
+				fvr.On("SelectAllFavourites", mock.Anything).Return(vs, nil)
 			},
 			videos: []domain.Video{},
 			good:   true,
@@ -185,7 +185,7 @@ func TestGetAll(t *testing.T) {
 			test.setExpectations(fvr, test.videos)
 
 			fu := NewFavouritesUsecase(fvr)
-			videos, err := fu.GetAll(userID)
+			videos, err := fu.GetAllFavourites(userID)
 
 			if test.good {
 				assert.Equal(t, test.videos, videos)

@@ -108,7 +108,7 @@ func TestUpdateProfile(t *testing.T) {
 				uCase.On("UploadImage", mock.Anything, mock.Anything).Return("", nil).Maybe()
 				uCase.On("UpdateUser", mock.Anything).Return(*updatedUser, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/EmptyBody",

@@ -13,8 +13,8 @@ type FavouritesRepository struct {
 	mock.Mock
 }
 
-// Delete provides a mock function with given fields: videoID, userID
-func (_m *FavouritesRepository) Delete(videoID int, userID int) error {
+// DeleteFromFavourites provides a mock function with given fields: videoID, userID
+func (_m *FavouritesRepository) DeleteFromFavourites(videoID int, userID int) error {
 	ret := _m.Called(videoID, userID)
 
 	var r0 error
@@ -27,8 +27,8 @@ func (_m *FavouritesRepository) Delete(videoID int, userID int) error {
 	return r0
 }
 
-// Insert provides a mock function with given fields: videoID, userID
-func (_m *FavouritesRepository) Insert(videoID int, userID int) error {
+// InsertIntoFavourites provides a mock function with given fields: videoID, userID
+func (_m *FavouritesRepository) InsertIntoFavourites(videoID int, userID int) error {
 	ret := _m.Called(videoID, userID)
 
 	var r0 error
@@ -41,8 +41,8 @@ func (_m *FavouritesRepository) Insert(videoID int, userID int) error {
 	return r0
 }
 
-// SelectAll provides a mock function with given fields: userID
-func (_m *FavouritesRepository) SelectAll(userID int) ([]domain.Video, error) {
+// SelectAllFavourites provides a mock function with given fields: userID
+func (_m *FavouritesRepository) SelectAllFavourites(userID int) ([]domain.Video, error) {
 	ret := _m.Called(userID)
 
 	var r0 []domain.Video
