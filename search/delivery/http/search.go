@@ -38,7 +38,7 @@ func (h *SearchHandler) GetSearchData(w http.ResponseWriter, r *http.Request) {
 
 	data, err := h.SearchUsecase.GetSearchData(searchStr)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetSearchData", err, "Failed to get search data")
 		return
 	}

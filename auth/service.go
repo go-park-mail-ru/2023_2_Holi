@@ -3,7 +3,6 @@ package auth
 import (
 	"2023_2_Holi/domain"
 	"context"
-	"fmt"
 	"google.golang.org/grpc"
 	"net"
 	"net/http"
@@ -38,9 +37,9 @@ func startRpcServer(au domain.AuthUsecase) {
 
 	session.RegisterAuthCheckerServer(server, auth_grpc.NewAuthAuthHandler(au))
 
-	fmt.Println("starting server at :8081")
 	logs.Logger.Info("starting auth grpc server at ", port)
 	server.Serve(lis)
+	logs.Logger.Info("auth grpc server stopped")
 }
 
 func StartService() {
@@ -77,13 +76,13 @@ func StartService() {
 
 	mw := middleware.InitMiddleware(au)
 
-	authMiddlewareRouter.Use(mw.IsAuth) // TODO подумать что с ней делать с учётом превращения в grpc обращение
+	authMiddlewareRouter.Use(mw.IsAuth) // TODO переделать под вызов grpc
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
-	mainRouter.Use(mw.CSRFProtection)
+	mainRouter.Use(mw.CSRFProtection) // TODO перенести csrf-init в сервис авторизации
 
-	serverPort := ":" + os.Getenv("11")
+	serverPort := ":" + os.Getenv("AUTHMS_HTTP_SERVER_PORT")
 	logs.Logger.Info("starting auth http server at ", serverPort)
 
 	err = http.ListenAndServe(serverPort, mainRouter)

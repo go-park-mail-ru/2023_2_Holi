@@ -79,7 +79,7 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 		sessionToken := c.Value
 		exists, err := m.AuthUsecase.IsAuth(sessionToken)
 		if err != nil {
-			domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+			domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 			return
 		}
 		if !exists {

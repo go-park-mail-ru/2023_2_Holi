@@ -29,6 +29,7 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase, s *bluemond
 }
 
 // GetUserData godoc
+//
 //	@Summary		Get user by id
 //	@Description	Get user data by id
 //	@Tags			profile
@@ -50,7 +51,7 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.ProfileUsecase.GetUserData(userID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetUserData", err, err.Error())
 		return
 	}
@@ -67,6 +68,7 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateProfile godoc
+//
 //	@Summary		update profile
 //	@Description	update user data in db and return it
 //	@Tags			profile
@@ -93,7 +95,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	if len(newUser.ImageData) != 0 {
 		newUser.ImagePath, err = h.ProfileUsecase.UploadImage(newUser.ID, newUser.ImageData)
 		if err != nil {
-			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetHttpStatusCode(err))
 			logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to upload user image")
 			return
 		}
@@ -101,7 +103,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	updatedUser, err := h.ProfileUsecase.UpdateUser(newUser)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "UpdateProfile", err, err.Error())
 		return
 	}

@@ -49,14 +49,14 @@ func (h *FavouritesHandler) AddToFavourites(w http.ResponseWriter, r *http.Reque
 	c, _ := r.Cookie("session_token")
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
 	}
 	logs.Logger.Debug("AddToFavourites user id: ", userID)
 
 	err = h.FavouritesUsecase.AddToFavourites(videoID, userID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
 		return
 	}
@@ -89,14 +89,14 @@ func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.
 	c, _ := r.Cookie("session_token")
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 	}
 	logs.Logger.Debug("RemoveFromFavourites user id: ", userID)
 
 	err = h.FavouritesUsecase.RemoveFromFavourites(videoID, userID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 		return
 	}
@@ -117,14 +117,14 @@ func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Requ
 	c, _ := r.Cookie("session_token")
 	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 	}
 	logs.Logger.Debug("GetAllFavourites user id: ", userID)
 
 	videos, err := h.FavouritesUsecase.GetAllFavourites(userID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
 		return
 	}

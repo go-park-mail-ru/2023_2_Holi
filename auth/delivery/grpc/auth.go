@@ -4,7 +4,6 @@ import (
 	"2023_2_Holi/domain"
 	"2023_2_Holi/domain/grpc/session"
 	"context"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -26,10 +25,10 @@ func (h *AuthHandler) IsAuth(ctx context.Context, st *session.Token) (*session.U
 	}
 	userID, err := h.AuthUsecase.IsAuth(st.Token)
 	if err != nil {
-		return nil, status.Errorf(codes.InvalidArgument, "invalid session token")
+		return nil, status.Errorf(domain.GetGrpcStatusCode(err), err.Error())
 	}
-	
-	return nil, grpc.Errorf(codes.NotFound, "session not found")
 
-	return nil, status.Errorf(codes.Unimplemented, "method IsAuth not implemented")
+	return &session.UserID{
+		ID: userID,
+	}, nil
 }
