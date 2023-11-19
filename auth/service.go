@@ -1,0 +1,94 @@
+package auth
+
+import (
+	"2023_2_Holi/domain"
+	"context"
+	"fmt"
+	"google.golang.org/grpc"
+	"net"
+	"net/http"
+	"os"
+
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+
+	auth_grpc "2023_2_Holi/auth/delivery/grpc"
+	auth_http "2023_2_Holi/auth/delivery/http"
+	auth_postgres "2023_2_Holi/auth/repository/postgresql"
+	auth_redis "2023_2_Holi/auth/repository/redis"
+	auth_usecase "2023_2_Holi/auth/usecase"
+
+	"2023_2_Holi/db/connector/postgres"
+	"2023_2_Holi/db/connector/redis"
+
+	"2023_2_Holi/domain/grpc/session"
+	logs "2023_2_Holi/logger"
+	"2023_2_Holi/middleware"
+)
+
+func startRpcServer(au domain.AuthUsecase) {
+	port := ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT")
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		logs.LogFatal(logs.Logger, "auth", "startRpcServer", err, err.Error())
+	}
+
+	server := grpc.NewServer()
+
+	session.RegisterAuthCheckerServer(server, auth_grpc.NewAuthAuthHandler(au))
+
+	fmt.Println("starting server at :8081")
+	logs.Logger.Info("starting auth grpc server at ", port)
+	server.Serve(lis)
+}
+
+func StartService() {
+	err := godotenv.Load()
+	ctx := context.Background()
+	accessLogger := middleware.AccessLogger{
+		LogrusLogger: logs.Logger,
+	}
+
+	pc := postgres.Connect(ctx)
+	defer pc.Close()
+
+	rc := redis.Connect()
+	defer rc.Close()
+
+	//tokens, _ := domain.NewHMACHashToken("Gvjhlk123bl1lma0")
+
+	mainRouter := mux.NewRouter()
+	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
+
+	sr := auth_redis.NewSessionRedisRepository(rc)
+	//ur := utils_redis.NewUtilsRedisRepository(rc)
+	ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
+
+	au := auth_usecase.NewAuthUsecase(ar, sr)
+	//uu := utils_usecase.NewUtilsUsecase(ur)
+
+	//sanitizer := bluemonday.UGCPolicy()
+
+	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, au)
+	//csrf_http.NewCsrfHandler(mainRouter, tokens)
+
+	go startRpcServer(au)
+
+	mw := middleware.InitMiddleware(au)
+
+	authMiddlewareRouter.Use(mw.IsAuth) // TODO подумать что с ней делать с учётом превращения в grpc обращение
+	mainRouter.Use(accessLogger.AccessLogMiddleware)
+	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
+	mainRouter.Use(mw.CORS)
+	mainRouter.Use(mw.CSRFProtection)
+
+	serverPort := ":" + os.Getenv("11")
+	logs.Logger.Info("starting auth http server at ", serverPort)
+
+	err = http.ListenAndServe(serverPort, mainRouter)
+	if err != nil {
+		logs.LogFatal(logs.Logger, "auth", "main", err, err.Error())
+	}
+	logs.Logger.Info("auth http server stopped")
+}

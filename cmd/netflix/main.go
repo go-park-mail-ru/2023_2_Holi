@@ -1,9 +1,5 @@
 package main
 
-import (
-	"2023_2_Holi/netflix"
-)
-
 //	@title			Netfilx API
 //	@version		1.0
 //	@description	API of the nelfix project by holi
@@ -17,6 +13,6 @@ import (
 //	@host		127.0.0.1
 //	@schemes	http
 //	@BasePath	/
-func main() {
-	netflix.StartServer()
-}
+//func main() {
+//	netflix.StartServer()
+//}
