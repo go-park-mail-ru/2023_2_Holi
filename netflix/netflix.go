@@ -108,7 +108,7 @@ func StartServer() {
 	csrf_http.NewCsrfHandler(mainRouter, tokens)
 	favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
 
-	mw := middleware.InitMiddleware(au)
+	mw := middleware.InitMiddleware(au, tokens)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)

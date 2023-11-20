@@ -91,8 +91,11 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 	})
 }
 
-func InitMiddleware(authUsecase domain.AuthUsecase) *Middleware {
-	return &Middleware{AuthUsecase: authUsecase}
+func InitMiddleware(authUsecase domain.AuthUsecase, token *domain.HashToken) *Middleware {
+	return &Middleware{
+		AuthUsecase: authUsecase,
+		Token:       token,
+	}
 }
 
 type AccessLogger struct {
