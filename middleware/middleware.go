@@ -1,18 +1,21 @@
 package middleware
 
 import (
+	"2023_2_Holi/domain/grpc/session"
 	logs "2023_2_Holi/logger"
+	"context"
 	"net/http"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	req_context "github.com/gorilla/context"
 
 	"2023_2_Holi/domain"
+	"github.com/sirupsen/logrus"
 )
 
 type Middleware struct {
-	AuthUsecase domain.AuthUsecase
-	Token       *domain.HashToken
+	AuthClient session.AuthCheckerClient
+	Token      *domain.HashToken
 }
 
 func (m *Middleware) CORS(next http.Handler) http.Handler {
@@ -77,22 +80,29 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 			domain.WriteError(w, "cookie is expired", http.StatusUnauthorized)
 		}
 		sessionToken := c.Value
-		exists, err := m.AuthUsecase.IsAuth(sessionToken)
+		userID, err := m.AuthClient.IsAuth(
+			context.Background(),
+			&session.Token{
+				Token: sessionToken,
+			})
 		if err != nil {
 			domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 			return
 		}
-		if !exists {
+		if userID.ID == "" {
 			domain.WriteError(w, domain.ErrUnauthorized.Error(), http.StatusUnauthorized)
 			return
 		}
 
+		req_context.Set(r, "userID", userID.ID)
 		next.ServeHTTP(w, r)
 	})
 }
 
-func InitMiddleware(authUsecase domain.AuthUsecase) *Middleware {
-	return &Middleware{AuthUsecase: authUsecase}
+func InitMiddleware(authCl session.AuthCheckerClient) *Middleware {
+	return &Middleware{
+		AuthClient: authCl,
+	}
 }
 
 type AccessLogger struct {

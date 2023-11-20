@@ -18,8 +18,8 @@ import (
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
 
-	"2023_2_Holi/db/connector/postgres"
-	"2023_2_Holi/db/connector/redis"
+	"2023_2_Holi/connectors/postgres"
+	"2023_2_Holi/connectors/redis"
 
 	"2023_2_Holi/domain/grpc/session"
 	logs "2023_2_Holi/logger"

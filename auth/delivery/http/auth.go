@@ -210,11 +210,11 @@ func (a *AuthHandler) auth(r *http.Request) (bool, error) {
 		return false, domain.ErrUnauthorized
 	}
 	sessionToken := c.Value
-	exists, err := a.AuthUsecase.IsAuth(sessionToken)
+	userID, err := a.AuthUsecase.IsAuth(sessionToken)
 	if err != nil {
 		return false, err
 	}
-	if !exists {
+	if userID == "" {
 		return false, domain.ErrUnauthorized
 	}
 
