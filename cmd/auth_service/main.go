@@ -1,10 +1,12 @@
 package main
 
-import "2023_2_Holi/netflix"
+import (
+	"2023_2_Holi/auth"
+)
 
-//	@title			Netfilx API
+//	@title			Netfilx auth API
 //	@version		1.0
-//	@description	API of the nelfix project by holi
+//	@description	API of the nelfix auth service
 
 //	@contact.name	Alex Chinaev
 //	@contact.url	https://vk.com/l.chinaev
@@ -14,7 +16,7 @@ import "2023_2_Holi/netflix"
 
 // @host		127.0.0.1
 // @schemes	http
-// @BasePath	/
+// @BasePath	/api/v1/auth/
 func main() {
-	netflix.StartServer()
+	auth.StartService()
 }

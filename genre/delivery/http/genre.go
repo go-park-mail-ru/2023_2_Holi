@@ -22,6 +22,7 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 }
 
 // GetGenres godoc
+//
 //	@Summary		Get genres
 //	@Description	Get a list of genres.
 //	@Tags			genres
@@ -34,7 +35,7 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	genres, err := h.GenreUsecase.GetGenres()
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
 		return
 	}

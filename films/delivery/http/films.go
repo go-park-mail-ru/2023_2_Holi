@@ -26,6 +26,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 }
 
 // GetFilmsByGenre godoc
+//
 //	@Summary		Get films by genre
 //	@Description	Get a list of films based on the specified genre.
 //	@Tags			Films
@@ -42,7 +43,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 
 	films, err := h.FilmsUsecase.GetFilmsByGenre(genre)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		return
 	}
@@ -58,6 +59,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetFilmData godoc
+//
 //	@Summary		Get Video data by id
 //	@Description	Get content for Video page
 //	@Tags			Films
@@ -79,7 +81,7 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 
 	film, artists, err := h.FilmsUsecase.GetFilmData(filmID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
 		return
 	}
@@ -97,6 +99,7 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 }
 
 // GetCastPage godoc
+//
 //	@Summary		Get cast page
 //	@Description	Get a list of films based on the cast name.
 //	@Tags			Cast
@@ -117,7 +120,7 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	}
 	films, cast, err := h.FilmsUsecase.GetCastPage(id)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetCastPage", err, "Failed to get cast")
 		return
 	}
@@ -137,7 +140,7 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
 	film, err := h.FilmsUsecase.GetTopRate()
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetTopRate", err, "Failed to get top")
 		return
 	}

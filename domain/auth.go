@@ -13,7 +13,7 @@ type AuthUsecase interface {
 	Login(credentials Credentials) (Session, int, error)
 	Logout(token string) error
 	Register(user User) (int, error)
-	IsAuth(token string) (bool, error)
+	IsAuth(token string) (string, error)
 }
 
 type AuthRepository interface {
@@ -31,5 +31,5 @@ type Session struct {
 type SessionRepository interface {
 	Add(session Session) error
 	DeleteByToken(token string) error
-	SessionExists(token string) (bool, error)
+	SessionExists(token string) (string, error)
 }

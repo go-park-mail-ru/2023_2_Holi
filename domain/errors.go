@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"google.golang.org/grpc/codes"
 	"net/http"
 )
 
@@ -16,7 +17,7 @@ var (
 	ErrOutOfRange          = errors.New("id is out of range")
 )
 
-func GetStatusCode(err error) int {
+func GetHttpStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
 	}
@@ -39,10 +40,22 @@ func GetStatusCode(err error) int {
 
 	case ErrAlreadyExists:
 		return http.StatusConflict
-	case ErrInternalServerError:
-		return http.StatusInternalServerError
 
 	default:
 		return http.StatusInternalServerError
+	}
+}
+
+func GetGrpcStatusCode(err error) codes.Code {
+	if err == nil {
+		return codes.OK
+	}
+
+	switch err {
+	case ErrNotFound:
+		return codes.NotFound
+
+	default:
+		return codes.Internal
 	}
 }
