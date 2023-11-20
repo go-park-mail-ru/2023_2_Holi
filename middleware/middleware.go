@@ -45,7 +45,7 @@ func (m *Middleware) CSRFProtection(next http.Handler) http.Handler {
 					return
 				}
 
-				http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+				domain.WriteError(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 

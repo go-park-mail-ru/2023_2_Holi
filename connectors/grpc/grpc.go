@@ -16,12 +16,14 @@ func Connect(addr string) *grpc.ClientConn {
 
 	grpcConn, err := grpc.Dial(
 		addr,
-		//grpc.WithInsecure(),
+		//grpc.WithInsecure(), // TODO add any helpful options?
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 	)
 	if err != nil {
 		logs.LogFatal(logs.Logger, "grpc", "Connect", err, err.Error())
 	}
+
+	// TODO healthcheck?
 
 	logs.Logger.Debug("grpc client :", grpcConn)
 
