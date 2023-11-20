@@ -1,6 +1,7 @@
 package auth
 
 import (
+	csrf_http "2023_2_Holi/csrf/delivery/http"
 	"2023_2_Holi/domain"
 	"context"
 	"google.golang.org/grpc"
@@ -51,36 +52,31 @@ func StartService() {
 
 	pc := postgres.Connect(ctx)
 	defer pc.Close()
-
 	rc := redis.Connect()
 	defer rc.Close()
 
-	//tokens, _ := domain.NewHMACHashToken("Gvjhlk123bl1lma0")
-
-	mainRouter := mux.NewRouter()
-	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
+	//authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
 	sr := auth_redis.NewSessionRedisRepository(rc)
-	//ur := utils_redis.NewUtilsRedisRepository(rc)
 	ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
 
 	au := auth_usecase.NewAuthUsecase(ar, sr)
-	//uu := utils_usecase.NewUtilsUsecase(ur)
 
-	//sanitizer := bluemonday.UGCPolicy()
+	mainRouter := mux.NewRouter()
+	tokens, _ := domain.NewHMACHashToken("Gvjhlk123bl1lma0")
 
-	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, au)
-	//csrf_http.NewCsrfHandler(mainRouter, tokens)
+	auth_http.NewAuthHandler(mainRouter, au)
+	csrf_http.NewCsrfHandler(mainRouter, tokens)
 
 	go startRpcServer(au)
 
-	mw := middleware.InitMiddleware(au)
+	mw := middleware.InitMiddleware(nil, tokens)
 
-	authMiddlewareRouter.Use(mw.IsAuth) // TODO переделать под вызов grpc
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
-	mainRouter.Use(mw.CSRFProtection) // TODO перенести csrf-init в сервис авторизации
+	mainRouter.Use(mw.CSRFProtection)
 
 	serverPort := ":" + os.Getenv("AUTHMS_HTTP_SERVER_PORT")
 	logs.Logger.Info("starting auth http server at ", serverPort)

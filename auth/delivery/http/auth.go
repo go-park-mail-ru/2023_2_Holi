@@ -18,17 +18,15 @@ type AuthHandler struct {
 	AuthUsecase domain.AuthUsecase
 }
 
-func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.AuthUsecase) {
+func NewAuthHandler(mainRouter *mux.Router, u domain.AuthUsecase) {
 	handler := &AuthHandler{
 		AuthUsecase: u,
 	}
 
-	// TODO поменять роутеры
 	mainRouter.HandleFunc("/api/v1/auth/login", handler.Login).Methods(http.MethodPost, http.MethodOptions)
 	mainRouter.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
-
-	authMwRouter.HandleFunc("/v1/auth/check", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(http.StatusNoContent) }).Methods(http.MethodPost, http.MethodOptions)
-	authMwRouter.HandleFunc("/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/api/v1/auth/check", handler.CheckAuth).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/api/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
 }
 
 // Login godoc
@@ -40,8 +38,9 @@ func NewAuthHandler(authMwRouter *mux.Router, mainRouter *mux.Router, u domain.A
 //	@Param			body	body		domain.Credentials	true	"user credentials"
 //	@Success		200		{object}	object{body=object{id=int}}
 //	@Failure		400		{object}	object{err=string}
-//	@Failure		403		{object}	object{err=string}
+//	@Failure		401		{object}	object{err=string}
 //	@Failure		404		{object}	object{err=string}
+//	@Failure		409		{object}	object{err=string}
 //	@Failure		500		{object}	object{err=string}
 //	@Router			/api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -102,12 +101,19 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 //	@Tags			auth
 //	@Success		204
 //	@Failure		400	{object}	object{err=string}
-//	@Failure		403	{object}	object{err=string}
+//	@Failure		401	{object}	object{err=string}
 //	@Failure		404	{object}	object{err=string}
+//	@Failure		409	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/auth/logout [post]
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	// TODO добавить проверку наличия авторизации (миддлварка ушла)
+	auth, err := a.auth(r)
+	if auth != true {
+		domain.WriteError(w, "you must be unauthorised", domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
+		return
+	}
+
 	c, err := r.Cookie("session_token")
 	sessionToken := c.Value
 	logs.Logger.Debug("Logout: session token:", c)
@@ -139,7 +145,8 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 //	@Param			body	body		domain.Credentials	true	"user credentials"
 //	@Success		200		{object}	object{body=object{id=int}}
 //	@Failure		400		{object}	object{err=string}
-//	@Failure		403		{object}	object{err=string}
+//	@Failure		401		{object}	object{err=string}
+//	@Failure		409		{object}	object{err=string}
 //	@Failure		500		{object}	object{err=string}
 //	@Router			/api/v1/auth/register [post]
 func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -195,6 +202,28 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		},
 		http.StatusOK,
 	)
+}
+
+// CheckAuth godoc
+//
+//	@Summary		check auth
+//	@Description	check if user is authenticated
+//	@Tags			auth
+//	@Success		204
+//	@Failure		400	{object}	object{err=string}
+//	@Failure		401	{object}	object{err=string}
+//	@Failure		409	{object}	object{err=string}
+//	@Failure		500	{object}	object{err=string}
+//	@Router			/api/v1/auth/check [post]
+func (a *AuthHandler) CheckAuth(w http.ResponseWriter, r *http.Request) {
+	auth, err := a.auth(r)
+	if auth != true {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "CheckAuth", err, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (a *AuthHandler) auth(r *http.Request) (bool, error) {

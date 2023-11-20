@@ -99,9 +99,10 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 	})
 }
 
-func InitMiddleware(authCl session.AuthCheckerClient) *Middleware {
+func InitMiddleware(authCl session.AuthCheckerClient, token *domain.HashToken) *Middleware {
 	return &Middleware{
 		AuthClient: authCl,
+		Token:      token,
 	}
 }
 
