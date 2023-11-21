@@ -5,6 +5,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/pashagolub/pgxmock/v3"
 	"github.com/stretchr/testify/require"
@@ -25,6 +26,20 @@ JOIN episode AS e ON e.video_id = v.id
 JOIN video_genre AS vg ON v.id = vg.video_id 
 JOIN genre AS g ON vg.genre_id = g.id 
 WHERE g.name = \$1\;
+`
+
+const getFilmDataQueryTest = `
+	SELECT e.name, e.description, e.duration,
+		e.preview_path, e.media_path, preview_video_path, release_year, rating, age_restriction
+	FROM video
+		JOIN episode AS e ON video.id = video_id
+
+`
+
+const getFilmCastQueryTest = `
+	SELECT id, name
+	FROM "cast"
+		JOIN video_cast AS vc ON id = cast_id
 `
 
 func TestGetFilmsByGenre(t *testing.T) {
@@ -125,20 +140,17 @@ func TestGetFilmData(t *testing.T) {
 			},
 			good: true,
 		},
-		// {
-		// 	name: "BadCase/NegativeID",
-		// 	id:   -1,
-		// 	err:  pgx.ErrNoRows,
-		// },
-		// {
-		// 	name: "BadCase/NoFilm",
-		// 	id:   1,
-		// 	film: domain.Film{
-		// 		ID:   10,
-		// 		Name: "Avatar",
-		// 	},
-		// 	err: pgx.ErrNoRows,
-		// },
+		{
+			name: "BadCase/NegativeID",
+			id:   -1,
+			err:  pgx.ErrNoRows,
+		},
+		{
+			name: "BadCase/NoFilm",
+			id:   1,
+			film: domain.Film{},
+			err:  pgx.ErrNoRows,
+		},
 	}
 
 	mockDB, err := pgxmock.NewPool()
@@ -161,7 +173,7 @@ func TestGetFilmData(t *testing.T) {
 					test.film.MediaPath, test.film.PreviewVideoPath, test.film.ReleaseYear, test.film.Rating,
 					test.film.AgeRestriction)
 
-			eq := mockDB.ExpectQuery(getFilmDataQuery).WithArgs(test.id)
+			eq := mockDB.ExpectQuery(getFilmDataQueryTest).WithArgs(test.id)
 
 			if test.good {
 				eq.WillReturnRows(row)
@@ -173,6 +185,85 @@ func TestGetFilmData(t *testing.T) {
 			if test.good {
 				require.Nil(t, err)
 				require.Equal(t, film, test.film)
+			} else {
+				require.NotNil(t, err)
+			}
+
+			err = mockDB.ExpectationsWereMet()
+			require.Nil(t, err)
+		})
+
+	}
+}
+
+func TestFilmCast(t *testing.T) {
+	tests := []struct {
+		name string
+		id   int
+		cast []domain.Cast
+		good bool
+		err  error
+	}{
+		{
+			name: "GoodCase/Common",
+			id:   1,
+			cast: []domain.Cast{
+				{
+					ID:   1,
+					Name: "Robert de Niro",
+				},
+				{
+					ID:   2,
+					Name: "Tom H",
+				},
+			},
+			good: true,
+		},
+		{
+			name: "BadCase/NegativeID",
+			id:   -1,
+			err:  pgx.ErrNoRows,
+		},
+		{
+			name: "BadCase/NoFilm",
+			id:   1,
+			cast: []domain.Cast{},
+			err:  pgx.ErrNoRows,
+		},
+	}
+
+	mockDB, err := pgxmock.NewPool()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer mockDB.Close()
+	r := NewFilmsPostgresqlRepository(mockDB, context.Background())
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+
+			rows := mockDB.NewRows([]string{"id", "name"})
+
+			for _, cast := range test.cast {
+				rows.AddRow(cast.ID, cast.Name)
+			}
+
+			eq := mockDB.ExpectQuery(getFilmCastQueryTest).WithArgs(test.id)
+
+			if test.good {
+				eq.WillReturnRows(rows)
+			} else {
+				eq.WillReturnError(test.err)
+			}
+
+			cast, err := r.GetFilmCast(test.id)
+			if test.good {
+				require.Nil(t, err)
+				require.Equal(t, cast, test.cast)
 			} else {
 				require.NotNil(t, err)
 			}
