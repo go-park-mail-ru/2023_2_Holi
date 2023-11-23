@@ -6,16 +6,20 @@ import (
 	"context"
 )
 
-const getSuitableFilmQuery = `
+const getSuitableFilmsQuery = `
 	SELECT id, name, preview_path
-	FROM "video"
-	WHERE name ILIKE $1
+	FROM "video", plainto_tsquery($1) q
+	WHERE tsv @@ q
+	ORDER BY ts_rank(tsv, q) DESC
+	LIMIT 10;
 `
 
 const getSuitableCastQuery = `
 	SELECT id, name
-	FROM "cast"
-	WHERE name ILIKE $1
+	FROM "cast", plainto_tsquery($1) q
+	WHERE tsv @@ q
+	ORDER BY ts_rank(tsv, q) DESC
+	LIMIT 10;
 `
 
 type searchPostgresqlRepository struct {
@@ -31,8 +35,7 @@ func NewSearchPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 }
 
 func (r *searchPostgresqlRepository) GetSuitableFilms(searchStr string) ([]domain.Film, error) {
-	searchStr = "%" + searchStr + "%"
-	rows, err := r.db.Query(r.ctx, getSuitableFilmQuery, searchStr)
+	rows, err := r.db.Query(r.ctx, getSuitableFilmsQuery, searchStr)
 	if err != nil {
 		logs.LogError(logs.Logger, "search_postgresql", "GetSuitableFilms", err, err.Error())
 		return nil, err
@@ -62,7 +65,6 @@ func (r *searchPostgresqlRepository) GetSuitableFilms(searchStr string) ([]domai
 }
 
 func (r *searchPostgresqlRepository) GetSuitableCast(searchStr string) ([]domain.Cast, error) {
-	searchStr = "%" + searchStr + "%"
 	rows, err := r.db.Query(r.ctx, getSuitableCastQuery, searchStr)
 	if err != nil {
 		logs.LogError(logs.Logger, "search_postgresql", "GetSuitableCast", err, err.Error())
