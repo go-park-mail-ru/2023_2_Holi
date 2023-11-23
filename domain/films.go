@@ -15,6 +15,19 @@ type Film struct {
 	PreviewVideoPath string          `json:"previewVideoPath"`
 }
 
+type Episode struct {
+	ID               int             `json:"id"`
+	Name             string          `json:"name"`
+	Description      string          `json:"description"`
+	PreviewPath      string          `json:"previewPath"`
+	MediaPath        string          `json:"mediaPath"`
+	ReleaseYear      int             `json:"releaseYear"`
+	Rating           float64         `json:"rating"`
+	AgeRestriction   int             `json:"ageRestriction"`
+	Duration         pgtype.Interval `json:"duration"`
+	PreviewVideoPath string          `json:"previewVideoPath"`
+}
+
 type Cast struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
