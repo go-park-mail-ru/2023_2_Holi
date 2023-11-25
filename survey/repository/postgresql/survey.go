@@ -9,11 +9,19 @@ import (
 const addAttributeQuery = `
 	INSERT INTO survey (id, attribute, rate)
 	VALUES ($1, $2, $3)
-	ON CONFLICT DO UPDATE SET rate = $3
+	ON CONFLICT (id, attribute) DO UPDATE SET rate = $3
+`
+
+const checkSurveyQuery = `
+	SELECT EXISTS(SELECT 1
+				  FROM survey 
+				  WHERE id = $1 AND attribute = $2)
 `
 
 const getStatQuery = `
-
+	select attribute, rate, count(rate)
+	from survey
+	group by attribute, rate
 `
 
 type surveyPostgresqlRepository struct {
@@ -29,13 +37,21 @@ func NewSurveyPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 }
 
 func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
-
-	result := r.db.QueryRow(r.ctx, addAttributeQuery,
+	result, err := r.db.Exec(r.ctx, addAttributeQuery,
+		survey.ID,
 		survey.Attribute,
 		survey.Metric,
-		survey.ID)
+	)
+	// if err == pgx.ErrNoRows {
+	// 	logs.LogError(logs.Logger, "survey_postgres", "AddSurvey", err, err.Error())
+	// 	return domain.ErrNotFound
+	// }
+	if err != nil {
+		logs.LogError(logs.Logger, "survey_postgres", "AddSurvey", err, err.Error())
+		return err
+	}
 
-	logs.Logger.Debug("AddSurvey queryRow result:", result)
+	logs.Logger.Info("AddSurvey queryRow result:", result)
 
 	return nil
 }
@@ -49,16 +65,33 @@ func (r *surveyPostgresqlRepository) GetStat() ([]domain.Stat, error) {
 	defer rows.Close()
 	logs.Logger.Debug("GetStat query result:", rows)
 
-	var stats []domain.Stat
-	for rows.Next() {
-		var stat domain.Genre
-		err = rows.Scan()
+	i := 0
 
-		if err != nil {
-			return nil, err
+	var stats []domain.Stat
+
+	var cort1, cort2 string
+	var cort3 int
+	for rows.Next() {
+
+		var name string
+
+		err = rows.Scan
+		cort1 = err[0]
+		cort2 = err[1]
+		cort3 = err[2]
+		if i == 0 {
+			&stats[i].Name = cort1
+			a := &stats[i].Value[cort2]
+			a = append(a, cort3)
+			name = cort1
 		}
 
-		stats = append(stats, stat)
+		if name != cort1 {
+			i++
+		}
+
+		a := &stats[i].Value[cort2]
+		a = append(a, cort3)
 	}
 	logs.Logger.Info("lenth", len(stats))
 	if len(stats) == 0 {
@@ -66,4 +99,16 @@ func (r *surveyPostgresqlRepository) GetStat() ([]domain.Stat, error) {
 	}
 
 	return stats, nil
+}
+
+func (r *surveyPostgresqlRepository) SurveyExists(survey domain.Survey) (bool, error) {
+	result := r.db.QueryRow(r.ctx, checkSurveyQuery, survey.ID, survey.Attribute)
+
+	var exist bool
+	if err := result.Scan(&exist); err != nil {
+		logs.LogError(logs.Logger, "survey_postgres", "SurveyExists", err, err.Error())
+		return false, err
+	}
+
+	return exist, nil
 }

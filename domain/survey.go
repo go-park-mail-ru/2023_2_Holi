@@ -8,15 +8,17 @@ type Survey struct {
 
 type Stat struct {
 	Name  string `json:"name"`
-	Value map[string]interface{}
+	Value map[string][]string
 }
 
 type SurveyUsecase interface {
 	AddSurvey(survey Survey) error
 	GetStat() ([]Stat, error)
+	CheckSurvey(survey Survey) (bool, error)
 }
 
 type SurveyRepository interface {
 	AddSurvey(survey Survey) error
 	GetStat() ([]Stat, error)
+	SurveyExists(survey Survey) (bool, error)
 }

@@ -16,7 +16,7 @@ func NewSurveyUsecase(sr domain.SurveyRepository) domain.SurveyUsecase {
 }
 
 func (u *surveyUsecase) AddSurvey(survey domain.Survey) error {
-
+	logs.Logger.Info("survey:", survey)
 	if err := u.surveyRepo.AddSurvey(survey); err != nil {
 		return err
 	} else {
@@ -33,4 +33,12 @@ func (u *surveyUsecase) GetStat() ([]domain.Stat, error) {
 	logs.Logger.Debug("Usecase GetStat:", stats)
 
 	return stats, nil
+}
+
+func (u *surveyUsecase) CheckSurvey(survey domain.Survey) (bool, error) {
+	if exist, err := u.surveyRepo.SurveyExists(survey); err != nil {
+		return false, err
+	} else {
+		return exist, err
+	}
 }
