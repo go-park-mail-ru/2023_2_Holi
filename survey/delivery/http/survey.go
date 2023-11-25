@@ -23,6 +23,8 @@ func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase) {
 	}
 
 	mainRouter.HandleFunc("/v1/survey/add", handler.AddSurvey).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/v1/survey/stat", handler.AddSurvey).Methods(http.MethodGet, http.MethodOptions)
+
 }
 
 func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
@@ -42,8 +44,6 @@ func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 	}
 	logs.Logger.Debug("Http survey:", survey)
 
-	//defer r.CloseAndAlert(r.Body)
-
 	survey.ID = userID
 	survey.Attribute = strings.TrimSpace(survey.Attribute)
 	survey.Metric = survey.Metric
@@ -56,4 +56,19 @@ func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *SurveyHandler) GetStats(w http.ResponseWriter, r *http.Request) {
+	stat, err := s.SurveyUsecase.GetStat()
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
+		return
+	}
+
+	logs.Logger.Debug("Http GetGenres:", stat)
+	domain.WriteResponse(
+		w,
+		http.StatusOK,
+	)
 }

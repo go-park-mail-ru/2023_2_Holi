@@ -12,6 +12,10 @@ const addAttributeQuery = `
 	ON CONFLICT DO UPDATE SET rate = $3
 `
 
+const getStatQuery = `
+
+`
+
 type surveyPostgresqlRepository struct {
 	db  domain.PgxPoolIface
 	ctx context.Context
@@ -25,9 +29,6 @@ func NewSurveyPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 }
 
 func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
-	// if survey.Attribute == "" || survey.ID == 0 {
-	// 	return domain.ErrBadRequest
-	// }
 
 	result := r.db.QueryRow(r.ctx, addAttributeQuery,
 		survey.Attribute,
@@ -37,4 +38,32 @@ func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
 	logs.Logger.Debug("AddSurvey queryRow result:", result)
 
 	return nil
+}
+
+func (r *surveyPostgresqlRepository) GetStat() ([]domain.Stat, error) {
+	rows, err := r.db.Query(r.ctx, getStatQuery)
+	if err != nil {
+		logs.LogError(logs.Logger, "stat_postgres", "GetStat", err, err.Error())
+		return nil, err
+	}
+	defer rows.Close()
+	logs.Logger.Debug("GetStat query result:", rows)
+
+	var stats []domain.Stat
+	for rows.Next() {
+		var stat domain.Genre
+		err = rows.Scan()
+
+		if err != nil {
+			return nil, err
+		}
+
+		stats = append(stats, stat)
+	}
+	logs.Logger.Info("lenth", len(stats))
+	if len(stats) == 0 {
+		return nil, domain.ErrNotFound
+	}
+
+	return stats, nil
 }
