@@ -2,7 +2,9 @@ package http
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/context"
@@ -22,6 +24,7 @@ func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase) {
 	}
 
 	mainRouter.HandleFunc("/api/v1/survey/add", handler.AddSurvey).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/api/v1/survey/check/{attr}", handler.Check).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
@@ -52,4 +55,33 @@ func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *SurveyHandler) Check(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	attr := vars["attr"]
+
+	if attr == "" {
+		domain.WriteError(w, "empty param", http.StatusBadRequest)
+		logs.LogError(logs.Logger, "survey_http", "Check", errors.New("empty param"), "Failed to decode json from body")
+	}
+	userID := context.Get(r, "userID").(string)
+	uID, err := strconv.Atoi(userID)
+	if err != nil {
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "survey_http", "Check", err, err.Error())
+	}
+	exist, err := s.SurveyUsecase.CheckSurvey(domain.Survey{ID: uID, Attribute: attr})
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "survey_http", "Check", err, err.Error())
+	}
+
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"passed": exist,
+		},
+		http.StatusOK,
+	)
 }

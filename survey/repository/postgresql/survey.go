@@ -9,7 +9,13 @@ import (
 const addAttributeQuery = `
 	INSERT INTO survey (id, attribute, rate)
 	VALUES ($1, $2, $3)
-	ON CONFLICT DO UPDATE SET rate = $3
+	ON CONFLICT (id, attribute) DO UPDATE SET rate = $3
+`
+
+const checkSurveyQuery = `
+	SELECT EXISTS(SELECT 1
+				  FROM survey 
+				  WHERE id = $1 AND attribute = $2)
 `
 
 type surveyPostgresqlRepository struct {
@@ -37,4 +43,16 @@ func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
 	logs.Logger.Debug("AddSurvey queryRow result:", result)
 
 	return nil
+}
+
+func (r *surveyPostgresqlRepository) SurveyExists(survey domain.Survey) (bool, error) {
+	result := r.db.QueryRow(r.ctx, checkSurveyQuery, survey.ID, survey.Attribute)
+
+	var exist bool
+	if err := result.Scan(&exist); err != nil {
+		logs.LogError(logs.Logger, "survey_postgres", "SurveyExists", err, err.Error())
+		return false, err
+	}
+
+	return exist, nil
 }

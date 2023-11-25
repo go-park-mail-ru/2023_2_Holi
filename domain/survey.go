@@ -8,8 +8,10 @@ type Survey struct {
 
 type SurveyUsecase interface {
 	AddSurvey(survey Survey) error
+	CheckSurvey(survey Survey) (bool, error)
 }
 
 type SurveyRepository interface {
 	AddSurvey(survey Survey) error
+	SurveyExists(survey Survey) (bool, error)
 }

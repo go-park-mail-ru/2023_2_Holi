@@ -23,3 +23,11 @@ func (u *surveyUsecase) AddSurvey(survey domain.Survey) error {
 	}
 
 }
+
+func (u *surveyUsecase) CheckSurvey(survey domain.Survey) (bool, error) {
+	if exist, err := u.surveyRepo.SurveyExists(survey); err != nil {
+		return false, err
+	} else {
+		return exist, err
+	}
+}
