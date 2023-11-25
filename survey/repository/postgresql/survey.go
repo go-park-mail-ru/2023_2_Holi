@@ -31,16 +31,21 @@ func NewSurveyPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 }
 
 func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
-	// if survey.Attribute == "" || survey.ID == 0 {
-	// 	return domain.ErrBadRequest
-	// }
-
-	result := r.db.QueryRow(r.ctx, addAttributeQuery,
+	result, err := r.db.Exec(r.ctx, addAttributeQuery,
+		survey.ID,
 		survey.Attribute,
 		survey.Metric,
-		survey.ID)
+	)
+	// if err == pgx.ErrNoRows {
+	// 	logs.LogError(logs.Logger, "survey_postgres", "AddSurvey", err, err.Error())
+	// 	return domain.ErrNotFound
+	// }
+	if err != nil {
+		logs.LogError(logs.Logger, "survey_postgres", "AddSurvey", err, err.Error())
+		return err
+	}
 
-	logs.Logger.Debug("AddSurvey queryRow result:", result)
+	logs.Logger.Info("AddSurvey queryRow result:", result)
 
 	return nil
 }
