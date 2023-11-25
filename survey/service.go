@@ -1,4 +1,4 @@
-package survay
+package survey
 
 import (
 	g_sess "2023_2_Holi/domain/grpc/session"

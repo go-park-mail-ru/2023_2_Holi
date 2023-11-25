@@ -7,9 +7,8 @@ import (
 )
 
 const addAttributeQuery = `
-	SELECT id, email, password
-	FROM "user"
-	WHERE email = $1
+	INSERT INTO survey (id, attribute, rate)
+	VALUES ($1, $2, $3)
 `
 
 type surveyPostgresqlRepository struct {
