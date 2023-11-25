@@ -4,18 +4,24 @@ import (
 	g_sess "2023_2_Holi/domain/grpc/session"
 	"context"
 	"embed"
+	"net/http"
+	"os"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/microcosm-cc/bluemonday"
-	"net/http"
-	"os"
 
 	"github.com/gorilla/mux"
+
+	survey_http "2023_2_Holi/survey/delivery/http"
+	survey_postgres "2023_2_Holi/survey/repository/postgresql"
+	survey_usecase "2023_2_Holi/survey/usecase"
 
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
+
 	"github.com/joho/godotenv"
 
 	genre_http "2023_2_Holi/genre/delivery/http"
@@ -31,6 +37,7 @@ import (
 	"2023_2_Holi/connectors/postgres"
 	logs "2023_2_Holi/logger"
 	"2023_2_Holi/middleware"
+
 	_ "github.com/lib/pq"
 )
 
@@ -66,11 +73,13 @@ func StartServer() {
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
+	sr := survey_postgres.NewSurveyPostgresqlRepository(pc, ctx)
 	//fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
 	fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
+	su := survey_usecase.NewSurveyUsecase(sr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
 	//su := search_usecase.NewSearchUsecase(srr)
@@ -85,6 +94,7 @@ func StartServer() {
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
+	survey_http.NewSurveyHandler(authMiddlewareRouter, su)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
 	//favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
