@@ -14,13 +14,11 @@ import (
 
 type SurveyHandler struct {
 	SurveyUsecase domain.SurveyUsecase
-	UtilsUsecase  domain.UtilsUsecase
 }
 
-func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase, uu domain.UtilsUsecase) {
+func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase) {
 	handler := &SurveyHandler{
 		SurveyUsecase: s,
-		UtilsUsecase:  uu,
 	}
 
 	mainRouter.HandleFunc("/api/v1/survey/add", handler.AddSurvey).Methods(http.MethodPost, http.MethodOptions)
@@ -28,7 +26,7 @@ func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase, uu domain.
 
 func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 
-	userID := context.Get(r, "userID")
+	userID := context.Get(r, "userID").(int)
 
 	var survey domain.Survey
 
@@ -42,7 +40,7 @@ func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 
 	//defer r.CloseAndAlert(r.Body)
 
-	survey.Id = userID
+	survey.ID = userID
 	survey.Attribute = strings.TrimSpace(survey.Attribute)
 	survey.Metric = survey.Metric
 

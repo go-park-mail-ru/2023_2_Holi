@@ -68,7 +68,7 @@ func StartServer() {
 
 	//srr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
 	//sr := auth_redis.NewSessionRedisRepository(rc)
-	ur := utils_redis.NewUtilsRedisRepository(rc)
+	//ur := utils_redis.NewUtilsRedisRepository(rc)
 	//ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
@@ -80,7 +80,7 @@ func StartServer() {
 	fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
 	su := survey_usecase.NewSurveyUsecase(sr)
-	uu := utils_usecase.NewUtilsUsecase(ur)
+	//uu := utils_usecase.NewUtilsUsecase(ur)
 	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
 	//su := search_usecase.NewSearchUsecase(srr)
 
@@ -94,7 +94,7 @@ func StartServer() {
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
-	survey_http.NewSurveyHandler(authMiddlewareRouter, su, uu)
+	survey_http.NewSurveyHandler(authMiddlewareRouter, su)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
 	//favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
