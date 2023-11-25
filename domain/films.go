@@ -16,16 +16,11 @@ type Film struct {
 }
 
 type Episode struct {
-	ID               int             `json:"id"`
-	Name             string          `json:"name"`
-	Description      string          `json:"description"`
-	PreviewPath      string          `json:"previewPath"`
-	MediaPath        string          `json:"mediaPath"`
-	ReleaseYear      int             `json:"releaseYear"`
-	Rating           float64         `json:"rating"`
-	AgeRestriction   int             `json:"ageRestriction"`
-	Duration         pgtype.Interval `json:"duration"`
-	PreviewVideoPath string          `json:"previewVideoPath"`
+	ID          int    `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	PreviewPath string `json:"previewPath"`
+	MediaPath   string `json:"mediaPath"`
 }
 
 type Cast struct {
@@ -47,4 +42,14 @@ type FilmsUsecase interface {
 	GetFilmData(id int) (Film, []Cast, error)
 	GetCastPage(id int) ([]Film, Cast, error)
 	GetTopRate() (Film, error)
+}
+
+type SeriesRepository interface {
+	GetSeriesByGenre(genre string) ([]Film, error)
+	GetSeriesData(id int) (Film, []Cast, error)
+}
+
+type SeriesUsecase interface {
+	GetSeriesByGenre(genre string) ([]Film, error)
+	GetSeriesData(id int) (Film, []Cast, error)
 }

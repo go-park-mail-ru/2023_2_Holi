@@ -3,10 +3,10 @@ package postgres
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5"
-
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
+
+	"github.com/jackc/pgx"
 )
 
 const getFilmsByGenreQuery = `
@@ -59,19 +59,19 @@ const getTopRateQuery = `
 	LIMIT 1
 `
 
-type filmsPostgresqlRepository struct {
+type seriesPostgresqlRepository struct {
 	db  domain.PgxPoolIface
 	ctx context.Context
 }
 
-func NewFilmsPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.FilmsRepository {
-	return &filmsPostgresqlRepository{
+func NewSeriesPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.SeriesRepository {
+	return &seriesPostgresqlRepository{
 		db:  pool,
 		ctx: ctx,
 	}
 }
 
-func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film, error) {
+func (r *seriesPostgresqlRepository) GetSeriesByGenre(genre string) ([]domain.Film, error) {
 	rows, err := r.db.Query(r.ctx, getFilmsByGenreQuery, genre)
 	if err != nil {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
@@ -107,7 +107,7 @@ func (r *filmsPostgresqlRepository) GetFilmsByGenre(genre string) ([]domain.Film
 	return films, nil
 }
 
-func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
+func (r *seriesPostgresqlRepository) GetSeriesData(id int) (domain.Film, error) {
 	row := r.db.QueryRow(r.ctx, getFilmDataQuery, id)
 
 	logs.Logger.Debug("GetFilmData query result:", row)
@@ -137,112 +137,112 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Film, error) {
 	return film, nil
 }
 
-func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, error) {
-	rows, err := r.db.Query(r.ctx, getFilmCastQuery, FilmId)
-	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
-		return nil, err
-	}
-	defer rows.Close()
-	logs.Logger.Debug("GetFilmCast query result:", rows)
+// func (r *filmsPostgresqlRepository) GetFilmCast(FilmId int) ([]domain.Cast, error) {
+// 	rows, err := r.db.Query(r.ctx, getFilmCastQuery, FilmId)
+// 	if err != nil {
+// 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+// 	logs.Logger.Debug("GetFilmCast query result:", rows)
 
-	var artists []domain.Cast
-	for rows.Next() {
-		var artist domain.Cast
-		err = rows.Scan(
-			&artist.ID,
-			&artist.Name,
-		)
-		if err != nil {
-			logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
-			return nil, err
-		}
-		artists = append(artists, artist)
-	}
-	if len(artists) == 0 {
-		return nil, domain.ErrNotFound
-	}
+// 	var artists []domain.Cast
+// 	for rows.Next() {
+// 		var artist domain.Cast
+// 		err = rows.Scan(
+// 			&artist.ID,
+// 			&artist.Name,
+// 		)
+// 		if err != nil {
+// 			logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
+// 			return nil, err
+// 		}
+// 		artists = append(artists, artist)
+// 	}
+// 	if len(artists) == 0 {
+// 		return nil, domain.ErrNotFound
+// 	}
 
-	return artists, nil
-}
+// 	return artists, nil
+// }
 
-func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
-	rows, err := r.db.Query(r.ctx, getCastPageQuery, id)
-	if err != nil {
-		logs.LogError(logs.Logger, "cast_postgres", "GetCastPage", err, err.Error())
-		return nil, err
-	}
-	defer rows.Close()
-	logs.Logger.Debug("GetCastPage query result:", rows)
+// func (r *filmsPostgresqlRepository) GetCastPage(id int) ([]domain.Film, error) {
+// 	rows, err := r.db.Query(r.ctx, getCastPageQuery, id)
+// 	if err != nil {
+// 		logs.LogError(logs.Logger, "cast_postgres", "GetCastPage", err, err.Error())
+// 		return nil, err
+// 	}
+// 	defer rows.Close()
+// 	logs.Logger.Debug("GetCastPage query result:", rows)
 
-	var films []domain.Film
-	for rows.Next() {
-		var film domain.Film
-		err = rows.Scan(
-			&film.ID,
-			&film.Name,
-			&film.PreviewPath,
-			&film.Rating,
-			&film.PreviewVideoPath,
-		)
+// 	var films []domain.Film
+// 	for rows.Next() {
+// 		var film domain.Film
+// 		err = rows.Scan(
+// 			&film.ID,
+// 			&film.Name,
+// 			&film.PreviewPath,
+// 			&film.Rating,
+// 			&film.PreviewVideoPath,
+// 		)
 
-		if err != nil {
-			return nil, err
-		}
+// 		if err != nil {
+// 			return nil, err
+// 		}
 
-		films = append(films, film)
-	}
-	if len(films) == 0 {
-		return nil, domain.ErrNotFound
-	}
+// 		films = append(films, film)
+// 	}
+// 	if len(films) == 0 {
+// 		return nil, domain.ErrNotFound
+// 	}
 
-	return films, nil
-}
+// 	return films, nil
+// }
 
-func (r *filmsPostgresqlRepository) GetCastName(FilmId int) (domain.Cast, error) {
-	rows := r.db.QueryRow(r.ctx, getCastNameQuery, FilmId)
+// func (r *filmsPostgresqlRepository) GetCastName(FilmId int) (domain.Cast, error) {
+// 	rows := r.db.QueryRow(r.ctx, getCastNameQuery, FilmId)
 
-	logs.Logger.Debug("GetCastName query result:", rows)
+// 	logs.Logger.Debug("GetCastName query result:", rows)
 
-	var cast domain.Cast
-	err := rows.Scan(
-		&cast.Name,
-	)
+// 	var cast domain.Cast
+// 	err := rows.Scan(
+// 		&cast.Name,
+// 	)
 
-	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return domain.Cast{}, domain.ErrNotFound
-	}
-	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return domain.Cast{}, err
-	}
+// 	if err == pgx.ErrNoRows {
+// 		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+// 		return domain.Cast{}, domain.ErrNotFound
+// 	}
+// 	if err != nil {
+// 		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+// 		return domain.Cast{}, err
+// 	}
 
-	return cast, nil
-}
+// 	return cast, nil
+// }
 
-func (r *filmsPostgresqlRepository) GetTopRate() (domain.Film, error) {
-	rows := r.db.QueryRow(r.ctx, getTopRateQuery)
+// func (r *filmsPostgresqlRepository) GetTopRate() (domain.Film, error) {
+// 	rows := r.db.QueryRow(r.ctx, getTopRateQuery)
 
-	logs.Logger.Debug("GetCastName query result:", rows)
+// 	logs.Logger.Debug("GetCastName query result:", rows)
 
-	var film domain.Film
-	err := rows.Scan(
-		&film.ID,
-		&film.Name,
-		&film.Description,
-		&film.PreviewVideoPath,
-		&film.MediaPath,
-	)
+// 	var film domain.Film
+// 	err := rows.Scan(
+// 		&film.ID,
+// 		&film.Name,
+// 		&film.Description,
+// 		&film.PreviewVideoPath,
+// 		&film.MediaPath,
+// 	)
 
-	if err == pgx.ErrNoRows {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return domain.Film{}, domain.ErrNotFound
-	}
-	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
-		return domain.Film{}, err
-	}
+// 	if err == pgx.ErrNoRows {
+// 		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+// 		return domain.Film{}, domain.ErrNotFound
+// 	}
+// 	if err != nil {
+// 		logs.LogError(logs.Logger, "films_postgresql", "GetCastName", err, err.Error())
+// 		return domain.Film{}, err
+// 	}
 
-	return film, nil
-}
+// 	return film, nil
+// }
