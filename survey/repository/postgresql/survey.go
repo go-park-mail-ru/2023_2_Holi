@@ -29,7 +29,8 @@ func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
 	}
 
 	result := r.db.QueryRow(r.ctx, addAttributeQuery,
-		survey.Attribute,
+		survey.
+			survey.Attribute,
 		survey.Metric)
 
 	logs.Logger.Debug("AddSurvey queryRow result:", result)
