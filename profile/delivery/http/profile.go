@@ -29,16 +29,17 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase, s *bluemond
 }
 
 // GetUserData godoc
-// @Summary 		Get user by id
-// @Description 	Get user data by id
-// @Tags 			profile
-// @Param 			id path int true "The user id you want to retrieve."
-// @Produce 		json
-// @Success 		200 {json} domain.User
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
-// @Router 			/api/v1/profile/{id} [get]
+//
+//	@Summary		Get user by id
+//	@Description	Get user data by id
+//	@Tags			profile
+//	@Param			id	path	int	true	"The user id you want to retrieve."
+//	@Produce		json
+//	@Success		200	{json}	domain.User
+//	@Failure		400	{json}	ApiResponse
+//	@Failure		404	{json}	ApiResponse
+//	@Failure		500	{json}	ApiResponse
+//	@Router			/api/v1/profile/{id} [get]
 func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID, err := strconv.Atoi(vars["id"])
@@ -50,7 +51,7 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 
 	user, err := h.ProfileUsecase.GetUserData(userID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetUserData", err, err.Error())
 		return
 	}
@@ -67,17 +68,18 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 }
 
 // UpdateProfile godoc
-// @Summary      update profile
-// @Description  update user data in db and return it
-// @Tags         profile
-// @Produce      json
-// @Accept       json
-// @Param 		 body body domain.UserRequest true "user that must be updated"
-// @Success      200  {object} domain.Response{body=object{user=domain.User}}
-// @Failure      400  {json} domain.Response
-// @Failure      403  {json} domain.Response
-// @Failure      500  {json} domain.Response
-// @Router       /api/v1/profile/update [post]
+//
+//	@Summary		update profile
+//	@Description	update user data in db and return it
+//	@Tags			profile
+//	@Produce		json
+//	@Accept			json
+//	@Param			body	body		domain.UserRequest	true	"user that must be updated"
+//	@Success		200		{object}	domain.Response{body=object{user=domain.User}}
+//	@Failure		400		{json}		domain.Response
+//	@Failure		403		{json}		domain.Response
+//	@Failure		500		{json}		domain.Response
+//	@Router			/api/v1/profile/update [post]
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var newUser domain.User
 
@@ -93,7 +95,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	if len(newUser.ImageData) != 0 {
 		newUser.ImagePath, err = h.ProfileUsecase.UploadImage(newUser.ID, newUser.ImageData)
 		if err != nil {
-			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
+			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetHttpStatusCode(err))
 			logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to upload user image")
 			return
 		}
@@ -101,7 +103,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	updatedUser, err := h.ProfileUsecase.UpdateUser(newUser)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "UpdateProfile", err, err.Error())
 		return
 	}

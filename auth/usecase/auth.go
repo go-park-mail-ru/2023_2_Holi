@@ -50,7 +50,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int
 
 func (u *authUsecase) Logout(token string) error {
 	if token == "" {
-		return domain.ErrBadRequest
+		return domain.ErrInvalidToken
 	}
 
 	if err := u.sessionRepo.DeleteByToken(token); err != nil {
@@ -79,18 +79,18 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 	}
 }
 
-func (u *authUsecase) IsAuth(token string) (bool, error) {
+func (u *authUsecase) IsAuth(token string) (string, error) {
 	if token == "" {
-		return false, domain.ErrBadRequest
+		return "", domain.ErrInvalidToken
 	}
 
-	auth, err := u.sessionRepo.SessionExists(token)
-	logs.Logger.Debug("Usecase IsAuth auth: ", auth)
+	userID, err := u.sessionRepo.SessionExists(token)
+	logs.Logger.Debug("Usecase IsAuth userID: ", userID)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
-	return auth, nil
+	return userID, nil
 }
 
 func HashPassword(salt []byte, password []byte) []byte {

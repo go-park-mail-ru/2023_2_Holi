@@ -1,18 +1,32 @@
 package middleware
 
 import (
+	"2023_2_Holi/domain/grpc/session"
 	logs "2023_2_Holi/logger"
+	"context"
+	"errors"
 	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	req_context "github.com/gorilla/context"
 
 	"2023_2_Holi/domain"
+	"github.com/sirupsen/logrus"
 )
 
 type Middleware struct {
-	AuthUsecase domain.AuthUsecase
-	Token       *domain.HashToken
+	AuthClient session.AuthCheckerClient
+	Token      *domain.HashToken
+	metrics    *Metrics
+}
+
+func InitMiddleware(authCl session.AuthCheckerClient, token *domain.HashToken) *Middleware {
+	return &Middleware{
+		AuthClient: authCl,
+		Token:      token,
+		metrics:    NewMetrics(),
+	}
 }
 
 func (m *Middleware) CORS(next http.Handler) http.Handler {
@@ -36,13 +50,13 @@ func (m *Middleware) CSRFProtection(next http.Handler) http.Handler {
 			headerCsrfToken := r.Header.Get("X-CSRF-TOKEN")
 			cookieCsrfToken, err := r.Cookie("csrf-token")
 			if err != nil {
-				if err == http.ErrNoCookie {
+				if errors.Is(err, http.ErrNoCookie) {
 					domain.WriteError(w, err.Error(), http.StatusUnauthorized)
 					logs.LogError(logs.Logger, "middleware", "CSRFProtection", err, err.Error())
 					return
 				}
 
-				http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+				domain.WriteError(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 
@@ -65,34 +79,47 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("session_token")
 		if err != nil {
-			if err == http.ErrNoCookie {
-				http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusUnauthorized)
+			if errors.Is(err, http.ErrNoCookie) {
+				domain.WriteError(w, err.Error(), http.StatusUnauthorized)
 				return
 			}
 
-			http.Error(w, `{"err":"`+err.Error()+`"}`, http.StatusBadRequest)
+			domain.WriteError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		if c.Expires.After(time.Now()) {
-			http.Error(w, `{"err":"cookie is expired"}`, http.StatusUnauthorized)
+			domain.WriteError(w, "cookie is expired", http.StatusUnauthorized)
 		}
 		sessionToken := c.Value
-		exists, err := m.AuthUsecase.IsAuth(sessionToken)
+		userID, err := m.AuthClient.IsAuth(
+			context.Background(),
+			&session.Token{
+				Token: sessionToken,
+			})
 		if err != nil {
-			http.Error(w, `{"err":"`+domain.ErrInternalServerError.Error()+`"}`, http.StatusInternalServerError)
+			domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 			return
 		}
-		if !exists {
-			http.Error(w, `{"err":"`+domain.ErrUnauthorized.Error()+`"}`, http.StatusUnauthorized)
+		if userID.ID == "" {
+			domain.WriteError(w, domain.ErrUnauthorized.Error(), http.StatusUnauthorized)
 			return
 		}
 
+		req_context.Set(r, "userID", userID.ID)
 		next.ServeHTTP(w, r)
 	})
 }
 
-func InitMiddleware(authUsecase domain.AuthUsecase) *Middleware {
-	return &Middleware{AuthUsecase: authUsecase}
+func (m *Middleware) Metrics(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		lrw := NewLoggingResponseWriter(w)
+
+		next.ServeHTTP(lrw, r)
+
+		m.metrics.workTime.WithLabelValues(strconv.Itoa(lrw.statusCode), r.URL.Path).Observe(float64(time.Since(start).Milliseconds()))
+		m.metrics.hits.WithLabelValues(strconv.Itoa(lrw.statusCode), r.URL.Path).Inc()
+	})
 }
 
 type AccessLogger struct {
@@ -102,12 +129,30 @@ type AccessLogger struct {
 func (ac *AccessLogger) AccessLogMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		next.ServeHTTP(w, r)
+
+		lrw := NewLoggingResponseWriter(w)
+		next.ServeHTTP(lrw, r)
 
 		ac.LogrusLogger.WithFields(logrus.Fields{
 			"method":      r.Method,
 			"remote_addr": r.RemoteAddr,
+			"request_id":  r.Header.Get("Request-ID"),
 			"work_time":   time.Since(start),
+			"status":      lrw.statusCode,
 		}).Info(r.URL.Path)
 	})
+}
+
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func NewLoggingResponseWriter(w http.ResponseWriter) *loggingResponseWriter {
+	return &loggingResponseWriter{w, http.StatusOK}
+}
+
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
 }

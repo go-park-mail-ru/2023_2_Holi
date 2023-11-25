@@ -61,7 +61,7 @@ func TestLogin(t *testing.T) {
 				*session = domain.Session{}
 				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/InvalidJson",
@@ -83,7 +83,7 @@ func TestLogin(t *testing.T) {
 				*session = domain.Session{}
 				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/NoBody",
@@ -112,7 +112,7 @@ func TestLogin(t *testing.T) {
 
 				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusConflict,
 			auth:   true,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
@@ -358,7 +358,7 @@ func TestRegister(t *testing.T) {
 				assert.NoError(t, err)
 				uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusConflict,
 		},
 		{
 			name: "BadCase/EmptyJson",
@@ -369,7 +369,7 @@ func TestRegister(t *testing.T) {
 				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
 				uCase.On("Login", mock.Anything).Return(*session, 1, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/EmptyBody",
@@ -410,7 +410,7 @@ func TestRegister(t *testing.T) {
 				assert.NoError(t, err)
 				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusConflict,
 			auth:   true,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{

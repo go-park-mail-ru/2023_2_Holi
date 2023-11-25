@@ -7,8 +7,6 @@ import (
 	logs "2023_2_Holi/logger"
 )
 
-var logger = logs.LoggerInit()
-
 const getGenresQuery = `
 	SELECT name
 	FROM genre

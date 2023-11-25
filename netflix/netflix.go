@@ -1,43 +1,36 @@
 package netflix
 
 import (
+	g_sess "2023_2_Holi/domain/grpc/session"
 	"context"
-	"net/http"
-	"os"
-
+	"embed"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/gorilla/mux"
-
-	"github.com/joho/godotenv"
 	"github.com/microcosm-cc/bluemonday"
+	"net/http"
+	"os"
 
-	auth_http "2023_2_Holi/auth/delivery/http"
-	auth_postgres "2023_2_Holi/auth/repository/postgresql"
-	auth_redis "2023_2_Holi/auth/repository/redis"
-	auth_usecase "2023_2_Holi/auth/usecase"
-	"2023_2_Holi/domain"
+	"github.com/gorilla/mux"
 
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
-
-	"2023_2_Holi/db/connector/postgres"
-	"2023_2_Holi/db/connector/redis"
-	logs "2023_2_Holi/logger"
-	"2023_2_Holi/middleware"
+	"github.com/joho/godotenv"
 
 	genre_http "2023_2_Holi/genre/delivery/http"
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
+	profile_postgres "2023_2_Holi/profile/repository/postgresql"
+
 	genre_usecase "2023_2_Holi/genre/usecase"
 
 	profile_http "2023_2_Holi/profile/delivery/http"
-	profile_postgres "2023_2_Holi/profile/repository/postgresql"
 	profile_usecase "2023_2_Holi/profile/usecase"
 
-	csrf_http "2023_2_Holi/csrf/delivery/http"
-
+	grpc_connector "2023_2_Holi/connectors/grpc"
+	"2023_2_Holi/connectors/postgres"
+	logs "2023_2_Holi/logger"
+	"2023_2_Holi/middleware"
 	_ "github.com/lib/pq"
 )
 
@@ -45,6 +38,8 @@ const (
 	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
 	defaultRegion         = "ru-msk"
 )
+
+var static embed.FS
 
 func StartServer() {
 	err := godotenv.Load()
@@ -56,36 +51,46 @@ func StartServer() {
 	pc := postgres.Connect(ctx)
 	defer pc.Close()
 
-	rc := redis.Connect()
-	defer rc.Close()
+	//rc := redis.Connect()
+	//defer rc.Close()
 
-	tokens, _ := domain.NewHMACHashToken("Gvjhlk123bl1lma0")
+	//tokens, _ := domain.NewHMACHashToken("Gvjhlk123bl1lma0")
 
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
-	sessionRepository := auth_redis.NewSessionRedisRepository(rc)
-	authRepository := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
-	filmRepository := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
-	genreRepository := genre_postgres.GenrePostgresqlRepository(pc, ctx)
-	profileRepository := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
+	//srr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
+	//sr := auth_redis.NewSessionRedisRepository(rc)
+	//ur := utils_redis.NewUtilsRedisRepository(rc)
+	//ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
+	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
+	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
+	pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
+	//fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
 
-	authUsecase := auth_usecase.NewAuthUsecase(authRepository, sessionRepository)
-	filmsUsecase := films_usecase.NewFilmsUsecase(filmRepository)
-	genreUsecase := genre_usecase.NewGenreUsecase(genreRepository)
+	//au := auth_usecase.NewAuthUsecase(ar, sr)
+	fu := films_usecase.NewFilmsUsecase(fr)
+	gu := genre_usecase.NewGenreUsecase(gr)
+	//uu := utils_usecase.NewUtilsUsecase(ur)
+	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
+	//su := search_usecase.NewSearchUsecase(srr)
 
 	sess, _ := session.NewSession()
 	svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
-	profileUsecase := profile_usecase.NewProfileUsecase(profileRepository, svc)
+	pu := profile_usecase.NewProfileUsecase(pr, svc)
+
 	sanitizer := bluemonday.UGCPolicy()
 
-	auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, authUsecase)
-	films_http.NewFilmsHandler(authMiddlewareRouter, filmsUsecase)
-	genre_http.NewGenreHandler(authMiddlewareRouter, genreUsecase)
-	profile_http.NewProfileHandler(authMiddlewareRouter, profileUsecase, sanitizer)
-	csrf_http.NewCsrfHandler(mainRouter, tokens)
+	//auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, au)
+	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
+	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
+	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
+	//search_http.NewSearchHandler(authMiddlewareRouter, su)
+	//csrf_http.NewCsrfHandler(mainRouter, tokens)
+	//favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
 
-	mw := middleware.InitMiddleware(authUsecase)
+	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
+	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
 	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)

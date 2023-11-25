@@ -9,8 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var logger = logs.LoggerInit()
-
 type GenreHandler struct {
 	GenreUsecase domain.GenreUsecase
 }
@@ -24,24 +22,25 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 }
 
 // GetGenres godoc
-// @Summary Get genres
-// @Description Get a list of genres.
-// @Tags genres
-// @Produce json
-// @Success 		200 {array} domain.Genre
-// @Failure			400 {json} domain.Response
-// @Failure 		404 {json} domain.Response
-// @Failure 		500 {json} domain.Response
-// @Router /v1/genres [get]
+//
+//	@Summary		Get genres
+//	@Description	Get a list of genres.
+//	@Tags			genres
+//	@Produce		json
+//	@Success		200	{array}	domain.Genre
+//	@Failure		400	{json}	domain.Response
+//	@Failure		404	{json}	domain.Response
+//	@Failure		500	{json}	domain.Response
+//	@Router			/v1/genres [get]
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	genres, err := h.GenreUsecase.GetGenres()
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
 		return
 	}
 
-	logger.Debug("Http GetGenres:", genres)
+	logs.Logger.Debug("Http GetGenres:", genres)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
