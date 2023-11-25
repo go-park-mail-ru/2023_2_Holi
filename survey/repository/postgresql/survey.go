@@ -9,6 +9,7 @@ import (
 const addAttributeQuery = `
 	INSERT INTO survey (id, attribute, rate)
 	VALUES ($1, $2, $3)
+	ON CONFLICT DO UPDATE SET rate = $3
 `
 
 type surveyPostgresqlRepository struct {
@@ -24,9 +25,9 @@ func NewSurveyPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 }
 
 func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
-	if survey.Attribute == "" || survey.Metric == 0 || survey.ID == 0 {
-		return domain.ErrBadRequest
-	}
+	// if survey.Attribute == "" || survey.ID == 0 {
+	// 	return domain.ErrBadRequest
+	// }
 
 	result := r.db.QueryRow(r.ctx, addAttributeQuery,
 		survey.Attribute,

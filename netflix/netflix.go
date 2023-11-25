@@ -14,10 +14,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	survey_http "2023_2_Holi/survey/delivery/http"
-	survey_postgres "2023_2_Holi/survey/repository/postgresql"
-	survey_usecase "2023_2_Holi/survey/usecase"
-
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
@@ -74,13 +70,13 @@ func StartServer() {
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
-	sr := survey_postgres.NewSurveyPostgresqlRepository(pc, ctx)
+	// sr := survey_postgres.NewSurveyPostgresqlRepository(pc, ctx)
 	//fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
 	fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
-	su := survey_usecase.NewSurveyUsecase(sr)
+	// su := survey_usecase.NewSurveyUsecase(sr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
 	//su := search_usecase.NewSearchUsecase(srr)
@@ -95,7 +91,7 @@ func StartServer() {
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
-	survey_http.NewSurveyHandler(authMiddlewareRouter, su)
+	//survey_http.NewSurveyHandler(authMiddlewareRouter, su)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
 	//favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
@@ -103,7 +99,7 @@ func StartServer() {
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
-	//authMiddlewareRouter.Use(mw.IsAuth)
+	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)

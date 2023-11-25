@@ -1,7 +1,7 @@
 package main
 
 import (
-	"2023_2_Holi/survay"
+	"2023_2_Holi/survey"
 )
 
 //	@title			Netfilx auth API
@@ -18,5 +18,5 @@ import (
 // @schemes	http
 // @BasePath	/api/v1/survay/
 func main() {
-	survay.StartServer()
+	survey.StartServer()
 }

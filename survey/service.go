@@ -1,4 +1,4 @@
-package survay
+package survey
 
 import (
 	g_sess "2023_2_Holi/domain/grpc/session"
@@ -16,6 +16,10 @@ import (
 	"2023_2_Holi/middleware"
 
 	_ "github.com/lib/pq"
+
+	survey_http "2023_2_Holi/survey/delivery/http"
+	survey_postgres "2023_2_Holi/survey/repository/postgresql"
+	survey_usecase "2023_2_Holi/survey/usecase"
 )
 
 func StartServer() {
@@ -29,34 +33,14 @@ func StartServer() {
 	pc := postgres.Connect(ctx, dbParams)
 	defer pc.Close()
 
-	//rc := redis.Connect()
-	//defer rc.Close()
-
 	//tokens, _ := domain.NewHMACHashToken("Gvjhlk123bl1lma0")
 
 	mainRouter := mux.NewRouter()
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
-	//srr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
-	//sr := auth_redis.NewSessionRedisRepository(rc)
-	//ur := utils_redis.NewUtilsRedisRepository(rc)
-	//ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
-	// fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
-	// gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
-	// pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
-	//fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
-
-	//au := auth_usecase.NewAuthUsecase(ar, sr)
-	// fu := films_usecase.NewFilmsUsecase(fr)
-	// gu := genre_usecase.NewGenreUsecase(gr)
-	//uu := utils_usecase.NewUtilsUsecase(ur)
-	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
-	//su := search_usecase.NewSearchUsecase(srr)
-
-	// sess, _ := session.NewSession()
-	// svc := s3.New(sess, aws.NewConfig().WithEndpoint(vkCloudHotboxEndpoint).WithRegion(defaultRegion))
-	// pu := profile_usecase.NewProfileUsecase(pr, svc)
-
+	sr := survey_postgres.NewSurveyPostgresqlRepository(pc, ctx)
+	su := survey_usecase.NewSurveyUsecase(sr)
+	survey_http.NewSurveyHandler(authMiddlewareRouter, su)
 	//sanitizer := bluemonday.UGCPolicy()
 
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
@@ -66,7 +50,7 @@ func StartServer() {
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
-	mainRouter.Use(mw.CSRFProtection)
+	// mainRouter.Use(mw.CSRFProtection)
 
 	serverPort := ":" + os.Getenv("SURVAYMS_HTTP_SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)

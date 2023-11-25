@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/context"
@@ -21,16 +22,19 @@ func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase) {
 		SurveyUsecase: s,
 	}
 
-	mainRouter.HandleFunc("/api/v1/survey/add", handler.AddSurvey).Methods(http.MethodPost, http.MethodOptions)
+	mainRouter.HandleFunc("/v1/survey/add", handler.AddSurvey).Methods(http.MethodPost, http.MethodOptions)
 }
 
 func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 
-	userID := context.Get(r, "userID").(int)
+	userID, err := strconv.Atoi(context.Get(r, "userID").(string))
+	if err != nil {
+		return
+	}
 
 	var survey domain.Survey
 
-	err := json.NewDecoder(r.Body).Decode(&survey)
+	err = json.NewDecoder(r.Body).Decode(&survey)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to decode json from body")
