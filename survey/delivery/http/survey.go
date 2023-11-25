@@ -71,7 +71,9 @@ func (s *SurveyHandler) GetStats(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("Http GetGenres:", stat)
 	domain.WriteResponse(
 		w,
-		stat,
+		map[string]interface{}{
+			"films": stat,
+		},
 		http.StatusOK,
 	)
 }

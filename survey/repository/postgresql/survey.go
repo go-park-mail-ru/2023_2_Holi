@@ -4,6 +4,7 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 	"context"
+	"strconv"
 )
 
 const addAttributeQuery = `
@@ -67,31 +68,41 @@ func (r *surveyPostgresqlRepository) GetStat() ([]domain.Stat, error) {
 
 	i := 0
 
+	//const getStatQuery = `
+	//select attribute, rate, count(rate)
+	//from survey
+	//group by attribute, rate
+	//`
 	var stats []domain.Stat
 
-	var cort1, cort2 string
-	var cort3 int
+	var attribute, rate string
+	var count int
 	for rows.Next() {
 
 		var name string
 
-		err = rows.Scan
-		cort1 = err[0]
-		cort2 = err[1]
-		cort3 = err[2]
+		res := rows.Scan(
+			attribute,
+			rate,
+			count,
+		)
+
+		if res != nil {
+			return nil, res
+		}
 		if i == 0 {
-			&stats[i].Name = cort1
-			a := &stats[i].Value[cort2]
-			a = append(a, cort3)
-			name = cort1
+			(&stats[i]).Name = attribute
+			a := (&stats[i]).Value[rate]
+			a = append(a, strconv.Itoa(count))
+			name = attribute
 		}
 
-		if name != cort1 {
+		if name != attribute {
 			i++
 		}
 
-		a := &stats[i].Value[cort2]
-		a = append(a, cort3)
+		a := (&stats[i]).Value[rate]
+		a = append(a, strconv.Itoa(count))
 	}
 	logs.Logger.Info("lenth", len(stats))
 	if len(stats) == 0 {
