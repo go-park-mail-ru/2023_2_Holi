@@ -9,18 +9,16 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/gorilla/mux"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
-
 	auth_grpc "2023_2_Holi/auth/delivery/grpc"
 	auth_http "2023_2_Holi/auth/delivery/http"
 	auth_postgres "2023_2_Holi/auth/repository/postgresql"
 	auth_redis "2023_2_Holi/auth/repository/redis"
 	auth_usecase "2023_2_Holi/auth/usecase"
-
 	"2023_2_Holi/connectors/postgres"
 	"2023_2_Holi/connectors/redis"
+	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 
 	"2023_2_Holi/domain/grpc/session"
 	logs "2023_2_Holi/logger"

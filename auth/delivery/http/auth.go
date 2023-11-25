@@ -9,16 +9,29 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 )
+
+var hits = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "hits",
+	Help: "Number of hits.",
+}, []string{"status", "path"})
+
+var fooCount = prometheus.NewCounterVec(prometheus.CounterOpts{
+	Name: "foo_total",
+	Help: "Number of foo successfully processed.",
+}, []string{"path"})
 
 type AuthHandler struct {
 	AuthUsecase domain.AuthUsecase
 }
 
 func NewAuthHandler(mainRouter *mux.Router, u domain.AuthUsecase) {
+	prometheus.MustRegister(fooCount, hits)
 	handler := &AuthHandler{
 		AuthUsecase: u,
 	}
@@ -27,6 +40,8 @@ func NewAuthHandler(mainRouter *mux.Router, u domain.AuthUsecase) {
 	mainRouter.HandleFunc("/api/v1/auth/register", handler.Register).Methods(http.MethodPost, http.MethodOptions)
 	mainRouter.HandleFunc("/api/v1/auth/check", handler.CheckAuth).Methods(http.MethodPost, http.MethodOptions)
 	mainRouter.HandleFunc("/api/v1/auth/logout", handler.Logout).Methods(http.MethodPost, http.MethodOptions)
+
+	mainRouter.Handle("/metrics", promhttp.Handler())
 }
 
 // Login godoc
@@ -44,6 +59,7 @@ func NewAuthHandler(mainRouter *mux.Router, u domain.AuthUsecase) {
 //	@Failure		500		{object}	object{err=string}
 //	@Router			/api/v1/auth/login [post]
 func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
+	hits.WithLabelValues("200", r.URL.String()).Inc()
 	auth, err := a.auth(r)
 	if auth == true {
 		domain.WriteError(w, "you must be unauthorised", domain.GetHttpStatusCode(err))
@@ -132,6 +148,7 @@ func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
+	hits.WithLabelValues("204", r.URL.String()).Inc()
 	w.WriteHeader(http.StatusNoContent)
 }
 
@@ -195,6 +212,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 	})
 
+	hits.WithLabelValues("200", r.URL.String()).Inc()
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
@@ -216,6 +234,10 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/auth/check [post]
 func (a *AuthHandler) CheckAuth(w http.ResponseWriter, r *http.Request) {
+	hits.WithLabelValues("404", "lknerg").Inc()
+	labels := prometheus.Labels{"path": r.URL.Path}
+	fooCount.With(labels).Inc()
+
 	auth, err := a.auth(r)
 	if auth != true {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
