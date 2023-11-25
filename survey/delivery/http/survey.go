@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/mux"
 
 	"2023_2_Holi/domain"
@@ -25,6 +26,8 @@ func NewSurveyHandler(mainRouter *mux.Router, s domain.SurveyUsecase) {
 
 func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 
+	userID := context.Get(r, "userID").(int)
+
 	var survey domain.Survey
 
 	err := json.NewDecoder(r.Body).Decode(&survey)
@@ -37,12 +40,16 @@ func (s *SurveyHandler) AddSurvey(w http.ResponseWriter, r *http.Request) {
 
 	//defer r.CloseAndAlert(r.Body)
 
+	survey.ID = userID
 	survey.Attribute = strings.TrimSpace(survey.Attribute)
 	survey.Metric = survey.Metric
 
-	domain.WriteResponse(
-		w,
-		nil,
-		http.StatusOK,
-	)
+	err = s.SurveyUsecase.AddSurvey(survey)
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

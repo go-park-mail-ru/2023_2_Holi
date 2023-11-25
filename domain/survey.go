@@ -1,6 +1,7 @@
 package domain
 
 type Survey struct {
+	ID        int    `json:"id"`
 	Attribute string `json:"attribute"`
 	Metric    int    `json:"metric"`
 }
