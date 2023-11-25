@@ -25,7 +25,8 @@ func StartServer() {
 		LogrusLogger: logs.Logger,
 	}
 
-	pc := postgres.Connect(ctx)
+	dbParams := postgres.GetParamsForSurveyDB()
+	pc := postgres.Connect(ctx, dbParams)
 	defer pc.Close()
 
 	//rc := redis.Connect()
