@@ -31,9 +31,9 @@ func NewSurveyPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 }
 
 func (r *surveyPostgresqlRepository) AddSurvey(survey domain.Survey) error {
-	if survey.Attribute == "" || survey.Metric == 0 || survey.ID == 0 {
-		return domain.ErrBadRequest
-	}
+	// if survey.Attribute == "" || survey.ID == 0 {
+	// 	return domain.ErrBadRequest
+	// }
 
 	result := r.db.QueryRow(r.ctx, addAttributeQuery,
 		survey.Attribute,
