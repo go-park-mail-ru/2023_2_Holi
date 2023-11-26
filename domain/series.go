@@ -6,6 +6,8 @@ type Episode struct {
 	Description string `json:"description"`
 	PreviewPath string `json:"previewPath"`
 	MediaPath   string `json:"mediaPath"`
+	Number      int    `json:"number"`
+	Season      int    `json:"season"`
 }
 
 type SeriesRepository interface {

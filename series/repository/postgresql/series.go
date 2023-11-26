@@ -34,7 +34,7 @@ const getSeriesCastQuery = `
 	WHERE vc.video_id = $1
 `
 const getSeriesEpisodesQuery = `
-	SELECT e.name, e.description, e.season_number, e.number, e.media_path
+	SELECT e.id, e.name, e.description,  e.media_path, e.number, e.season_number
 	FROM episode AS e
 		JOIN video AS v ON e.video_id = v.id
 		WHERE v.id = $1
@@ -121,9 +121,7 @@ func (r *seriesPostgresqlRepository) GetSeriesData(id int) (domain.Video, error)
 	err := row.Scan(
 		&series.Name,
 		&series.Description,
-		&series.Duration,
 		&series.PreviewPath,
-		&series.MediaPath,
 		&series.PreviewVideoPath,
 		&series.ReleaseYear,
 		&series.Rating,
@@ -186,8 +184,10 @@ func (r *seriesPostgresqlRepository) GetSeriesEpisodes(SeriesId int) ([]domain.E
 		err = rows.Scan(
 			&episode.ID,
 			&episode.Name,
-			&episode.PreviewPath,
+			&episode.Description,
 			&episode.MediaPath,
+			&episode.Number,
+			&episode.Season,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "series_postgresql", "GetSeriesEpisodes", err, err.Error())
