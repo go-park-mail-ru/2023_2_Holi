@@ -16,6 +16,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/microcosm-cc/bluemonday"
 
+	series_http "2023_2_Holi/series/delivery/http"
+	series_postgres "2023_2_Holi/series/repository/postgresql"
+	series_usecase "2023_2_Holi/series/usecase"
+
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
@@ -71,12 +75,14 @@ func StartServer() {
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
 	fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
+	sr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
 	fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	fvu := favourites_usecase.NewFavouritesUsecase(fvr)
+	su := series_usecase.NewFilmsUsecase(sr)
 	//su := search_usecase.NewSearchUsecase(srr)
 
 	sess, _ := session.NewSession()
@@ -88,6 +94,7 @@ func StartServer() {
 	//auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, au)
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
+	series_http.NewSeriesHandler(authMiddlewareRouter, su)
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
@@ -96,7 +103,7 @@ func StartServer() {
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)

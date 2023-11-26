@@ -17,14 +17,14 @@ const getSeriesByGenreQuery = `
 		JOIN episode AS e ON e.video_id = v.id
 		JOIN video_genre AS vg ON v.id = vg.video_id
 		JOIN genre AS g ON vg.genre_id = g.id
-	WHERE g.name = 'Драма' AND v.product = 'series';
+	WHERE g.name = $1 AND v.product = 'series';
 `
 
 const getSeriesDataQuery = `
 	SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating, age_restriction
 	FROM video
 		JOIN episode AS e ON video.id = video_id
-	WHERE video.id = 20 AND video.product = 'series';
+	WHERE video.id = $1 AND video.product = 'series';
 `
 
 const getSeriesCastQuery = `
@@ -79,11 +79,11 @@ func NewSeriesPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 func (r *seriesPostgresqlRepository) GetSeriesByGenre(genre string) ([]domain.Video, error) {
 	rows, err := r.db.Query(r.ctx, getSeriesByGenreQuery, genre)
 	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
+		logs.LogError(logs.Logger, "series_postgresql", "GetSeriesByGenre", err, err.Error())
 		return nil, err
 	}
 	defer rows.Close()
-	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
+	logs.Logger.Debug("GetSeriesByGenre query result:", rows)
 
 	var films []domain.Video
 

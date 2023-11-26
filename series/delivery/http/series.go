@@ -14,7 +14,7 @@ type SeriesHandler struct {
 	SeriesUsecase domain.SeriesUsecase
 }
 
-func NewFilmsHandler(router *mux.Router, su domain.SeriesUsecase) {
+func NewSeriesHandler(router *mux.Router, su domain.SeriesUsecase) {
 	handler := &SeriesHandler{
 		SeriesUsecase: su,
 	}
@@ -77,20 +77,20 @@ func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	film, artists, episodes, err := h.SeriesUsecase.GetSeriesData(filmID)
+	series, artists, episodes, err := h.SeriesUsecase.GetSeriesData(filmID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
 		return
 	}
 
-	logs.Logger.Debug("film:", film)
+	logs.Logger.Debug("film:", series)
 	logs.Logger.Debug("artists:", artists)
 	logs.Logger.Debug("episodes:", episodes)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
-			"film":     film,
+			"film":     series,
 			"artists":  artists,
 			"episodes": episodes,
 		},
