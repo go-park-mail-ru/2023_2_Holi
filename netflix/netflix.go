@@ -2,6 +2,7 @@ package netflix
 
 import (
 	g_sess "2023_2_Holi/domain/grpc/session"
+	favourites_http "2023_2_Holi/favourites/delivery/http"
 	"context"
 	"embed"
 	"net/http"
@@ -10,15 +11,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
-	"github.com/microcosm-cc/bluemonday"
-
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/microcosm-cc/bluemonday"
 
 	films_http "2023_2_Holi/films/delivery/http"
 	films_postgres "2023_2_Holi/films/repository/postgresql"
 	films_usecase "2023_2_Holi/films/usecase"
 
-	"github.com/joho/godotenv"
+	favourites_postgres "2023_2_Holi/favourites/repository/postgresql"
+	favourites_usecase "2023_2_Holi/favourites/usecase"
 
 	genre_http "2023_2_Holi/genre/delivery/http"
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
@@ -33,8 +36,6 @@ import (
 	"2023_2_Holi/connectors/postgres"
 	logs "2023_2_Holi/logger"
 	"2023_2_Holi/middleware"
-
-	_ "github.com/lib/pq"
 )
 
 const (
@@ -69,13 +70,13 @@ func StartServer() {
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
-	//fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
+	fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
 	fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
-	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
+	fvu := favourites_usecase.NewFavouritesUsecase(fvr)
 	//su := search_usecase.NewSearchUsecase(srr)
 
 	sess, _ := session.NewSession()
@@ -90,7 +91,7 @@ func StartServer() {
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
-	//favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
+	favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu)
 
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
@@ -100,7 +101,7 @@ func StartServer() {
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 	mainRouter.Use(mw.CSRFProtection)
-	mainRouter.Use(mw.Metrics)
+	//mainRouter.Use(mw.Metrics)
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
 	logs.Logger.Info("starting server at ", serverPort)
