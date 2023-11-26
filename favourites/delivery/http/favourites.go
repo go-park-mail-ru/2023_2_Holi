@@ -3,6 +3,7 @@ package http
 import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
+	"github.com/gorilla/context"
 	"net/http"
 	"strconv"
 
@@ -11,13 +12,11 @@ import (
 
 type FavouritesHandler struct {
 	FavouritesUsecase domain.FavouritesUsecase
-	UtilsUsecase      domain.UtilsUsecase
 }
 
-func NewFavouritesHandler(router *mux.Router, fu domain.FavouritesUsecase, uu domain.UtilsUsecase) {
+func NewFavouritesHandler(router *mux.Router, fu domain.FavouritesUsecase) {
 	handler := &FavouritesHandler{
 		FavouritesUsecase: fu,
-		UtilsUsecase:      uu,
 	}
 
 	router.HandleFunc("/v1/video/favourites/{id}", handler.AddToFavourites).Methods(http.MethodPost, http.MethodOptions)
@@ -46,8 +45,7 @@ func (h *FavouritesHandler) AddToFavourites(w http.ResponseWriter, r *http.Reque
 	}
 	logs.Logger.Debug("AddToFavourites path param id: ", videoID)
 
-	c, _ := r.Cookie("session_token")
-	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
+	userID, err := strconv.Atoi(context.Get(r, "userID").(string))
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
@@ -86,8 +84,7 @@ func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.
 	}
 	logs.Logger.Debug("RemoveFromFavourites path param id: ", videoID)
 
-	c, _ := r.Cookie("session_token")
-	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
+	userID, err := strconv.Atoi(context.Get(r, "userID").(string))
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
@@ -114,8 +111,7 @@ func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/video/favourites/{id} [get]
 func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Request) {
-	c, _ := r.Cookie("session_token")
-	userID, err := h.UtilsUsecase.GetIdBy(c.Value)
+	userID, err := strconv.Atoi(context.Get(r, "userID").(string))
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "RemoveFromFavourites", err, err.Error())
