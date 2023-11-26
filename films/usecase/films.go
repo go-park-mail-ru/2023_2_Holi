@@ -15,7 +15,7 @@ func NewFilmsUsecase(fr domain.FilmsRepository) domain.FilmsUsecase {
 	}
 }
 
-func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
+func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Video, error) {
 	films, err := u.filmRepo.GetFilmsByGenre(genre)
 	if err != nil {
 		logs.LogError(logs.Logger, "films_usecase", "GetFilmsByGenre", err, err.Error())
@@ -25,7 +25,7 @@ func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Film, error) {
 	return films, nil
 }
 
-func (u *filmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
+func (u *filmsUsecase) GetCastPage(id int) ([]domain.Video, domain.Cast, error) {
 	films, err := u.filmRepo.GetCastPage(id)
 	if err != nil {
 		return nil, domain.Cast{}, err
@@ -39,24 +39,24 @@ func (u *filmsUsecase) GetCastPage(id int) ([]domain.Film, domain.Cast, error) {
 	return films, artist, nil
 }
 
-func (u *filmsUsecase) GetFilmData(id int) (domain.Film, []domain.Cast, error) {
+func (u *filmsUsecase) GetFilmData(id int) (domain.Video, []domain.Cast, error) {
 	film, err := u.filmRepo.GetFilmData(id)
 	if err != nil {
 		logs.LogError(logs.Logger, "films_usecase", "GetFilmData", err, err.Error())
-		return domain.Film{}, nil, err
+		return domain.Video{}, nil, err
 	}
 	artists, err := u.filmRepo.GetFilmCast(id)
 	if err != nil {
-		return domain.Film{}, nil, err
+		return domain.Video{}, nil, err
 	}
 
 	return film, artists, nil
 }
 
-func (u *filmsUsecase) GetTopRate() (domain.Film, error) {
+func (u *filmsUsecase) GetTopRate() (domain.Video, error) {
 	genres, err := u.filmRepo.GetTopRate()
 	if err != nil {
-		return domain.Film{}, err
+		return domain.Video{}, err
 	}
 	//logger.Debug("Usecase GetGenres:", genres)
 

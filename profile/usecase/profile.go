@@ -29,6 +29,7 @@ func (u *profileUseCase) GetUserData(userID int) (domain.User, error) {
 		logs.LogError(logs.Logger, "profile_usecase", "GetUserData", err, err.Error())
 		return domain.User{}, err
 	}
+	user.Password = []byte{}
 	logs.Logger.Debug("Usecase GetUserData:", user)
 
 	return user, nil
@@ -53,6 +54,7 @@ func (u *profileUseCase) UpdateUser(newUser domain.User) (domain.User, error) {
 		logs.LogError(logs.Logger, "profile_usecase", "UpdateUser", err, err.Error())
 		return domain.User{}, err
 	}
+	updatedUser.Password = []byte{}
 	logs.Logger.Debug("Usecase UpdateUser:", updatedUser)
 
 	return updatedUser, nil

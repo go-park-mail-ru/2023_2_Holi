@@ -9,8 +9,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-var logger = logs.LoggerInit()
-
 type GenreHandler struct {
 	GenreUsecase domain.GenreUsecase
 }
@@ -37,12 +35,12 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	genres, err := h.GenreUsecase.GetGenres()
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
 		return
 	}
 
-	logger.Debug("Http GetGenres:", genres)
+	logs.Logger.Debug("Http GetGenres:", genres)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
@@ -52,8 +50,8 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
-// GetGenres godoc
-// @Summary Get genres
+// GetGenresSeries godoc
+// @Summary Get genres of series
 // @Description Get a list of genres.
 // @Tags genres
 // @Produce json
@@ -65,12 +63,12 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 func (h *GenreHandler) GetGenresSeries(w http.ResponseWriter, r *http.Request) {
 	genres, err := h.GenreUsecase.GetGenresSeries()
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
 		return
 	}
 
-	logger.Debug("Http GetGenres:", genres)
+	logs.Logger.Debug("Http GetGenres:", genres)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{

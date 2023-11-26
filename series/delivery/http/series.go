@@ -20,12 +20,12 @@ func NewFilmsHandler(router *mux.Router, su domain.SeriesUsecase) {
 	}
 
 	router.HandleFunc("/v1/series/genre/{genre}", handler.GetSeriesByGenre).Methods(http.MethodGet, http.MethodOptions)
-	// router.HandleFunc("/v1/series/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
-	// router.HandleFunc("/v1/series/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/series/{id}", handler.GetSeriesData).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/series/cast/{id}", handler.GetCastPageSeries).Methods(http.MethodGet, http.MethodOptions)
 	// router.HandleFunc("/v1/series/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
 }
 
-// GetFilmsByGenre godoc
+// GetSeriesByGenre godoc
 // @Summary 		Get films by genre
 // @Description 	Get a list of films based on the specified genre.
 // @Tags 			Films
@@ -35,14 +35,14 @@ func NewFilmsHandler(router *mux.Router, su domain.SeriesUsecase) {
 // @Failure         400  {object} object{err=string}
 // @Failure         404  {object} object{err=string}
 // @Failure         500  {object} object{err=string}
-// @Router 			/api/v1/films/genre/{genre} [get]
+// @Router 			/api/v1/series/genre/{genre} [get]
 func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	genre := vars["genre"]
 
 	films, err := h.SeriesUsecase.GetSeriesByGenre(genre)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmsByGenre", err, "Failed to get films")
 		return
 	}
@@ -57,7 +57,7 @@ func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request)
 	)
 }
 
-// GetFilmData godoc
+// GetSeriesData godoc
 // @Summary 		Get Film data by id
 // @Description 	Get content for Film page
 // @Tags 			Films
@@ -67,7 +67,7 @@ func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request)
 // @Failure 		400 {json} domain.Response
 // @Failure 		404 {json} domain.Response
 // @Failure 		500 {json} domain.Response
-// @Router 			/api/v1/films/{id} [get]
+// @Router 			/api/v1/series/{id} [get]
 func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filmID, err := strconv.Atoi(vars["id"])
@@ -77,62 +77,64 @@ func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	film, artists, err := h.SeriesUsecase.GetSeriesData(filmID)
+	film, artists, episodes, err := h.SeriesUsecase.GetSeriesData(filmID)
 	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
 		return
 	}
 
 	logs.Logger.Debug("film:", film)
 	logs.Logger.Debug("artists:", artists)
+	logs.Logger.Debug("episodes:", episodes)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
-			"film":    film,
-			"artists": artists,
+			"film":     film,
+			"artists":  artists,
+			"episodes": episodes,
 		},
 		http.StatusOK,
 	)
 }
 
-// // GetCastPage godoc
-// // @Summary 		Get cast page
-// // @Description 	Get a list of films based on the cast name.
-// // @Tags 			Cast
-// // @Param 			cast path string true "The Films of the Cast you want to retrieve."
-// // @Produce 		json
-// // @Success 		200 {json} domain.Films
-// // @Failure			400 {json} domain.Response
-// // @Failure 		404 {json} domain.Response
-// // @Failure 		500 {json} domain.Response
-// // @Router 			/api/v1/films/cast/{id} [get]
-// func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
-// 	vars := mux.Vars(r)
-// 	id, err := strconv.Atoi(vars["id"])
-// 	if err != nil {
-// 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-// 		logs.LogError(logs.Logger, "films_http", "GetCastPage", err, err.Error())
-// 		return
-// 	}
-// 	films, cast, err := h.FilmsUsecase.GetCastPage(id)
-// 	if err != nil {
-// 		domain.WriteError(w, err.Error(), domain.GetStatusCode(err))
-// 		logs.LogError(logs.Logger, "http", "GetCastPage", err, "Failed to get cast")
-// 		return
-// 	}
+// GetCastPageSeries godoc
+// @Summary 		Get cast page series
+// @Description 	Get a list of series based on the cast name.
+// @Tags 			Cast
+// @Param 			cast path string true "The Series of the Cast you want to retrieve."
+// @Produce 		json
+// @Success 		200 {json} []domain.Video
+// @Failure			400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
+// @Router 			/api/v1/series/cast/{id} [get]
+func (h *SeriesHandler) GetCastPageSeries(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "films_http", "GetCastPageSeries", err, err.Error())
+		return
+	}
+	series, cast, err := h.SeriesUsecase.GetCastPageSeries(id)
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetCastPageSeries", err, "Failed to get cast")
+		return
+	}
 
-// 	logs.Logger.Debug("Http GetCastPage:", films)
-// 	logs.Logger.Debug("Http GetCastPage:", cast)
-// 	domain.WriteResponse(
-// 		w,
-// 		map[string]interface{}{
-// 			"films": films,
-// 			"cast":  cast,
-// 		},
-// 		http.StatusOK,
-// 	)
-// }
+	logs.Logger.Debug("Http GetCastPageSeries:", series)
+	logs.Logger.Debug("Http GetCastPageSeries:", cast)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"series": series,
+			"cast":   cast,
+		},
+		http.StatusOK,
+	)
+}
 
 // func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
 // 	film, err := h.FilmsUsecase.GetTopRate()

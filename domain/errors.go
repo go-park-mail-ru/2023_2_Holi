@@ -2,6 +2,7 @@ package domain
 
 import (
 	"errors"
+	"google.golang.org/grpc/codes"
 	"net/http"
 )
 
@@ -11,26 +12,50 @@ var (
 	ErrBadRequest          = errors.New("request is not valid")
 	ErrUnauthorized        = errors.New("need to authorize")
 	ErrWrongCredentials    = errors.New("username or password is invalid")
+	ErrInvalidToken        = errors.New("session token is invalid")
 	ErrAlreadyExists       = errors.New("resource already exists")
+	ErrOutOfRange          = errors.New("id is out of range")
 )
 
-func GetStatusCode(err error) int {
+func GetHttpStatusCode(err error) int {
 	if err == nil {
 		return http.StatusOK
 	}
 
 	switch err {
-	case ErrAlreadyExists:
-		return http.StatusForbidden
-	case ErrInternalServerError:
-		return http.StatusInternalServerError
-	case ErrNotFound:
-		return http.StatusNotFound
+	case ErrWrongCredentials:
+		return http.StatusBadRequest
 	case ErrUnauthorized:
 		return http.StatusUnauthorized
-	case ErrWrongCredentials:
-		return http.StatusForbidden
+
+	case ErrInvalidToken:
+		return http.StatusBadRequest
+	case ErrBadRequest:
+		return http.StatusBadRequest
+
+	case ErrNotFound:
+		return http.StatusNotFound
+	case ErrOutOfRange:
+		return http.StatusNotFound
+
+	case ErrAlreadyExists:
+		return http.StatusConflict
+
 	default:
 		return http.StatusInternalServerError
+	}
+}
+
+func GetGrpcStatusCode(err error) codes.Code {
+	if err == nil {
+		return codes.OK
+	}
+
+	switch err {
+	case ErrNotFound:
+		return codes.NotFound
+
+	default:
+		return codes.Internal
 	}
 }

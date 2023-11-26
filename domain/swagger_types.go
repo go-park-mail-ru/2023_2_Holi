@@ -8,3 +8,16 @@ type UserRequest struct {
 	Email     string `json:"email" binding:"required"`
 	ImagePath string `json:"imagePath"`
 }
+
+type VideoResponse struct {
+	ID               int     `json:"id"`
+	Name             string  `json:"name"`
+	Description      string  `json:"description"`
+	PreviewPath      string  `json:"previewPath"`
+	MediaPath        string  `json:"mediaPath"`
+	ReleaseYear      int     `json:"releaseYear"`
+	Rating           float64 `json:"rating"`
+	AgeRestriction   int     `json:"ageRestriction"`
+	Duration         string  `json:"duration"`
+	PreviewVideoPath string  `json:"previewVideoPath"`
+}

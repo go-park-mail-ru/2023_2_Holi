@@ -19,7 +19,7 @@ func NewSessionRedisRepository(client *redis.Client) domain.SessionRepository {
 
 func (s *sessionRedisRepository) Add(session domain.Session) error {
 	if session.Token == "" {
-		return errors.New("empty token")
+		return domain.ErrInvalidToken
 	}
 	duration := session.ExpiresAt.Sub(time.Now())
 	err := s.client.Set(context.TODO(), session.Token, session.UserID, duration).Err()
@@ -31,7 +31,7 @@ func (s *sessionRedisRepository) Add(session domain.Session) error {
 
 func (s *sessionRedisRepository) DeleteByToken(token string) error {
 	if token == "" {
-		return errors.New("empty token")
+		return domain.ErrInvalidToken
 	}
 	err := s.client.Del(context.Background(), token).Err()
 	if err != nil {
@@ -40,13 +40,18 @@ func (s *sessionRedisRepository) DeleteByToken(token string) error {
 	return nil
 }
 
-func (s *sessionRedisRepository) SessionExists(token string) (bool, error) {
+func (s *sessionRedisRepository) SessionExists(token string) (string, error) {
 	if token == "" {
-		return false, errors.New("empty token")
+		return "", domain.ErrInvalidToken
 	}
-	exists, err := s.client.Exists(context.Background(), token).Result()
+
+	ID, err := s.client.Get(context.Background(), token).Result()
 	if err != nil {
-		return false, err
+		if errors.Is(err, redis.Nil) {
+			return "", domain.ErrNotFound
+		}
+		return "", err
 	}
-	return exists == 1, nil
+
+	return ID, nil
 }

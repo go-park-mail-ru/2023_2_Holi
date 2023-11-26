@@ -17,7 +17,7 @@ func Connect() *redis.Client {
 
 	_, err := r.Ping(context.Background()).Result()
 	if err != nil {
-		logs.LogError(logs.Logger, "redis", "Connect", err, err.Error())
+		logs.LogFatal(logs.Logger, "redis", "Connect", err, err.Error())
 	}
 	logs.Logger.Info("Connected to redis")
 	logs.Logger.Debug("Redis client :", r)
