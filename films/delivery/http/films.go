@@ -69,7 +69,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 //	@Tags			Films
 //	@Param			id	path	int	true	"Id film you want to get."
 //	@Produce		json
-//	@Success		200	{json}	domain.Films
+//	@Success		200	{json}	domain.Video
 //	@Failure		400	{json}	domain.Response
 //	@Failure		404	{json}	domain.Response
 //	@Failure		500	{json}	domain.Response
@@ -109,7 +109,7 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 //	@Tags			Cast
 //	@Param			cast	path	string	true	"The Films of the Cast you want to retrieve."
 //	@Produce		json
-//	@Success		200	{json}	domain.Films
+//	@Success		200	{json}	domain.Video
 //	@Failure		400	{json}	domain.Response
 //	@Failure		404	{json}	domain.Response
 //	@Failure		500	{json}	domain.Response

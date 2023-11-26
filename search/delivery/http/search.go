@@ -26,7 +26,7 @@ func NewSearchHandler(router *mux.Router, su domain.SearchUsecase) {
 // @Tags         search
 // @Produce 	 json
 // @Param 		 searchStr path string true "The string to be searched for"
-// @Success      200  {object} object{body=object{films=[]domain.Films, cast=[]domain.Cast}}
+// @Success      200  {object} object{body=object{films=[]domain.Video, cast=[]domain.Cast}}
 // @Failure      400  {object} object{err=string}
 // @Failure      403  {object} object{err=string}
 // @Failure      404  {object} object{err=string}
