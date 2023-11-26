@@ -1,9 +1,10 @@
 package http
 
 import (
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"strconv"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
@@ -69,10 +70,10 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 //	@Tags			Films
 //	@Param			id	path	int	true	"Id film you want to get."
 //	@Produce		json
-//	@Success		200	{json}	domain.Films
-//	@Failure		400	{json}	domain.Response
-//	@Failure		404	{json}	domain.Response
-//	@Failure		500	{json}	domain.Response
+//	@Success		200	{json}	object{body=domain.Video}
+//	@Failure		403		{object}	object{err=string}
+//	@Failure		404	{json}	object{err=string}
+//	@Failure		500	{json}	object{err=string}
 //	@Router			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
