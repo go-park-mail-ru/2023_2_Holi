@@ -21,14 +21,12 @@ func NewSearchHandler(router *mux.Router, su domain.SearchUsecase) {
 }
 
 // GetSearchData godoc
-// @Summary      search data
-// @Description  get search data by incoming string
-// @Tags         search
+// @Summary      Search data
+// @Description  Get search data by incoming string
+// @Tags         Search
 // @Produce 	 json
 // @Param 		 searchStr path string true "The string to be searched for"
 // @Success      200  {object} object{body=object{films=[]domain.Video, cast=[]domain.Cast}}
-// @Failure      400  {object} object{err=string}
-// @Failure      403  {object} object{err=string}
 // @Failure      404  {object} object{err=string}
 // @Failure      500  {object} object{err=string}
 // @Router       /api/v1/search/{searchStr} [get]
