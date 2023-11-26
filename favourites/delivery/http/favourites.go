@@ -107,7 +107,7 @@ func (h *FavouritesHandler) RemoveFromFavourites(w http.ResponseWriter, r *http.
 //	@Description	Retrieves all video from favourites.
 //	@Tags			Favourites
 //	@Produce		json
-//	@Success		200	{object}	object{body=[]domain.VideoResponse}
+//	@Success		200	{object}	object{body=object{videos=[]domain.VideoResponse}}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/video/favourites/{id} [get]
 func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Request) {

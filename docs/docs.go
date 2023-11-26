@@ -478,10 +478,15 @@ const docTemplate = `{
                             "type": "json"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "404": {
@@ -527,42 +532,56 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/domain.Response"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "body": {
-                                            "type": "object",
-                                            "properties": {
-                                                "user": {
-                                                    "$ref": "#/definitions/domain.User"
-                                                }
-                                            }
-                                        }
-                                    }
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "$ref": "#/definitions/domain.User"
                                 }
-                            ]
+                            }
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "403": {
                         "description": "Forbidden",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -591,25 +610,45 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "$ref": "#/definitions/domain.User"
+                                }
+                            }
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "type": "json"
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -617,14 +656,14 @@ const docTemplate = `{
         },
         "/api/v1/search/{searchStr}": {
             "get": {
-                "description": "get search data by incoming string",
+                "description": "Get search data by incoming string",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "search"
+                    "Search"
                 ],
-                "summary": "search data",
+                "summary": "Search data",
                 "parameters": [
                     {
                         "type": "string",
@@ -656,28 +695,6 @@ const docTemplate = `{
                                             }
                                         }
                                     }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "err": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "err": {
-                                    "type": "string"
                                 }
                             }
                         }
@@ -724,9 +741,14 @@ const docTemplate = `{
                             "type": "object",
                             "properties": {
                                 "body": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/domain.VideoResponse"
+                                    "type": "object",
+                                    "properties": {
+                                        "videos": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/domain.VideoResponse"
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -925,15 +947,6 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.Response": {
-            "type": "object",
-            "properties": {
-                "body": {},
-                "err": {
-                    "type": "string"
-                }
-            }
-        },
         "domain.User": {
             "type": "object",
             "properties": {
@@ -1066,10 +1079,10 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "127.0.0.1",
-	BasePath:         "/api/v1/auth/",
+	BasePath:         "/",
 	Schemes:          []string{"http"},
-	Title:            "Netfilx auth API",
-	Description:      "API of the nelfix auth service",
+	Title:            "Netfilx API",
+	Description:      "API of the nelfix project by holi",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

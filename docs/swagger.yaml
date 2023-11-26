@@ -1,4 +1,4 @@
-basePath: /api/v1/auth/
+basePath: /
 definitions:
   domain.Cast:
     properties:
@@ -19,12 +19,6 @@ definitions:
   domain.Genre:
     properties:
       name:
-        type: string
-    type: object
-  domain.Response:
-    properties:
-      body: {}
-      err:
         type: string
     type: object
   domain.User:
@@ -116,10 +110,10 @@ info:
     email: ax.chinaev@yandex.ru
     name: Alex Chinaev
     url: https://vk.com/l.chinaev
-  description: API of the nelfix auth service
+  description: API of the nelfix project by holi
   license:
     name: AS IS (NO WARRANTY)
-  title: Netfilx auth API
+  title: Netfilx API
   version: "1.0"
 paths:
   /api/v1/auth/check:
@@ -336,10 +330,13 @@ paths:
           description: OK
           schema:
             type: json
-        "400":
-          description: Bad Request
+        "403":
+          description: Forbidden
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
         "404":
           description: Not Found
           schema:
@@ -443,19 +440,31 @@ paths:
         "200":
           description: OK
           schema:
-            type: json
-        "400":
-          description: Bad Request
+            properties:
+              body:
+                $ref: '#/definitions/domain.User'
+            type: object
+        "403":
+          description: Forbidden
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
         "404":
           description: Not Found
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
       summary: Get user by id
       tags:
       - profile
@@ -477,33 +486,44 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/domain.Response'
-            - properties:
-                body:
-                  properties:
-                    user:
-                      $ref: '#/definitions/domain.User'
-                  type: object
-              type: object
+            properties:
+              body:
+                $ref: '#/definitions/domain.User'
+            type: object
         "400":
           description: Bad Request
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
         "403":
           description: Forbidden
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
         "500":
           description: Internal Server Error
           schema:
-            type: json
+            properties:
+              err:
+                type: string
+            type: object
       summary: update profile
       tags:
       - profile
   /api/v1/search/{searchStr}:
     get:
-      description: get search data by incoming string
+      description: Get search data by incoming string
       parameters:
       - description: The string to be searched for
         in: path
@@ -529,20 +549,6 @@ paths:
                     type: array
                 type: object
             type: object
-        "400":
-          description: Bad Request
-          schema:
-            properties:
-              err:
-                type: string
-            type: object
-        "403":
-          description: Forbidden
-          schema:
-            properties:
-              err:
-                type: string
-            type: object
         "404":
           description: Not Found
           schema:
@@ -557,9 +563,9 @@ paths:
               err:
                 type: string
             type: object
-      summary: search data
+      summary: Search data
       tags:
-      - search
+      - Search
   /api/v1/video/favourites/{id}:
     delete:
       description: Deletes a film or a whole series from favourites by id.
@@ -608,9 +614,12 @@ paths:
           schema:
             properties:
               body:
-                items:
-                  $ref: '#/definitions/domain.VideoResponse'
-                type: array
+                properties:
+                  videos:
+                    items:
+                      $ref: '#/definitions/domain.VideoResponse'
+                    type: array
+                type: object
             type: object
         "500":
           description: Internal Server Error
