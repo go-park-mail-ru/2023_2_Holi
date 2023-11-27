@@ -10,58 +10,61 @@ import (
 )
 
 const getSeriesByGenreQuery = `
-	SELECT DISTINCT v.id, v.name, v.preview_path, v.rating , v.preview_video_path
-	FROM video AS v
-		JOIN video_cast AS vc ON v.id = vc.video_id
-		JOIN "cast" AS c ON vc.cast_id = c.id
-		JOIN episode AS e ON e.video_id = v.id
-		JOIN video_genre AS vg ON v.id = vg.video_id
-		JOIN genre AS g ON vg.genre_id = g.id
-	WHERE g.name = $1 AND v.product = 'series';
+    SELECT DISTINCT v.id, v.name, v.preview_path, v.rating, v.preview_video_path, v.seasons_count
+    FROM video AS v
+        JOIN video_cast AS vc ON v.id = vc.video_id
+        JOIN "cast" AS c ON vc.cast_id = c.id
+        JOIN episode AS e ON e.video_id = v.id
+        JOIN video_genre AS vg ON v.id = vg.video_id
+        JOIN genre AS g ON vg.genre_id = g.id
+    WHERE g.name = $1 AND v.seasons_count > 0;
 `
 
 const getSeriesDataQuery = `
-	SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating, age_restriction
-	FROM video
-		JOIN episode AS e ON video.id = video_id
-	WHERE video.id = $1 AND video.product = 'series';
+    SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating, age_restriction
+    FROM video
+        JOIN episode AS e ON video.id = e.video_id
+    WHERE video.id = $1 AND video.seasons_count > 0;
 `
 
 const getSeriesCastQuery = `
-	SELECT id, name
-	FROM "cast"
-		JOIN video_cast AS vc ON id = cast_id
-	WHERE vc.video_id = $1
+    SELECT c.id, c.name
+    FROM "cast" c
+        JOIN video_cast vc ON c.id = vc.cast_id
+        JOIN video v ON vc.video_id = v.id
+    WHERE vc.video_id = $1 AND v.seasons_count > 0;
 `
+
 const getSeriesEpisodesQuery = `
-	SELECT e.id, e.name, e.description,  e.media_path, e.number, e.season_number
-	FROM episode AS e
-		JOIN video AS v ON e.video_id = v.id
-		WHERE v.id = $1
+    SELECT e.id, e.name, e.description, e.media_path, e.number, e.season_number
+    FROM episode AS e
+    JOIN video AS v ON e.video_id = v.id
+    WHERE v.id = $1 AND v.seasons_count > 0;
 `
 
 const getCastPageQuery = `
-	SELECT video.id, video.name, video.preview_path, video.rating, video.preview_video_path
-	FROM video
-	WHERE video.id IN (
-		SELECT vc.video_id
-		FROM video_cast AS vc
-		WHERE vc.cast_id = $1
-		);
+    SELECT video.id, video.name, video.preview_path, video.rating, video.preview_video_path
+    FROM video
+    WHERE video.id IN (
+        SELECT vc.video_id
+        FROM video_cast AS vc
+        WHERE vc.cast_id = $1 AND video.seasons_count > 0
+    );
 `
 
 const getCastNameQuery = `
-		SELECT "cast".name
-		FROM "cast" 
-		WHERE "cast".id = $1
+    SELECT "cast".name
+    FROM "cast" 
+    WHERE "cast".id = $1;
 `
 
 const getTopRateQuery = `	
-	SELECT video.id, video.name,video.description, video.preview_video_path, e.media_path
-	FROM video
-	JOIN episode AS e ON video.id = e.video_id
-	ORDER BY rating DESC
-	LIMIT 1
+    SELECT video.id, video.name, video.description, video.preview_video_path, e.media_path
+    FROM video
+    JOIN episode AS e ON video.id = e.video_id
+    WHERE video.seasons_count > 0
+    ORDER BY rating DESC
+    LIMIT 1;
 `
 
 type seriesPostgresqlRepository struct {
@@ -95,6 +98,7 @@ func (r *seriesPostgresqlRepository) GetSeriesByGenre(genre string) ([]domain.Vi
 			&film.PreviewPath,
 			&film.Rating,
 			&film.PreviewVideoPath,
+			&film.SeasonsCount,
 		)
 
 		if err != nil {

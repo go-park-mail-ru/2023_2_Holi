@@ -13,5 +13,5 @@ type Video struct {
 	AgeRestriction   int             `json:"ageRestriction"`
 	Duration         pgtype.Interval `json:"-"`
 	PreviewVideoPath string          `json:"previewVideoPath"`
-	SeasonsCount     int             `json:"seasonsCount,omitempty"`
+	SeasonsCount     int             `json:"seasonsCount"`
 }

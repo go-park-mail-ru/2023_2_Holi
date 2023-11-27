@@ -167,7 +167,7 @@ func main() {
 		genres := strings.Split(row[1], ",")
 		casts := strings.Split(row[10], ",")
 
-		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, product, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 		name := strings.Replace(row[5], " ", "_", -1)
 		pr_Path := pathPreview + name + ".jpg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
@@ -178,7 +178,7 @@ func main() {
 			return
 		}
 		age_restriction := ageRes(row[11])
-		_, err = db.Exec(sqlVideo, count, row[0], row[23], pr_Path, pr_pathMedia, "movie", releaseInt, row[12], age_restriction, 0)
+		_, err = db.Exec(sqlVideo, count, row[0], row[23], pr_Path, pr_pathMedia, releaseInt, row[12], age_restriction, 0)
 		if err != nil {
 			log.Printf("Ошибка при вставке video: %v", err)
 			continue
@@ -242,7 +242,7 @@ func main() {
 		genres := strings.Split(records[i][1], ",")
 		casts := strings.Split(records[i][10], ",")
 
-		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, product, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 		name := strings.Replace(records[i][5], " ", "_", -1)
 		pr_Path := pathPreview + name + ".jpg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
@@ -253,7 +253,7 @@ func main() {
 			return
 		}
 		age_restriction := ageRes(records[i][11])
-		_, err = db.Exec(sqlVideo, count, records[i][0], records[i][23], pr_Path, pr_pathMedia, "series", releaseInt, records[i][12], age_restriction, records[i][2])
+		_, err = db.Exec(sqlVideo, count, records[i][0], records[i][23], pr_Path, pr_pathMedia, releaseInt, records[i][12], age_restriction, records[i][2])
 		if err != nil {
 			log.Printf("Ошибка при вставке video: %v", err)
 			continue
