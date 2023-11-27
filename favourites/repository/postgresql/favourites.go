@@ -21,7 +21,7 @@ const DeleteFromFavouritesQuery = `
 
 const SelectAllQuery = `
 	SELECT v.id, v.name, v.description,
-		v.preview_path, v.preview_video_path, v.release_year, v.rating, v.age_restriction
+		v.preview_path, v.preview_video_path, v.release_year, v.rating, v.age_restriction, v.seeasons_count
 	FROM video AS v
 		JOIN favourite AS f ON video_id = v.id
 	WHERE f.user_id = $1
@@ -94,6 +94,7 @@ func (r *favouritesUsecasePostgresqlRepository) SelectAllFavourites(userID int) 
 			&video.ReleaseYear,
 			&video.Rating,
 			&video.AgeRestriction,
+			&video.SeasonsCount,
 		)
 
 		if err != nil {
