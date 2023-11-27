@@ -222,5 +222,14 @@ func main() {
 		}
 	}
 
+	_, err = db.Exec(`UPDATE "video" SET tsv = setweight(to_tsvector(name), 'A');`)
+	if err != nil {
+		log.Printf("Ошибка при создании вектора для video.name: %v", err)
+	}
+	_, err = db.Exec(`UPDATE "cast" SET tsv = setweight(to_tsvector(name), 'A');`)
+	if err != nil {
+		log.Printf("Ошибка при создании вектора для cast.name: %v", err)
+	}
+
 	fmt.Println("Данные из CSV-файла успешно вставлены в таблицу films.")
 }
