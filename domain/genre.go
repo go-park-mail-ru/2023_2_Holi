@@ -7,10 +7,10 @@ type Genre struct {
 
 type GenreRepository interface {
 	GetGenres() ([]Genre, error)
-	GetGenresSeries() ([]Genre, error)
+	//GetGenresSeries() ([]Genre, error)
 }
 
 type GenreUsecase interface {
 	GetGenres() ([]Genre, error)
-	GetGenresSeries() ([]Genre, error)
+	//GetGenresSeries() ([]Genre, error)
 }

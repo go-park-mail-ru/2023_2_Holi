@@ -18,8 +18,8 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 		GenreUsecase: gu,
 	}
 
-	router.HandleFunc("/v1/genres/films", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/genres/series", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/genres", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
+	//router.HandleFunc("/v1/genres/series", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetGenres godoc
@@ -31,7 +31,7 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 // @Failure			400 {json} domain.Response
 // @Failure 		404 {json} domain.Response
 // @Failure 		500 {json} domain.Response
-// @Router /v1/genres/films [get]
+// @Router /v1/genres [get]
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 	genres, err := h.GenreUsecase.GetGenres()
 	if err != nil {
@@ -60,20 +60,20 @@ func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
 // @Failure 		404 {json} domain.Response
 // @Failure 		500 {json} domain.Response
 // @Router /v1/genres/series [get]
-func (h *GenreHandler) GetGenresSeries(w http.ResponseWriter, r *http.Request) {
-	genres, err := h.GenreUsecase.GetGenresSeries()
-	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
-		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
-		return
-	}
-
-	logs.Logger.Debug("Http GetGenres:", genres)
-	domain.WriteResponse(
-		w,
-		map[string]interface{}{
-			"genres": genres,
-		},
-		http.StatusOK,
-	)
-}
+//func (h *GenreHandler) GetGenresSeries(w http.ResponseWriter, r *http.Request) {
+//	genres, err := h.GenreUsecase.GetGenresSeries()
+//	if err != nil {
+//		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+//		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
+//		return
+//	}
+//
+//	logs.Logger.Debug("Http GetGenres:", genres)
+//	domain.WriteResponse(
+//		w,
+//		map[string]interface{}{
+//			"genres": genres,
+//		},
+//		http.StatusOK,
+//	)
+//}
