@@ -18,6 +18,10 @@ import (
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
 	genre_usecase "2023_2_Holi/genre/usecase"
 
+	search_http "2023_2_Holi/search/delivery/http"
+	search_postgres "2023_2_Holi/search/repository/postgresql"
+	search_usecase "2023_2_Holi/search/usecase"
+
 	grpc_connector "2023_2_Holi/connectors/grpc"
 	"2023_2_Holi/connectors/postgres"
 	logs "2023_2_Holi/logger"
@@ -49,12 +53,14 @@ func StartServer() {
 	//ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
+	sr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
 	//pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
 	//fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
 	fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
+	su := search_usecase.NewSearchUsecase(sr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	//fvu := favourites_usecase.NewFavouritesUsecase(fvr)
 	//su := search_usecase.NewSearchUsecase(srr)
@@ -68,6 +74,7 @@ func StartServer() {
 	//auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, au)
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
+	search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
