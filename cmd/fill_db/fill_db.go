@@ -85,7 +85,7 @@ func main() {
 
 	for {
 		genreID++
-		if genreID == 20 {
+		if genreID == 60 {
 			break
 		}
 		row, err := reader.Read()
@@ -145,6 +145,11 @@ func main() {
 		log.Fatal(err)
 	}
 
+	row, err := reader.Read()
+	if err != nil {
+		fmt.Println(row)
+	}
+
 	for {
 		count++
 		if count == 20 {
@@ -162,8 +167,9 @@ func main() {
 		genres := strings.Split(row[1], ",")
 		casts := strings.Split(row[10], ",")
 
-		sqlVideo := "INSERT INTO video (id, name, description, preview_video_path, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)"
-		name := strings.Replace(row[0], " ", "_", -1)
+		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, product, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+		name := strings.Replace(row[5], " ", "_", -1)
+		pr_Path := pathPreview + name + ".jpg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
 		release := row[19][:4]
 		releaseInt, err := strconv.Atoi(release)
@@ -172,15 +178,13 @@ func main() {
 			return
 		}
 		age_restriction := ageRes(row[11])
-		_, err = db.Exec(sqlVideo, count, row[0], row[23], pr_pathMedia, releaseInt, row[12], age_restriction, 1)
+		_, err = db.Exec(sqlVideo, count, row[0], row[23], pr_Path, pr_pathMedia, "movie", releaseInt, row[12], age_restriction, 0)
 		if err != nil {
 			log.Printf("Ошибка при вставке video: %v", err)
 			continue
 		}
 
 		sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-		name = strings.Replace(row[0], " ", "_", -1)
-		pr_Path := pathPreview + name + ".jpg"
 		pr_Media := pathMedia + name + ".mp4"
 		duration := 0
 		_, err = db.Exec(sqlEpisode, count, row[0], row[23], duration, pr_Path, pr_Media, 1, 1, count)
@@ -220,6 +224,93 @@ func main() {
 				log.Printf("Ошибка при вставке записи в cast_video: %v", err)
 			}
 		}
+	}
+
+	i := 0
+	count--
+	countEpisode := 20
+	records, err := reader.ReadAll()
+	if err != nil {
+		fmt.Println("Error reading CSV:", err)
+		return
+	}
+	for {
+		count++
+		if count == 21 {
+			break
+		}
+		genres := strings.Split(records[i][1], ",")
+		casts := strings.Split(records[i][10], ",")
+
+		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, product, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)"
+		name := strings.Replace(records[i][5], " ", "_", -1)
+		pr_Path := pathPreview + name + ".jpg"
+		pr_pathMedia := pathPreviewMedia + name + ".mp4"
+		release := records[i][19][:4]
+		releaseInt, err := strconv.Atoi(release)
+		if err != nil {
+			fmt.Println("Ошибка при преобразовании в int:", err)
+			return
+		}
+		age_restriction := ageRes(records[i][11])
+		_, err = db.Exec(sqlVideo, count, records[i][0], records[i][23], pr_Path, pr_pathMedia, "series", releaseInt, records[i][12], age_restriction, records[i][2])
+		if err != nil {
+			log.Printf("Ошибка при вставке video: %v", err)
+			continue
+		}
+
+		i++
+
+		for {
+			if records[i][4] != "Episode" {
+				i--
+				break
+			}
+			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
+			pr_Path := pathPreview + name + ".jpg"
+			pr_Media := pathMedia + name + "_S" + records[i][2] + "_E" + records[i][3] + ".mp4"
+			duration := 0
+			_, err = db.Exec(sqlEpisode, countEpisode, records[i][0], records[i][23], duration, pr_Path, pr_Media, records[i][3], records[i][2], count)
+			if err != nil {
+				log.Printf("Ошибка при вставке video: %v", err)
+				continue
+			}
+			i++
+			countEpisode++
+		}
+
+		for _, genre := range genres {
+			genre = strings.TrimSpace(genre)
+			var genreID int
+			err := db.QueryRow("SELECT id FROM genre WHERE name = $1", genre).Scan(&genreID)
+			if err != nil {
+				log.Printf("Ошибка при получении ID жанра %s: %v", genre, err)
+				continue
+			}
+
+			sqlStatement := "INSERT INTO video_genre (genre_id, video_id) VALUES ($1, $2)"
+			_, err = db.Exec(sqlStatement, genreID, count)
+			if err != nil {
+				log.Printf("Ошибка при вставке записи в genre_video: %v", err)
+			}
+		}
+
+		for _, cast := range casts {
+			cast = strings.TrimSpace(cast)
+			var castID int
+			err := db.QueryRow(`SELECT id FROM "cast" WHERE name = $1`, cast).Scan(&castID)
+			if err != nil {
+				log.Printf("Ошибка при получении ID касоа %s: %v", cast, err)
+				continue
+			}
+
+			sqlStatement := "INSERT INTO video_cast (cast_id, video_id) VALUES ($1, $2)"
+			_, err = db.Exec(sqlStatement, castID, count)
+			if err != nil {
+				log.Printf("Ошибка при вставке записи в cast_video: %v", err)
+			}
+		}
+
 	}
 
 	_, err = db.Exec(`UPDATE "video" SET tsv = setweight(to_tsvector(name), 'A');`)

@@ -5,16 +5,20 @@ import (
 	g_sess "2023_2_Holi/domain/grpc/session"
 	//favourites_http "2023_2_Holi/favourites/delivery/http"
 	"context"
+	"embed"
 	"net/http"
 	"os"
 
-	films_http "2023_2_Holi/films/delivery/http"
-	films_postgres "2023_2_Holi/films/repository/postgresql"
-	films_usecase "2023_2_Holi/films/usecase"
+	series_http "2023_2_Holi/series/delivery/http"
+	series_postgres "2023_2_Holi/series/repository/postgresql"
+	series_usecase "2023_2_Holi/series/usecase"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
+	films_http "2023_2_Holi/films/delivery/http"
+	films_postgres "2023_2_Holi/films/repository/postgresql"
+	films_usecase "2023_2_Holi/films/usecase"
 	genre_http "2023_2_Holi/genre/delivery/http"
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
 	genre_usecase "2023_2_Holi/genre/usecase"
@@ -32,6 +36,13 @@ import (
 	logs "2023_2_Holi/logger"
 	"2023_2_Holi/middleware"
 )
+
+const (
+	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
+	defaultRegion         = "ru-msk"
+)
+
+var static embed.FS
 
 func StartServer() {
 	err := godotenv.Load()
@@ -61,6 +72,7 @@ func StartServer() {
 	sr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
 	//pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
 	fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
+	serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
 	fu := films_usecase.NewFilmsUsecase(fr)
@@ -68,6 +80,7 @@ func StartServer() {
 	su := search_usecase.NewSearchUsecase(sr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	fvu := favourites_usecase.NewFavouritesUsecase(fvr)
+	seru := series_usecase.NewSeriesUsecase(serr)
 	//su := search_usecase.NewSearchUsecase(srr)
 
 	//sess, _ := session.NewSession()
@@ -81,6 +94,7 @@ func StartServer() {
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
+	series_http.NewSeriesHandler(authMiddlewareRouter, seru)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
 	favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu)
@@ -88,7 +102,7 @@ func StartServer() {
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
