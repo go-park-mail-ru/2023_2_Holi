@@ -4,7 +4,6 @@ import (
 	g_sess "2023_2_Holi/domain/grpc/session"
 	favourites_http "2023_2_Holi/favourites/delivery/http"
 	"context"
-	"embed"
 	"net/http"
 	"os"
 
@@ -37,13 +36,6 @@ import (
 	logs "2023_2_Holi/logger"
 	"2023_2_Holi/middleware"
 )
-
-const (
-	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
-	defaultRegion         = "ru-msk"
-)
-
-var static embed.FS
 
 func StartServer() {
 	err := godotenv.Load()
