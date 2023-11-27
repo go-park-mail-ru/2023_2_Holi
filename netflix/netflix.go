@@ -44,7 +44,8 @@ func StartServer() {
 		LogrusLogger: logs.Logger,
 	}
 
-	pc := postgres.Connect(ctx)
+	dbParams := postgres.GetParamsForNetflixDB()
+	pc := postgres.Connect(ctx, dbParams)
 	defer pc.Close()
 
 	//rc := redis.Connect()
@@ -83,7 +84,7 @@ func StartServer() {
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
-	favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu)
+	//favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu, uu)
 
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)

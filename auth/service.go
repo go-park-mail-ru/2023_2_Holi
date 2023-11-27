@@ -4,10 +4,11 @@ import (
 	csrf_http "2023_2_Holi/csrf/delivery/http"
 	"2023_2_Holi/domain"
 	"context"
-	"google.golang.org/grpc"
 	"net"
 	"net/http"
 	"os"
+
+	"google.golang.org/grpc"
 
 	auth_grpc "2023_2_Holi/auth/delivery/grpc"
 	auth_http "2023_2_Holi/auth/delivery/http"
@@ -16,6 +17,7 @@ import (
 	auth_usecase "2023_2_Holi/auth/usecase"
 	"2023_2_Holi/connectors/postgres"
 	"2023_2_Holi/connectors/redis"
+
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -48,7 +50,8 @@ func StartService() {
 		LogrusLogger: logs.Logger,
 	}
 
-	pc := postgres.Connect(ctx)
+	dbParams := postgres.GetParamsForNetflixDB()
+	pc := postgres.Connect(ctx, dbParams)
 	defer pc.Close()
 	rc := redis.Connect()
 	defer rc.Close()
