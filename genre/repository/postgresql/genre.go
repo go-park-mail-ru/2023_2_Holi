@@ -8,7 +8,7 @@ import (
 )
 
 const getGenresQuery = `
-	SELECT name
+	SELECT id, name
 	FROM genre
 `
 
@@ -37,6 +37,7 @@ func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
 	for rows.Next() {
 		var genre domain.Genre
 		err = rows.Scan(
+			&genre.ID,
 			&genre.Name,
 		)
 
