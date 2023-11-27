@@ -5,7 +5,6 @@ import (
 	logs "2023_2_Holi/logger"
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -106,9 +105,6 @@ func (m *Middleware) IsAuth(next http.Handler) http.Handler {
 			domain.WriteError(w, domain.ErrUnauthorized.Error(), http.StatusUnauthorized)
 			return
 		}
-		fmt.Println("-----------")
-		fmt.Println(userID)
-		fmt.Println("-----------")
 
 		req_context.Set(r, "userID", userID.ID)
 		next.ServeHTTP(w, r)
