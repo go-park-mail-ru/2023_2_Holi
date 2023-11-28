@@ -21,6 +21,17 @@ func GetParamsForNetflixDB() string {
 	return params
 }
 
+func GetParamsForUsrDB() string {
+	host := os.Getenv("POSTGRES_USR_HOST")
+	port := os.Getenv("POSTGRES_USR_PORT")
+	user := os.Getenv("POSTGRES_USR_USER")
+	pass := os.Getenv("POSTGRES_USR_PASSWORD")
+	dbname := os.Getenv("POSTGRES_USR_DB")
+	params := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
+
+	return params
+}
+
 //func GetParamsForSurveyDB() string {
 //	host := os.Getenv("POSTGRES_CSAT_HOST")
 //	port := "5432"

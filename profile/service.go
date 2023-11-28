@@ -32,7 +32,7 @@ func StartService() {
 		LogrusLogger: logs.Logger,
 	}
 
-	dbParams := postgres.GetParamsForNetflixDB()
+	dbParams := postgres.GetParamsForUsrDB()
 	pc := postgres.Connect(ctx, dbParams)
 	defer pc.Close()
 
