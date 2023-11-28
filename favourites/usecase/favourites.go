@@ -38,7 +38,7 @@ func (u *FavouritesUsecase) RemoveFromFavourites(videoID, userID int) error {
 func (u *FavouritesUsecase) GetAllFavourites(userID int) ([]domain.Video, error) {
 	videos, err := u.favouritesRepo.SelectAllFavourites(userID)
 	if err != nil {
-		logs.LogError(logs.Logger, "usecase", "SelectAllFavourites", err, err.Error())
+		logs.LogError(logs.Logger, "usecase", "GetAllFavourites", err, err.Error())
 		return []domain.Video{}, err
 	}
 

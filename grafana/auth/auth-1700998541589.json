@@ -25,7 +25,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+        "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
       },
       "description": "",
       "fieldConfig": {
@@ -77,7 +77,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -100,7 +100,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+        "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
       },
       "description": "",
       "fieldConfig": {
@@ -152,7 +152,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "disableTextWrap": false,
           "editorMode": "code",
@@ -175,7 +175,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+        "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
       },
       "fieldConfig": {
         "defaults": {
@@ -258,7 +258,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
@@ -270,7 +270,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.90, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
@@ -283,7 +283,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.75, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
@@ -296,7 +296,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.50, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
@@ -313,7 +313,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+        "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
       },
       "fieldConfig": {
         "defaults": {
@@ -396,7 +396,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.95, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -408,7 +408,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.90, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -421,7 +421,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.75, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -434,7 +434,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.50, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -451,7 +451,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+        "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
       },
       "fieldConfig": {
         "defaults": {
@@ -530,7 +530,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "d2ce8fff-40d7-43a3-9f16-0971069ad670"
+            "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
           },
           "editorMode": "code",
           "expr": "rate(hits[5m])",
