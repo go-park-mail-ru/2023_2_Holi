@@ -16,6 +16,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/microcosm-cc/bluemonday"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 )
@@ -46,16 +47,17 @@ func StartService() {
 	sanitizer := bluemonday.UGCPolicy()
 
 	profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
+	mainRouter.Handle("/metrics", promhttp.Handler())
 
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
+	mainRouter.Use(mw.Metrics)
 	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
 	mainRouter.Use(mw.CSRFProtection)
-	//mainRouter.Use(mw.Metrics)
 
 	serverPort := ":" + os.Getenv("PROFILEMS_HTTP_SERVER_PORT")
 	logs.Logger.Info("starting service at ", serverPort)
