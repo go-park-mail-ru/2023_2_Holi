@@ -100,7 +100,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "dc504202-1aa4-4d7b-acd5-927ae1f7cb7a"
+        "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
       },
       "description": "",
       "fieldConfig": {
