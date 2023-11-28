@@ -8,7 +8,7 @@ import (
 )
 
 const getGenresQuery = `
-	SELECT name
+	SELECT id, name
 	FROM genre
 `
 
@@ -37,6 +37,7 @@ func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
 	for rows.Next() {
 		var genre domain.Genre
 		err = rows.Scan(
+			&genre.ID,
 			&genre.Name,
 		)
 
@@ -53,3 +54,33 @@ func (r *genrePostgresRepo) GetGenres() ([]domain.Genre, error) {
 
 	return genres, nil
 }
+
+//func (r *genrePostgresRepo) GetGenresSeries() ([]domain.Genre, error) {
+//	rows, err := r.db.Query(r.ctx, getGenresQuery)
+//	if err != nil {
+//		logs.LogError(logs.Logger, "genre_postgres", "GetGenres", err, err.Error())
+//		return nil, err
+//	}
+//	defer rows.Close()
+//	logs.Logger.Debug("GetGenres query result:", rows)
+//
+//	var genres []domain.Genre
+//	for rows.Next() {
+//		var genre domain.Genre
+//		err = rows.Scan(
+//			&genre.Name,
+//		)
+//
+//		if err != nil {
+//			return nil, err
+//		}
+//
+//		genres = append(genres, genre)
+//	}
+//	logs.Logger.Info("lenth", len(genres))
+//	if len(genres) == 0 {
+//		return nil, domain.ErrNotFound
+//	}
+//
+//	return genres, nil
+//}

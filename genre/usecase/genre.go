@@ -24,3 +24,13 @@ func (u *genreUsecase) GetGenres() ([]domain.Genre, error) {
 
 	return genres, nil
 }
+
+//func (u *genreUsecase) GetGenresSeries() ([]domain.Genre, error) {
+//	genres, err := u.genreRepo.GetGenres()
+//	if err != nil {
+//		return nil, err
+//	}
+//	logs.Logger.Debug("Usecase GetGenres:", genres)
+//
+//	return genres, nil
+//}
