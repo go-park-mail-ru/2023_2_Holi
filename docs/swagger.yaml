@@ -1,4 +1,4 @@
-basePath: /
+basePath: /api/v1/films/ & /api/v1/series/
 definitions:
   domain.Cast:
     properties:
@@ -18,7 +18,15 @@ definitions:
     type: object
   domain.Genre:
     properties:
+      id:
+        type: integer
       name:
+        type: string
+    type: object
+  domain.Response:
+    properties:
+      body: {}
+      err:
         type: string
     type: object
   domain.User:
@@ -107,10 +115,10 @@ definitions:
 host: 127.0.0.1
 info:
   contact:
-    email: ax.chinaev@yandex.ru
-    name: Alex Chinaev
-    url: https://vk.com/l.chinaev
-  description: API of the nelfix project by holi
+    email: 3592703@gmail.com
+    name: Aleksej Moldovanov
+    url: https://vk.com/yepkekw
+  description: API of the nelfix film and series service
   license:
     name: AS IS (NO WARRANTY)
   title: Netfilx API
@@ -330,13 +338,10 @@ paths:
           description: OK
           schema:
             type: json
-        "403":
-          description: Forbidden
+        "400":
+          description: Bad Request
           schema:
-            properties:
-              err:
-                type: string
-            type: object
+            type: json
         "404":
           description: Not Found
           schema:
@@ -378,7 +383,7 @@ paths:
             type: json
       summary: Get cast page
       tags:
-      - Cast
+      - Films
   /api/v1/films/genre/{genre}:
     get:
       description: Get a list of films based on the specified genre.
@@ -394,35 +399,51 @@ paths:
         "200":
           description: OK
           schema:
-            properties:
-              body:
-                properties:
-                  film:
-                    $ref: '#/definitions/domain.Video'
-                type: object
-            type: object
+            type: json
         "400":
           description: Bad Request
           schema:
-            properties:
-              err:
-                type: string
-            type: object
+            type: json
         "404":
           description: Not Found
           schema:
-            properties:
-              err:
-                type: string
-            type: object
+            type: json
         "500":
           description: Internal Server Error
           schema:
-            properties:
-              err:
-                type: string
-            type: object
+            type: json
       summary: Get films by genre
+      tags:
+      - Films
+  /api/v1/films/top/rate:
+    get:
+      description: Get information about the most rated film.
+      parameters:
+      - description: The top rate Film  you want to retrieve.
+        in: path
+        name: rate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get top rate information
       tags:
       - Films
   /api/v1/profile/{id}:
@@ -566,6 +587,105 @@ paths:
       summary: Search data
       tags:
       - Search
+  /api/v1/series/{id}:
+    get:
+      description: Get content for Series page
+      parameters:
+      - description: Id series you want to get.
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get Series data by id
+      tags:
+      - Series
+  /api/v1/series/cast/{id}:
+    get:
+      description: Get a list of series based on the cast name.
+      parameters:
+      - description: The Series of the Cast you want to retrieve.
+        in: path
+        name: cast
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get cast page series
+      tags:
+      - Series
+  /api/v1/series/genre/{genre}:
+    get:
+      description: Get a list of series based on the specified genre.
+      parameters:
+      - description: The genre of the Series you want to retrieve.
+        in: path
+        name: genre
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  film:
+                    $ref: '#/definitions/domain.Video'
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.Response'
+      summary: Get series by genre
+      tags:
+      - Series
   /api/v1/video/favourites/{id}:
     delete:
       description: Deletes a film or a whole series from favourites by id.

@@ -9,16 +9,10 @@ import (
 	"net/http"
 	"os"
 
-	series_http "2023_2_Holi/series/delivery/http"
-	series_postgres "2023_2_Holi/series/repository/postgresql"
-	series_usecase "2023_2_Holi/series/usecase"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 
-	films_http "2023_2_Holi/films/delivery/http"
-	films_postgres "2023_2_Holi/films/repository/postgresql"
-	films_usecase "2023_2_Holi/films/usecase"
 	genre_http "2023_2_Holi/genre/delivery/http"
 	genre_postgres "2023_2_Holi/genre/repository/postgresql"
 	genre_usecase "2023_2_Holi/genre/usecase"
@@ -67,20 +61,20 @@ func StartServer() {
 	//sr := auth_redis.NewSessionRedisRepository(rc)
 	//ur := utils_redis.NewUtilsRedisRepository(rc)
 	//ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
-	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
+	//fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	sr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
 	//pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
 	fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
-	serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
+	//serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
 
 	//au := auth_usecase.NewAuthUsecase(ar, sr)
-	fu := films_usecase.NewFilmsUsecase(fr)
+	//fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
 	su := search_usecase.NewSearchUsecase(sr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	fvu := favourites_usecase.NewFavouritesUsecase(fvr)
-	seru := series_usecase.NewSeriesUsecase(serr)
+	//seru := series_usecase.NewSeriesUsecase(serr)
 	//su := search_usecase.NewSearchUsecase(srr)
 
 	//sess, _ := session.NewSession()
@@ -90,11 +84,11 @@ func StartServer() {
 	//sanitizer := bluemonday.UGCPolicy()
 
 	//auth_http.NewAuthHandler(authMiddlewareRouter, mainRouter, au)
-	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
+	//films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
-	series_http.NewSeriesHandler(authMiddlewareRouter, seru)
+	//series_http.NewSeriesHandler(authMiddlewareRouter, seru)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
 	//csrf_http.NewCsrfHandler(mainRouter, tokens)
 	favourites_http.NewFavouritesHandler(authMiddlewareRouter, fvu)

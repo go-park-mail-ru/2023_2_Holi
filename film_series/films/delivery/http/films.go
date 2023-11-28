@@ -37,10 +37,12 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 //	@Tags			Films
 //	@Param			genre	path	string	true	"The genre of the Films you want to retrieve."
 //	@Produce		json
-//	@Success		200	{object}	object{body=object{film=domain.Video}}
-//	@Failure		400	{object}	object{err=string}
-//	@Failure		404	{object}	object{err=string}
-//	@Failure		500	{object}	object{err=string}
+//
+// @Success 		200 {json} []domain.Video
+// @Failure 		400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
+//
 //	@Router			/api/v1/films/genre/{genre} [get]
 func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -70,10 +72,12 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 //	@Tags			Films
 //	@Param			id	path	int	true	"Id film you want to get."
 //	@Produce		json
-//	@Success		200	{json}	object{body=domain.Video}
-//	@Failure		403	{object}	object{err=string}
-//	@Failure		404	{json}	object{err=string}
-//	@Failure		500	{json}	object{err=string}
+//
+// @Success 		200 {json} domain.Video, []domain.Cast
+// @Failure 		400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
+//
 //	@Router			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -107,13 +111,15 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 //
 //	@Summary		Get cast page
 //	@Description	Get a list of films based on the cast name.
-//	@Tags			Cast
+//	@Tags			Films
 //	@Param			cast	path	string	true	"The Films of the Cast you want to retrieve."
 //	@Produce		json
-//	@Success		200	{json}	domain.Video
-//	@Failure		400	{json}	domain.Response
-//	@Failure		404	{json}	domain.Response
-//	@Failure		500	{json}	domain.Response
+//
+// @Success 		200 {json} []domain.Video
+// @Failure 		400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
+//
 //	@Router			/api/v1/films/cast/{id} [get]
 func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -142,6 +148,20 @@ func (h *FilmsHandler) GetCastPage(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
+// GetTopRate godoc
+//
+//	@Summary		Get top rate information
+//	@Description	Get information about the most rated film.
+//	@Tags			Films
+//	@Param			rate	path	string	true	"The top rate Film  you want to retrieve."
+//	@Produce		json
+//
+// @Success 		200 {json} []domain.Video
+// @Failure 		400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
+//
+//	@Router			/api/v1/films/top/rate [get]
 func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
 	film, err := h.FilmsUsecase.GetTopRate()
 	if err != nil {

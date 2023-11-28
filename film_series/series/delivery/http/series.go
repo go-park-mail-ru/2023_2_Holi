@@ -26,15 +26,15 @@ func NewSeriesHandler(router *mux.Router, su domain.SeriesUsecase) {
 }
 
 // GetSeriesByGenre godoc
-// @Summary 		Get films by genre
-// @Description 	Get a list of films based on the specified genre.
-// @Tags 			Films
-// @Param 			genre path string true "The genre of the Films you want to retrieve."
+// @Summary 		Get series by genre
+// @Description 	Get a list of series based on the specified genre.
+// @Tags 			Series
+// @Param 			genre path string true "The genre of the Series you want to retrieve."
 // @Produce 		json
-// @Success         200  {object} object{body=object{film=domain.Film}}
-// @Failure         400  {object} object{err=string}
-// @Failure         404  {object} object{err=string}
-// @Failure         500  {object} object{err=string}
+// @Success         200  {object} object{body=object{film=domain.Video}}
+// @Failure         400  {object} domain.Response
+// @Failure         404  {object} domain.Response
+// @Failure         500  {object} domain.Response
 // @Router 			/api/v1/series/genre/{genre} [get]
 func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -58,12 +58,12 @@ func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request)
 }
 
 // GetSeriesData godoc
-// @Summary 		Get Film data by id
-// @Description 	Get content for Film page
-// @Tags 			Films
-// @Param 			id path int true "Id film you want to get."
+// @Summary 		Get Series data by id
+// @Description 	Get content for Series page
+// @Tags 			Series
+// @Param 			id path int true "Id series you want to get."
 // @Produce 		json
-// @Success 		200 {json} domain.Films
+// @Success 		200 {json} domain.Video, []domain.Cast, []domain.Episode
 // @Failure 		400 {json} domain.Response
 // @Failure 		404 {json} domain.Response
 // @Failure 		500 {json} domain.Response
@@ -101,7 +101,7 @@ func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 // GetCastPageSeries godoc
 // @Summary 		Get cast page series
 // @Description 	Get a list of series based on the cast name.
-// @Tags 			Cast
+// @Tags 			Series
 // @Param 			cast path string true "The Series of the Cast you want to retrieve."
 // @Produce 		json
 // @Success 		200 {json} []domain.Video
