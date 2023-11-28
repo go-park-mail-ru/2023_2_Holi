@@ -1,116 +1,94 @@
-package postgresql
+package postgres
 
 import (
-	"database/sql"
-
 	"2023_2_Holi/domain"
-	logs "2023_2_Holi/logs"
+	logs "2023_2_Holi/logger"
+	"context"
+
+	"github.com/jackc/pgx/v5"
 )
 
-var logger = logs.LoggerInit()
+const getByEmailQuery = `
+	SELECT id, email, password
+	FROM "user"
+	WHERE email = $1
+`
+
+const addUserQuery = `
+	INSERT INTO "user" (password, name, email, image_path)
+	VALUES ($1, $2, $3, $4)
+	RETURNING id
+`
+
+const userExistsQuery = `
+	SELECT EXISTS(SELECT 1
+				  FROM "user"
+				  WHERE email = $1)
+`
 
 type authPostgresqlRepository struct {
-	db *sql.DB
+	db  domain.PgxPoolIface
+	ctx context.Context
 }
 
-func NewAuthPostgresqlRepository(conn *sql.DB) domain.AuthRepository {
+func NewAuthPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.AuthRepository {
 	return &authPostgresqlRepository{
-		db: conn,
+		db:  pool,
+		ctx: ctx,
 	}
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
-	result, err := r.db.Query(`SELECT id, email, password FROM "user" WHERE email = $1`, email)
-	if err != nil {
-		return domain.User{}, err
-	}
-	defer func(result *sql.Rows) {
-		err := result.Close()
-		if err != nil {
-			logs.LogError(logger, "postgresql", "GetByName", err, "Failed to close query")
-		}
-	}(result)
-	logger.Debug("GetByName query result:", result)
+	result := r.db.QueryRow(r.ctx, getByEmailQuery, email)
+
+	logs.Logger.Debug("GetByEmail query result:", result)
 
 	var user domain.User
-	for result.Next() {
-		err = result.Scan(
-			&user.ID,
-			&user.Email,
-			&user.Password,
-		)
+	err := result.Scan(
+		&user.ID,
+		&user.Email,
+		&user.Password,
+	)
 
-		if err != nil {
-			return domain.User{}, err
-		}
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
+		return domain.User{}, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "GetByEmail", err, err.Error())
+		return domain.User{}, err
 	}
 
 	return user, nil
 }
 
 func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
-	if user.Email == "" || user.Password == "" {
+	if user.Email == "" || len(user.Password) == 0 {
 		return 0, domain.ErrBadRequest
 	}
 
-	result := r.db.QueryRow(
-		`INSERT INTO "user" (password, name, email, date_joined, image_path) 
-		VALUES ($1, $2, $3, $4, $5) RETURNING id`,
+	result := r.db.QueryRow(r.ctx, addUserQuery,
 		user.Password,
 		user.Name,
 		user.Email,
-		user.DateJoined,
 		user.ImagePath)
 
-	logger.Debug("AddUser queryRow result:", result)
+	logs.Logger.Debug("AddUser queryRow result:", result)
 
 	var id int
 	if err := result.Scan(&id); err != nil {
-		return 0, domain.ErrInternalServerError
+		logs.LogError(logs.Logger, "auth_postgres", "AddUser", err, err.Error())
+		return 0, err
 	}
 	return id, nil
 }
 
 func (r *authPostgresqlRepository) UserExists(email string) (bool, error) {
-	result := r.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "user" WHERE email = $1)`, email)
+	result := r.db.QueryRow(r.ctx, userExistsQuery, email)
 
 	var exist bool
 	if err := result.Scan(&exist); err != nil {
-		return false, err
-	}
-
-	return exist, nil
-}
-
-type sessionPostgresqlRepository struct {
-	db *sql.DB
-}
-
-func NewSessionPostgresqlRepository(conn *sql.DB) domain.SessionRepository {
-	return &sessionPostgresqlRepository{conn}
-}
-
-func (s *sessionPostgresqlRepository) Add(session domain.Session) error {
-	_, err := s.db.Exec(`INSERT INTO "session" VALUES ($1, $2, $3)`, session.Token, session.ExpiresAt, session.UserID)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *sessionPostgresqlRepository) DeleteByToken(token string) error {
-	_, err := s.db.Exec(`DELETE FROM "session" WHERE token = $1`, token)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func (s *sessionPostgresqlRepository) SessionExists(token string) (bool, error) {
-	result := s.db.QueryRow(`SELECT EXISTS(SELECT 1 FROM "session" WHERE token = $1)`, token)
-
-	var exist bool
-	if err := result.Scan(&exist); err != nil {
+		logs.LogError(logs.Logger, "auth_postgres", "UserExists", err, err.Error())
 		return false, err
 	}
 
