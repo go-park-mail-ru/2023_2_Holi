@@ -15,6 +15,7 @@ import (
 	"context"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 )
@@ -40,6 +41,8 @@ func StartService() {
 	serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
 	seru := series_usecase.NewSeriesUsecase(serr)
 	series_http.NewSeriesHandler(authMiddlewareRouter, seru)
+
+	mainRouter.Handle("/metrics", promhttp.Handler())
 
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)

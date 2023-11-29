@@ -11,6 +11,10 @@ scrape_configs:
     static_configs:
       - targets: [ 'profile:3003' ]
 
+  - job_name: 'films_series'
+    static_configs:
+      - targets: [ 'films_series:3002' ]
+
   - job_name: 'system'
     static_configs:
       - targets: [ 'node-exporter:9100' ]

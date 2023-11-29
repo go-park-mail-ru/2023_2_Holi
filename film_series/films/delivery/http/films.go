@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 
@@ -25,8 +23,6 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
-
-	router.Handle("/metrics", promhttp.Handler())
 
 }
 
