@@ -8,22 +8,20 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/csrf"
+	"github.com/microcosm-cc/bluemonday"
+
 	"github.com/gorilla/mux"
 )
 
-type Result struct {
-	Body interface{} `json:"body,omitempty"`
-	Err  string      `json:"err,omitempty"`
-}
-
 type ProfileHandler struct {
 	ProfileUsecase domain.ProfileUsecase
+	Sanitizer      *bluemonday.Policy
 }
 
-func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase) {
+func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase, s *bluemonday.Policy) {
 	handler := &ProfileHandler{
 		ProfileUsecase: pu,
+		Sanitizer:      s,
 	}
 
 	router.HandleFunc("/v1/profile/{id}", handler.GetUserData).Methods(http.MethodGet, http.MethodOptions)
@@ -31,60 +29,65 @@ func NewProfileHandler(router *mux.Router, pu domain.ProfileUsecase) {
 }
 
 // GetUserData godoc
-// @Summary 		Get user by id
-// @Description 	Get user data by id
-// @Tags 			profile
-// @Param 			id path int true "The user id you want to retrieve."
-// @Produce 		json
-// @Success 		200 {json} domain.User
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
-// @Router 			/api/v1/profile/{id} [get]
+//
+//	@Summary		Get user by id
+//	@Description	Get user data by id
+//	@Tags			profile
+//	@Param			id	path	int	true	"The user id you want to retrieve."
+//	@Produce		json
+//	@Success		200		{object}	object{body=domain.User}
+//	@Failure		403		{object}	object{err=string}
+//	@Failure		404		{object}	object{err=string}
+//	@Failure		500		{object}	object{err=string}
+//	@Router			/api/v1/profile/{id} [get]
 func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	vars := mux.Vars(r)
 	userID, err := strconv.Atoi(vars["id"])
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "profile_http", "GetUserData", err, "failed to read user id")
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "http", "GetUserData", err, err.Error())
 		return
 	}
 
 	user, err := h.ProfileUsecase.GetUserData(userID)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "profile_http", "GetUserData", err, err.Error())
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetUserData", err, err.Error())
 		return
 	}
-	logs.Logger.Debug("user:", user)
 
-	response := map[string]interface{}{
-		"user": user,
-	}
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	su := domain.SanitizeUser(user, h.Sanitizer)
+	logs.Logger.Debug("user:", su)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"user": su,
+		},
+		http.StatusOK,
+	)
 }
 
 // UpdateProfile godoc
-// @Summary      update profile
-// @Description  update user data in db and return it
-// @Tags         profile
-// @Produce      json
-// @Accept       json
-// @Param 		 body body domain.UserRequest true "user that must be updated"
-// @Success      200  {object} Result{body=object{user=domain.User}}
-// @Failure      400  {json} Result
-// @Failure      403  {json} Result
-// @Failure      500  {json} Result
-// @Router       /api/v1/profile/update [post]
+//
+//	@Summary		update profile
+//	@Description	update user data in db and return it
+//	@Tags			profile
+//	@Produce		json
+//	@Accept			json
+//	@Param			body	body		domain.UserRequest	true	"user that must be updated"
+//	@Success		200		{object}	object{body=domain.User}
+//	@Failure		400		{object}	object{err=string}
+//	@Failure		403		{object}	object{err=string}
+//	@Failure		404		{object}	object{err=string}
+//	@Failure		500		{object}	object{err=string}
+//	@Router			/api/v1/profile/update [post]
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	var newUser domain.User
 
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusBadRequest)
-		logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to decode json from body")
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "http", "UpdateProfile", err, "Failed to decode json from body")
 		return
 	}
 	logs.Logger.Debug("Need to update user for:", newUser)
@@ -92,25 +95,35 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	if len(newUser.ImageData) != 0 {
 		newUser.ImagePath, err = h.ProfileUsecase.UploadImage(newUser.ID, newUser.ImageData)
+		if err != nil {
+			http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetHttpStatusCode(err))
+			logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to upload user image")
+			return
+		}
 	}
 
 	updatedUser, err := h.ProfileUsecase.UpdateUser(newUser)
 	if err != nil {
-		http.Error(w, `{"err":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "profile_http", "UpdateProfile", err, "Failed to update user profile")
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "UpdateProfile", err, err.Error())
 		return
 	}
 	logs.Logger.Debug("Updated user:", updatedUser)
 
-	response := map[string]interface{}{
-		"user": updatedUser,
-	}
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	su := domain.SanitizeUser(updatedUser, h.Sanitizer)
+	logs.Logger.Debug("user:", su)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"user": su,
+		},
+		http.StatusOK,
+	)
 }
 
 func (h *ProfileHandler) CloseAndAlert(body io.ReadCloser) {
 	err := body.Close()
 	if err != nil {
-		logs.LogError(logs.Logger, "auth_http", "CloseAndAlert", err, "Failed to close body")
+		logs.LogError(logs.Logger, "http", "CloseAndAlert", err, err.Error())
 	}
 }

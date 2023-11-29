@@ -1,22 +1,13 @@
 package http
 
 import (
-	"encoding/json"
 	"net/http"
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 
-	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
 )
-
-var logger = logs.LoggerInit()
-
-type Result struct {
-	Body interface{} `json:"body,omitempty"`
-	Err  string      `json:"err,omitempty"`
-}
 
 type GenreHandler struct {
 	GenreUsecase domain.GenreUsecase
@@ -28,6 +19,7 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 	}
 
 	router.HandleFunc("/v1/genres", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
+	//router.HandleFunc("/v1/genres/series", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetGenres godoc
@@ -35,25 +27,53 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 // @Description Get a list of genres.
 // @Tags genres
 // @Produce json
-// @Success 		200 {array} Genre
-// @Failure			400 {json} ApiResponse
-// @Failure 		404 {json} ApiResponse
-// @Failure 		500 {json} ApiResponse
+// @Success 		200 {array} domain.Genre
+// @Failure			400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
 // @Router /v1/genres [get]
-
 func (h *GenreHandler) GetGenres(w http.ResponseWriter, r *http.Request) {
-
 	genres, err := h.GenreUsecase.GetGenres()
-	w.Header().Set("X-CSRF-Token", csrf.Token(r))
 	if err != nil {
-		http.Error(w, `{"error":"`+err.Error()+`"}`, domain.GetStatusCode(err))
-		logs.LogError(logs.Logger, "http", "GetGenres", err, "Failed to get genres")
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
 		return
 	}
-	response := map[string]interface{}{
-		"genres": genres,
-	}
 
-	logger.Debug("Http GetGenres:", genres)
-	json.NewEncoder(w).Encode(&Result{Body: response})
+	logs.Logger.Debug("Http GetGenres:", genres)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"genres": genres,
+		},
+		http.StatusOK,
+	)
 }
+
+// GetGenresSeries godoc
+// @Summary Get genres of series
+// @Description Get a list of genres.
+// @Tags genres
+// @Produce json
+// @Success 		200 {array} domain.Genre
+// @Failure			400 {json} domain.Response
+// @Failure 		404 {json} domain.Response
+// @Failure 		500 {json} domain.Response
+// @Router /v1/genres/series [get]
+//func (h *GenreHandler) GetGenresSeries(w http.ResponseWriter, r *http.Request) {
+//	genres, err := h.GenreUsecase.GetGenresSeries()
+//	if err != nil {
+//		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+//		logs.LogError(logs.Logger, "http", "GetGenres", err, err.Error())
+//		return
+//	}
+//
+//	logs.Logger.Debug("Http GetGenres:", genres)
+//	domain.WriteResponse(
+//		w,
+//		map[string]interface{}{
+//			"genres": genres,
+//		},
+//		http.StatusOK,
+//	)
+//}

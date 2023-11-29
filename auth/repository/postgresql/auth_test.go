@@ -62,10 +62,6 @@ func TestGetByEmail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
 	defer mockDB.Close()
 	r := NewAuthPostgresqlRepository(mockDB, context.Background())
 
@@ -134,10 +130,6 @@ func TestAddUser(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	if err != nil {
-		t.Fatal(err)
-	}
 	defer mockDB.Close()
 	r := NewAuthPostgresqlRepository(mockDB, context.Background())
 
@@ -195,10 +187,6 @@ func TestUserExists(t *testing.T) {
 	}
 
 	mockDB, err := pgxmock.NewPool()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	if err != nil {
 		t.Fatal(err)
 	}

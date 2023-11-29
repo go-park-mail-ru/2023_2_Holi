@@ -133,6 +133,16 @@ erDiagram
         _ video_id FK
         _ tag_id FK
         "PK (video_id, tag_id)"
-    }    
+    }
+
+    FAVOURITE ||--|{ VIDEO: video
+    FAVOURITE ||--|{ USER: user
+    FAVOURITE {
+        _ created_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ updated_at "DEFAULT CURRENT_TIMESTAMP NOT NULL"
+        _ video_id FK
+        _ user_id FK
+        "PK (video_id, user_id)"
+    }
 
 ```

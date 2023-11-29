@@ -50,7 +50,7 @@ func (u *authUsecase) Login(credentials domain.Credentials) (domain.Session, int
 
 func (u *authUsecase) Logout(token string) error {
 	if token == "" {
-		return domain.ErrBadRequest
+		return domain.ErrInvalidToken
 	}
 
 	if err := u.sessionRepo.DeleteByToken(token); err != nil {
@@ -71,7 +71,7 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 
 	salt := make([]byte, 8)
 	rand.Read(salt)
-	user.Password = hashPassword(salt, user.Password)
+	user.Password = HashPassword(salt, user.Password)
 	if id, err := u.authRepo.AddUser(user); err != nil {
 		return 0, err
 	} else {
@@ -79,27 +79,27 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 	}
 }
 
-func (u *authUsecase) IsAuth(token string) (bool, error) {
+func (u *authUsecase) IsAuth(token string) (string, error) {
 	if token == "" {
-		return false, domain.ErrBadRequest
+		return "", domain.ErrInvalidToken
 	}
 
-	auth, err := u.sessionRepo.SessionExists(token)
-	logs.Logger.Debug("Usecase IsAuth auth: ", auth)
+	userID, err := u.sessionRepo.SessionExists(token)
+	logs.Logger.Debug("Usecase IsAuth userID: ", userID)
 	if err != nil {
-		return false, err
+		return "", err
 	}
 
-	return auth, nil
+	return userID, nil
 }
 
-func hashPassword(salt []byte, password []byte) []byte {
+func HashPassword(salt []byte, password []byte) []byte {
 	hashedPass := argon2.IDKey(password, salt, 1, 64*1024, 4, 32)
 	return append(salt, hashedPass...)
 }
 
 func checkPasswords(passHash []byte, plainPassword []byte) bool {
 	salt := passHash[0:8]
-	userPassHash := hashPassword(salt, plainPassword)
+	userPassHash := HashPassword(salt, plainPassword)
 	return bytes.Equal(userPassHash, passHash)
 }

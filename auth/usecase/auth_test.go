@@ -86,7 +86,7 @@ func TestLogin(t *testing.T) {
 			},
 			setAuRepoExpectations: func(creds domain.Credentials, auRepo *mocks.AuthRepository, user *domain.User) {
 				faker.FakeData(user)
-				user.ID = 0
+				user.ID = -1
 				user.Email = creds.Email
 				hashedPass := argon2.IDKey([]byte{100}, salt, 1, 64*1024, 4, 32)
 				user.Password = append(salt, hashedPass...)

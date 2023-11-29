@@ -4,12 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/google/uuid"
 
@@ -60,7 +61,7 @@ func TestLogin(t *testing.T) {
 				*session = domain.Session{}
 				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/InvalidJson",
@@ -82,7 +83,7 @@ func TestLogin(t *testing.T) {
 				*session = domain.Session{}
 				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/NoBody",
@@ -111,7 +112,7 @@ func TestLogin(t *testing.T) {
 
 				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusConflict,
 			auth:   true,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
@@ -357,7 +358,7 @@ func TestRegister(t *testing.T) {
 				assert.NoError(t, err)
 				uCase.On("Login", mock.Anything).Return(*session, 1, nil).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusConflict,
 		},
 		{
 			name: "BadCase/EmptyJson",
@@ -368,7 +369,7 @@ func TestRegister(t *testing.T) {
 				uCase.On("Register", mock.Anything).Return(0, nil).Maybe()
 				uCase.On("Login", mock.Anything).Return(*session, 1, domain.ErrWrongCredentials).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusBadRequest,
 		},
 		{
 			name: "BadCase/EmptyBody",
@@ -409,7 +410,7 @@ func TestRegister(t *testing.T) {
 				assert.NoError(t, err)
 				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
 			},
-			status: http.StatusForbidden,
+			status: http.StatusConflict,
 			auth:   true,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
@@ -507,7 +508,7 @@ func TestRegister(t *testing.T) {
 			assert.Equal(t, test.status, rec.Code)
 			mockUCase.AssertExpectations(t)
 
-			var result *Result
+			var result *domain.Response
 			err = json.NewDecoder(rec.Result().Body).Decode(&result)
 			assert.NoError(t, err)
 
