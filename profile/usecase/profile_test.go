@@ -87,9 +87,10 @@ func TestUpdateUser(t *testing.T) {
 				Email: "alex@mail.ru",
 			},
 			newUser: domain.User{
-				ID:    1,
-				Name:  "Max",
-				Email: "max@mail.ru",
+				ID:       1,
+				Name:     "Max",
+				Email:    "max@mail.ru",
+				Password: []byte{},
 			},
 			setProfileRepoExpectations: func(user *domain.User, prRepo *mocks.ProfileRepository, newUser *domain.User, oldUser *domain.User) {
 				prRepo.On("GetUser", mock.Anything).Return(*oldUser, nil)
