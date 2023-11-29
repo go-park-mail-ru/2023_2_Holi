@@ -2,6 +2,7 @@ package http
 
 import (
 	"2023_2_Holi/domain"
+	"github.com/gorilla/context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -14,6 +15,8 @@ import (
 
 	"github.com/gorilla/mux"
 )
+
+const userID = "1"
 
 func TestAddToFavourites(t *testing.T) {
 	tests := []struct {
@@ -70,7 +73,6 @@ func TestAddToFavourites(t *testing.T) {
 			mfvu := new(mocks.FavouritesUsecase)
 			muu := new(mocks.UtilsUsecase)
 			test.setExpectations(mfvu, muu)
-
 			req, err := http.NewRequest("POST", "/api/v1/video/favourites/"+test.videoID, nil)
 			assert.NoError(t, err)
 			req.AddCookie(&http.Cookie{
@@ -83,12 +85,12 @@ func TestAddToFavourites(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			router := mux.NewRouter()
-			NewFavouritesHandler(router, mfvu, muu)
+			//NewFavouritesHandler(router, mfvu)
 			handler := &FavouritesHandler{
 				FavouritesUsecase: mfvu,
-				UtilsUsecase:      muu,
 			}
 			router.HandleFunc("/api/v1/video/favourites/{id}", handler.AddToFavourites).Methods("POST")
+			context.Set(req, "userID", userID)
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
@@ -166,10 +168,11 @@ func TestRemoveFromFavourites(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			router := mux.NewRouter()
-			NewFavouritesHandler(router, mfvu, muu)
+			context.Set(req, "userID", userID)
+
+			NewFavouritesHandler(router, mfvu)
 			handler := &FavouritesHandler{
 				FavouritesUsecase: mfvu,
-				UtilsUsecase:      muu,
 			}
 			router.HandleFunc("/api/v1/video/favourites/{id}", handler.RemoveFromFavourites).Methods("DELETE")
 			router.ServeHTTP(rec, req)
@@ -255,10 +258,11 @@ func TestGetAllFavourites(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			router := mux.NewRouter()
-			NewFavouritesHandler(router, mfvu, muu)
+			context.Set(req, "userID", userID)
+
+			NewFavouritesHandler(router, mfvu)
 			handler := &FavouritesHandler{
 				FavouritesUsecase: mfvu,
-				UtilsUsecase:      muu,
 			}
 			router.HandleFunc("/api/v1/video/favourites", handler.GetAllFavourites).Methods("GET")
 			router.ServeHTTP(rec, req)

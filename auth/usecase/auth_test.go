@@ -273,30 +273,30 @@ func TestIsAuth(t *testing.T) {
 	tests := []struct {
 		name                       string
 		token                      string
-		setSessionRepoExpectations func(sessionRepo *mocks.SessionRepository, auth bool)
+		setSessionRepoExpectations func(sessionRepo *mocks.SessionRepository, auth string)
 		good                       bool
-		auth                       bool
+		auth                       string
 	}{
 		{
 			name:  "GoodCase/Common",
 			token: uuid.NewString(),
-			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository, auth bool) {
+			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository, auth string) {
 				sessionRepo.On("SessionExists", mock.Anything).Return(auth, nil)
 			},
 			good: true,
-			auth: true,
+			auth: "1",
 		},
 		{
 			name:  "BadCase/EmptyToken",
 			token: "",
-			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository, auth bool) {
+			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository, auth string) {
 				sessionRepo.On("SessionExists", mock.Anything).Return(auth, errors.New("some db error")).Maybe()
 			},
 		},
 		{
 			name:  "BadCase/InvalidToken",
 			token: "8/refvd 3fdf  sdc",
-			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository, auth bool) {
+			setSessionRepoExpectations: func(sessionRepo *mocks.SessionRepository, auth string) {
 				sessionRepo.On("SessionExists", mock.Anything).Return(auth, errors.New("some db error"))
 			},
 		},
@@ -315,12 +315,10 @@ func TestIsAuth(t *testing.T) {
 
 			if test.good {
 				assert.Nil(t, err)
-				assert.Equal(t, auth, test.auth)
-				assert.True(t, auth)
 			} else {
 				assert.NotNil(t, err)
-				assert.False(t, auth)
 			}
+			assert.Equal(t, auth, test.auth)
 
 			ar.AssertExpectations(t)
 		})
