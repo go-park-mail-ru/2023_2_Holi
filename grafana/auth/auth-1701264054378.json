@@ -18,14 +18,99 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
+  "id": 2,
   "links": [],
   "liveNow": false,
   "panels": [
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "Down"
+                },
+                "1": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "Up"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 3,
+        "x": 0,
+        "y": 0
+      },
+      "id": 6,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "up{instance=\"auth:3001\"}",
+          "interval": "",
+          "legendFormat": "",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "State",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
       },
       "description": "",
       "fieldConfig": {
@@ -51,9 +136,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
+        "h": 5,
+        "w": 5,
+        "x": 3,
         "y": 0
       },
       "id": 1,
@@ -77,12 +162,12 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "sum(rate(hits{path!=\"/metrics\"}[1m]))",
+          "expr": "sum(rate(hits{path!=\"/metrics\", instance=\"auth:3001\"}[1m]))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -100,7 +185,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
       },
       "description": "",
       "fieldConfig": {
@@ -126,9 +211,9 @@
         "overrides": []
       },
       "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
+        "h": 5,
+        "w": 5,
+        "x": 8,
         "y": 0
       },
       "id": 2,
@@ -152,12 +237,12 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "disableTextWrap": false,
           "editorMode": "code",
           "exemplar": false,
-          "expr": "floor(sum(increase(hits{path!=\"/metrics\"}[24h])))",
+          "expr": "floor(sum(increase(hits{path!=\"/metrics\", instance=\"auth:3001\"}[24h])))",
           "format": "time_series",
           "fullMetaSearch": false,
           "includeNullMetadata": true,
@@ -175,7 +260,161 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "5xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "red",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "4xx"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "yellow",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 13,
+        "y": 0
+      },
+      "id": 7,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "vertical",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value_and_name",
+        "wideLayout": true
+      },
+      "pluginVersion": "10.2.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "(floor(sum(increase(hits{instance=\"auth:3001\",status=~'2..'}[24h]))))",
+          "format": "time_series",
+          "interval": "",
+          "legendFormat": "2xx",
+          "range": true,
+          "refId": "2xx"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "(floor(sum(increase(hits{instance=\"auth:3001\",status=~'3..'}[24h]))))",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "3xx",
+          "range": true,
+          "refId": "3xx"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "(floor(sum(increase(hits{instance=\"auth:3001\",status=~'4..'}[24h]))))",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "4xx",
+          "range": true,
+          "refId": "4xx"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
+          },
+          "editorMode": "code",
+          "exemplar": true,
+          "expr": "(floor(sum(increase(hits{instance=\"auth:3001\",status=~'5..'}[24h]))))",
+          "format": "time_series",
+          "hide": false,
+          "interval": "",
+          "legendFormat": "5xx",
+          "range": true,
+          "refId": "5xx"
+        }
+      ],
+      "title": "Requests",
+      "transformations": [
+        {
+          "id": "calculateField",
+          "options": {
+            "mode": "reduceRow",
+            "reduce": {
+              "include": [],
+              "reducer": "sum"
+            }
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
       },
       "fieldConfig": {
         "defaults": {
@@ -238,7 +477,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 5
       },
       "id": 4,
       "options": {
@@ -258,10 +497,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum  by (le) (rate(duration_bucket{status=~\"2..\", instance=\"auth:3001\"}[$__rate_interval])))",
           "instant": false,
           "legendFormat": "95",
           "range": true,
@@ -270,10 +509,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.90, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.90, sum  by (le) (rate(duration_bucket{status=~\"2..\", instance=\"auth:3001\"}[$__rate_interval])))",
           "hide": false,
           "instant": false,
           "legendFormat": "90",
@@ -283,10 +522,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.75, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.75, sum  by (le) (rate(duration_bucket{status=~\"2..\", instance=\"auth:3001\"}[$__rate_interval])))",
           "hide": false,
           "instant": false,
           "legendFormat": "75",
@@ -296,10 +535,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.50, sum  by (le) (rate(duration_bucket{status=~\"2..\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.50, sum  by (le) (rate(duration_bucket{status=~\"2..\", instance=\"auth:3001\"}[$__rate_interval])))",
           "hide": false,
           "instant": false,
           "legendFormat": "50",
@@ -313,7 +552,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
       },
       "fieldConfig": {
         "defaults": {
@@ -376,7 +615,7 @@
         "h": 8,
         "w": 12,
         "x": 12,
-        "y": 8
+        "y": 5
       },
       "id": 5,
       "options": {
@@ -396,10 +635,10 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\", instance=\"auth:3001\"}[$__rate_interval])))",
           "instant": false,
           "legendFormat": "95",
           "range": true,
@@ -408,7 +647,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.90, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -421,7 +660,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.75, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -434,7 +673,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
           "expr": "histogram_quantile(0.50, sum  by (le) (rate(duration_bucket{status=~\"4..|5..\"}[$__rate_interval])))",
@@ -451,7 +690,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+        "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
       },
       "fieldConfig": {
         "defaults": {
@@ -511,7 +750,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 13
       },
       "id": 3,
       "options": {
@@ -530,17 +769,17 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "da63d1ff-f7f5-43e4-af5f-584a3a5e8d0a"
+            "uid": "bab7d6b8-259e-4c5c-a35c-6b69803d54c0"
           },
           "editorMode": "code",
-          "expr": "rate(hits[5m])",
+          "expr": "increase(hits{instance=\"auth:3001\", path!=\"/metrics\"}[1m])",
           "instant": false,
           "legendFormat": "{{path}} {{status}}",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Rate",
+      "title": "RPS",
       "type": "timeseries"
     }
   ],
@@ -558,6 +797,6 @@
   "timezone": "",
   "title": "auth",
   "uid": "aa39f4fe-84f1-407a-a855-caf0bc597bb8",
-  "version": 12,
+  "version": 8,
   "weekStart": ""
 }
