@@ -24,7 +24,7 @@ JOIN "cast" AS c ON vc.cast_id = c.id
 JOIN episode AS e ON e.video_id = v.id 
 JOIN video_genre AS vg ON v.id = vg.video_id 
 JOIN genre AS g ON vg.genre_id = g.id 
-WHERE g.name = \$1\;
+WHERE g.name = \$1\ AND video.seasons_count = 0;
 `
 
 func TestGetFilmsByGenre(t *testing.T) {
