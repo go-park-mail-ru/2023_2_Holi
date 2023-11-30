@@ -2,7 +2,7 @@ package http
 
 //
 //import (
-//	"2023_2_Holi/domain"
+//	"frontend/domain"
 //	"github.com/gorilla/context"
 //	"net/http"
 //	"net/http/httptest"
@@ -12,7 +12,7 @@ package http
 //	"github.com/stretchr/testify/assert"
 //	"github.com/stretchr/testify/mock"
 //
-//	"2023_2_Holi/domain/mocks"
+//	"frontend/domain/mocks"
 //
 //	"github.com/gorilla/mux"
 //)

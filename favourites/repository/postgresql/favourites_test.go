@@ -2,7 +2,7 @@ package postgres
 
 //
 //import (
-//	"2023_2_Holi/domain"
+//	"frontend/domain"
 //	"context"
 //	"errors"
 //	"github.com/jackc/pgx/v5/pgconn"

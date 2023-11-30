@@ -2,8 +2,8 @@ package usecase
 
 //
 //import (
-//	"2023_2_Holi/domain"
-//	"2023_2_Holi/domain/mocks"
+//	"frontend/domain"
+//	"frontend/domain/mocks"
 //	"github.com/stretchr/testify/assert"
 //	"github.com/stretchr/testify/mock"
 //	"testing"

@@ -19,7 +19,7 @@ func NewSeriesHandler(router *mux.Router, su domain.SeriesUsecase) {
 		SeriesUsecase: su,
 	}
 
-	router.HandleFunc("/v1/series/genre/{genre}", handler.GetSeriesByGenre).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/series/genre/{id}", handler.GetSeriesByGenre).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/series/{id}", handler.GetSeriesData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/series/cast/{id}", handler.GetCastPageSeries).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/series/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)

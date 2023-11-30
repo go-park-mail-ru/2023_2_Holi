@@ -26,7 +26,7 @@ func (u *genreUsecase) GetGenres() ([]domain.Genre, error) {
 }
 
 func (u *genreUsecase) GetGenresSeries() ([]domain.Genre, error) {
-	genres, err := u.genreRepo.GetGenres()
+	genres, err := u.genreRepo.GetGenresSeries()
 	if err != nil {
 		return nil, err
 	}

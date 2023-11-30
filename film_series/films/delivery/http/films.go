@@ -19,7 +19,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 		FilmsUsecase: fu,
 	}
 
-	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/films/genre/{id}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)

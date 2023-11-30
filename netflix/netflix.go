@@ -3,7 +3,7 @@ package netflix
 import (
 	"2023_2_Holi/connectors/redis"
 	g_sess "2023_2_Holi/domain/grpc/session"
-	//favourites_http "2023_2_Holi/favourites/delivery/http"
+	//favourites_http "frontend/favourites/delivery/http"
 	"context"
 	"embed"
 	"net/http"
