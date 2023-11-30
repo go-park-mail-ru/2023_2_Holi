@@ -11,16 +11,18 @@ type Episode struct {
 }
 
 type SeriesRepository interface {
-	GetSeriesByGenre(genre string) ([]Video, error)
+	GetSeriesByGenre(genre int) ([]Video, error)
 	GetSeriesData(id int) (Video, error)
 	GetSeriesCast(id int) ([]Cast, error)
 	GetSeriesEpisodes(id int) ([]Episode, error)
 	GetCastPageSeries(id int) ([]Video, error)
 	GetCastNameSeries(id int) (Cast, error)
+	GetTopRate() (Video, error)
 }
 
 type SeriesUsecase interface {
-	GetSeriesByGenre(genre string) ([]Video, error)
+	GetSeriesByGenre(genre int) ([]Video, error)
 	GetSeriesData(id int) (Video, []Cast, []Episode, error)
 	GetCastPageSeries(id int) ([]Video, Cast, error)
+	GetTopRate() (Video, error)
 }

@@ -6,7 +6,7 @@ type Cast struct {
 }
 
 type FilmsRepository interface {
-	GetFilmsByGenre(genre string) ([]Video, error)
+	GetFilmsByGenre(genre int) ([]Video, error)
 	GetFilmData(id int) (Video, error)
 	GetFilmCast(filmId int) ([]Cast, error)
 	GetCastPage(id int) ([]Video, error)
@@ -15,7 +15,7 @@ type FilmsRepository interface {
 }
 
 type FilmsUsecase interface {
-	GetFilmsByGenre(genre string) ([]Video, error)
+	GetFilmsByGenre(genre int) ([]Video, error)
 	GetFilmData(id int) (Video, []Cast, error)
 	GetCastPage(id int) ([]Video, Cast, error)
 	GetTopRate() (Video, error)
