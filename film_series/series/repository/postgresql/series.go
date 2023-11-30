@@ -59,7 +59,7 @@ const getCastNameQuery = `
 `
 
 const getTopRateSeriesQuery = `	
-    SELECT video.id, video.name, video.description, video.preview_video_path,
+    SELECT video.id, video.name, video.description, video.preview_video_path
     FROM video
     JOIN episode AS e ON video.id = e.video_id
     WHERE video.seasons_count > 0
