@@ -18,8 +18,8 @@ func NewGenreHandler(router *mux.Router, gu domain.GenreUsecase) {
 		GenreUsecase: gu,
 	}
 
-	router.HandleFunc("/v1/genres/films", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/genres/series", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/genres/films/{id}", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/genres/series/{id}", handler.GetGenres).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetGenres godoc
