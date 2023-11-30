@@ -22,6 +22,8 @@ import (
 	"2023_2_Holi/domain/mocks"
 )
 
+const userID = "1"
+
 func TestLogin(t *testing.T) {
 	tests := []struct {
 		name                 string
@@ -29,7 +31,7 @@ func TestLogin(t *testing.T) {
 		setUCaseExpectations func(session *domain.Session, uCase *mocks.AuthUsecase)
 		status               int
 		wantCookie           bool
-		auth                 bool
+		auth                 string
 		setAuth              func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session)
 	}{
 		{
@@ -113,7 +115,7 @@ func TestLogin(t *testing.T) {
 				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
 			},
 			status: http.StatusConflict,
-			auth:   true,
+			auth:   userID,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
 					Name:     "session_token",
@@ -122,7 +124,7 @@ func TestLogin(t *testing.T) {
 					Path:     "/",
 					HttpOnly: true,
 				})
-				uCase.On("IsAuth", mock.Anything).Return(true, nil)
+				uCase.On("IsAuth", mock.Anything).Return(userID, nil)
 			},
 		},
 		{
@@ -143,7 +145,7 @@ func TestLogin(t *testing.T) {
 			},
 			status:     http.StatusOK,
 			wantCookie: true,
-			auth:       true,
+			auth:       userID,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
 					Name:     "session_token",
@@ -152,7 +154,7 @@ func TestLogin(t *testing.T) {
 					Path:     "/",
 					HttpOnly: true,
 				})
-				uCase.On("IsAuth", mock.Anything).Return(false, nil).Maybe()
+				uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
 			},
 		},
 		{
@@ -173,7 +175,7 @@ func TestLogin(t *testing.T) {
 			},
 			status:     http.StatusOK,
 			wantCookie: true,
-			auth:       true,
+			auth:       userID,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
 					Name:     "fevk",
@@ -182,7 +184,7 @@ func TestLogin(t *testing.T) {
 					Path:     "/",
 					HttpOnly: true,
 				})
-				uCase.On("IsAuth", mock.Anything).Return(false, nil).Maybe()
+				uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
 			},
 		},
 		{
@@ -197,6 +199,7 @@ func TestLogin(t *testing.T) {
 			setUCaseExpectations: func(session *domain.Session, uCase *mocks.AuthUsecase) {
 				*session = domain.Session{}
 
+				uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
 				uCase.On("Login", mock.Anything).Return(*session, 0, domain.ErrNotFound)
 			},
 			status: http.StatusNotFound,
@@ -214,11 +217,11 @@ func TestLogin(t *testing.T) {
 			var mockSession domain.Session
 			mockUCase := new(mocks.AuthUsecase)
 			test.setUCaseExpectations(&mockSession, mockUCase)
-			if test.auth {
+			if test.auth != "" {
 				test.setAuth(req, mockUCase, &mockSession)
 			}
 			rec := httptest.NewRecorder()
-			NewAuthHandler(mux.NewRouter(), mux.NewRouter(), mockUCase)
+			NewAuthHandler(mux.NewRouter(), mockUCase)
 			handler := &AuthHandler{
 				AuthUsecase: mockUCase,
 			}
@@ -267,6 +270,7 @@ func TestLogout(t *testing.T) {
 				}
 			},
 			setUCaseExpectations: func(uCase *mocks.AuthUsecase) {
+				uCase.On("IsAuth", mock.Anything).Return(userID, nil)
 				uCase.On("Logout", mock.Anything).Return(nil)
 			},
 			status:     http.StatusNoContent,
@@ -321,7 +325,7 @@ func TestRegister(t *testing.T) {
 		getBody              func() []byte
 		setUCaseExpectations func(uCase *mocks.AuthUsecase, session *domain.Session)
 		status               int
-		auth                 bool
+		auth                 string
 		setAuth              func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session)
 	}{
 		{
@@ -411,7 +415,7 @@ func TestRegister(t *testing.T) {
 				uCase.On("Login", mock.Anything).Return(*session, 0, nil).Maybe()
 			},
 			status: http.StatusConflict,
-			auth:   true,
+			auth:   userID,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
 					Name:     "session_token",
@@ -420,7 +424,7 @@ func TestRegister(t *testing.T) {
 					Path:     "/",
 					HttpOnly: true,
 				})
-				uCase.On("IsAuth", mock.Anything).Return(true, nil)
+				uCase.On("IsAuth", mock.Anything).Return(userID, nil)
 			},
 		},
 		{
@@ -441,7 +445,7 @@ func TestRegister(t *testing.T) {
 				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
 			},
 			status: http.StatusOK,
-			auth:   true,
+			auth:   userID,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
 					Name:     "session_token",
@@ -450,7 +454,7 @@ func TestRegister(t *testing.T) {
 					Path:     "/",
 					HttpOnly: true,
 				})
-				uCase.On("IsAuth", mock.Anything).Return(false, nil).Maybe()
+				uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
 			},
 		},
 		{
@@ -471,7 +475,7 @@ func TestRegister(t *testing.T) {
 				uCase.On("Login", mock.Anything).Return(*session, 1, nil)
 			},
 			status: http.StatusOK,
-			auth:   true,
+			auth:   userID,
 			setAuth: func(r *http.Request, uCase *mocks.AuthUsecase, session *domain.Session) {
 				r.AddCookie(&http.Cookie{
 					Name:     "fevk",
@@ -480,7 +484,7 @@ func TestRegister(t *testing.T) {
 					Path:     "/",
 					HttpOnly: true,
 				})
-				uCase.On("IsAuth", mock.Anything).Return(false, nil).Maybe()
+				uCase.On("IsAuth", mock.Anything).Return("", nil).Maybe()
 			},
 		},
 	}
@@ -495,7 +499,7 @@ func TestRegister(t *testing.T) {
 			mockUCase := new(mocks.AuthUsecase)
 			var mockSession domain.Session
 			test.setUCaseExpectations(mockUCase, &mockSession)
-			if test.auth {
+			if test.auth != "" {
 				test.setAuth(req, mockUCase, &mockSession)
 			}
 			rec := httptest.NewRecorder()
