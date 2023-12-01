@@ -10,7 +10,7 @@ https://github.com/frontend-park-mail-ru/2023_2_Holi
 - Алексей Чинаев
 
 #### Swagger
-https://raw.githubusercontent.com/go-park-mail-ru/2023_2_Holi/deploy_dev/docs/swagger.yaml
+https://kek-wait-w.github.io/Page/
 
 #### Макет
 https://www.figma.com/file/PEfIZ5K8ox9OKbxckS0KPo/NetflixHoliProject?type=design&mode=design&t=4cJlsuXjjVJnori5-1
