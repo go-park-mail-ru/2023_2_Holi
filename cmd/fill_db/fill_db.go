@@ -43,6 +43,11 @@ func dbParamsfromEnv() string {
 	user := os.Getenv("POSTGRES_USER")
 	pass := os.Getenv("POSTGRES_PASSWORD")
 	dbname := os.Getenv("POSTGRES_DB")
+	host = "localhost"
+	port = "5432"
+	user = "postgres"
+	pass = "1784"
+	dbname = "netflix"
 
 	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
@@ -236,7 +241,7 @@ func main() {
 	}
 	for {
 		count++
-		if count == 21 {
+		if count == 22 {
 			break
 		}
 		genres := strings.Split(records[i][1], ",")
@@ -263,7 +268,6 @@ func main() {
 
 		for {
 			if records[i][4] != "Episode" {
-				i--
 				break
 			}
 			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
