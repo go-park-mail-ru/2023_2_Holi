@@ -9,7 +9,18 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
+<<<<<<< HEAD
         "contact": {},
+=======
+        "contact": {
+            "name": "Alex Chinaev",
+            "url": "https://vk.com/l.chinaev",
+            "email": "ax.chinaev@yandex.ru"
+        },
+        "license": {
+            "name": "AS IS (NO WARRANTY)"
+        },
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -804,25 +815,51 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
+<<<<<<< HEAD
                             "type": "json"
+=======
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "film": {
+                                            "$ref": "#/definitions/domain.Video"
+                                        }
+                                    }
+                                }
+                            }
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
+<<<<<<< HEAD
                             "type": "json"
+=======
+                            "$ref": "#/definitions/domain.Response"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
+<<<<<<< HEAD
                             "type": "json"
+=======
+                            "$ref": "#/definitions/domain.Response"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
+<<<<<<< HEAD
                             "type": "json"
+=======
+                            "$ref": "#/definitions/domain.Response"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     }
                 }
@@ -1150,6 +1187,67 @@ const docTemplate = `{
                     }
                 }
             }
+<<<<<<< HEAD
+=======
+        },
+        "/v1/video/favourites/check/{id}": {
+            "post": {
+                "description": "check if video is in favourites of user",
+                "tags": [
+                    "Favourites"
+                ],
+                "summary": "check is in favourites",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video you want to delete.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "isFavourite": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         }
     },
     "definitions": {
@@ -1189,6 +1287,18 @@ const docTemplate = `{
                 }
             }
         },
+<<<<<<< HEAD
+=======
+        "domain.Response": {
+            "type": "object",
+            "properties": {
+                "body": {},
+                "err": {
+                    "type": "string"
+                }
+            }
+        },
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         "domain.User": {
             "type": "object",
             "properties": {
@@ -1319,12 +1429,21 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
+<<<<<<< HEAD
 	Version:          "",
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
 	Title:            "",
 	Description:      "",
+=======
+	Version:          "1.0",
+	Host:             "127.0.0.1",
+	BasePath:         "/",
+	Schemes:          []string{"http"},
+	Title:            "Netfilx API",
+	Description:      "API of the nelfix project by holi",
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

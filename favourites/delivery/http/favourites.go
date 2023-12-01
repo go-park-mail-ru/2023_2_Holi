@@ -22,6 +22,7 @@ func NewFavouritesHandler(router *mux.Router, fu domain.FavouritesUsecase) {
 	router.HandleFunc("/v1/video/favourites/{id}", handler.AddToFavourites).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/v1/video/favourites", handler.GetAllFavourites).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/video/favourites/{id}", handler.RemoveFromFavourites).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/v1/video/favourites/check/{id}", handler.Favourite).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // AddToFavourites godoc
@@ -129,6 +130,49 @@ func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Requ
 		w,
 		map[string]interface{}{
 			"videos": videos,
+		},
+		http.StatusOK,
+	)
+}
+
+// Favourite godoc
+//
+//	@Summary		check is in favourites
+//	@Description	check if video is in favourites of user
+//	@Tags			Favourites
+//	@Param			id	path	int	true	"The id of the video you want to delete."
+//	@Success		200	{object}	object{body=object{isFavourite=bool}}
+//	@Failure		400	{object}	object{err=string}
+//	@Failure		500	{object}	object{err=string}
+//	@Router			/v1/video/favourites/check/{id} [post]
+func (h *FavouritesHandler) Favourite(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	videoID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "http", "Favourite", err, err.Error())
+		return
+	}
+	logs.Logger.Debug("RemoveFromFavourites path param id: ", videoID)
+
+	userID, err := strconv.Atoi(context.Get(r, "userID").(string))
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "Favourite", err, err.Error())
+	}
+	logs.Logger.Debug("RemoveFromFavourites user id: ", userID)
+
+	favourite, err := h.FavouritesUsecase.Favourite(videoID, userID)
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "Favourite", err, err.Error())
+		return
+	}
+
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"isFavourite": favourite,
 		},
 		http.StatusOK,
 	)

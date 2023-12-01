@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+basePath: /
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 definitions:
   domain.Cast:
     properties:
@@ -22,6 +26,15 @@ definitions:
       name:
         type: string
     type: object
+<<<<<<< HEAD
+=======
+  domain.Response:
+    properties:
+      body: {}
+      err:
+        type: string
+    type: object
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
   domain.User:
     properties:
       email:
@@ -105,8 +118,22 @@ definitions:
       releaseYear:
         type: integer
     type: object
+<<<<<<< HEAD
 info:
   contact: {}
+=======
+host: 127.0.0.1
+info:
+  contact:
+    email: ax.chinaev@yandex.ru
+    name: Alex Chinaev
+    url: https://vk.com/l.chinaev
+  description: API of the nelfix project by holi
+  license:
+    name: AS IS (NO WARRANTY)
+  title: Netfilx API
+  version: "1.0"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 paths:
   /api/v1/auth/check:
     post:
@@ -648,6 +675,7 @@ paths:
         "200":
           description: OK
           schema:
+<<<<<<< HEAD
             type: json
         "400":
           description: Bad Request
@@ -661,6 +689,27 @@ paths:
           description: Internal Server Error
           schema:
             type: json
+=======
+            properties:
+              body:
+                properties:
+                  film:
+                    $ref: '#/definitions/domain.Video'
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/domain.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.Response'
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
       summary: Get series by genre
       tags:
       - Series
@@ -844,4 +893,46 @@ paths:
       summary: Get genres of series
       tags:
       - Genres
+<<<<<<< HEAD
+=======
+  /v1/video/favourites/check/{id}:
+    post:
+      description: check if video is in favourites of user
+      parameters:
+      - description: The id of the video you want to delete.
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  isFavourite:
+                    type: boolean
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: check is in favourites
+      tags:
+      - Favourites
+schemes:
+- http
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 swagger: "2.0"
