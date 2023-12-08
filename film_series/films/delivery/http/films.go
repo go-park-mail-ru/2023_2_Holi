@@ -19,7 +19,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 		FilmsUsecase: fu,
 	}
 
-	router.HandleFunc("/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/films/genre/{id}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
@@ -31,18 +31,23 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 //	@Summary		Get films by genre
 //	@Description	Get a list of films based on the specified genre.
 //	@Tags			Films
-//	@Param			genre	path	string	true	"The genre of the Films you want to retrieve."
+//	@Param			genre	path	string	true	"The Films of the genre you want to retrieve."
 //	@Produce		json
 //
-// @Success 		200 {json} []domain.Video
-// @Failure 		400 {json} domain.Response
-// @Failure 		404 {json} domain.Response
-// @Failure 		500 {json} domain.Response
+//	@Success		200		{json}	object{body=object{[]domain.Video}}
+//	@Failure		400		{json}	object{err=string}
+//	@Failure		404		{json}	object{err=string}
+//	@Failure		500		{json}	object{err=string}
 //
-//	@Router			/api/v1/films/genre/{genre} [get]
+//	@Router			/api/v1/films/genre/{genreId} [get]
 func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	genre := vars["genre"]
+	genre, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "films_http", "GetCastPage", err, err.Error())
+		return
+	}
 
 	films, err := h.FilmsUsecase.GetFilmsByGenre(genre)
 	if err != nil {
@@ -162,11 +167,11 @@ func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
 	film, err := h.FilmsUsecase.GetTopRate()
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
-		logs.LogError(logs.Logger, "http", "GetTopRate", err, "Failed to get top")
+		logs.LogError(logs.Logger, "films_http", "GetTopRate", err, "Failed to get top")
 		return
 	}
 
-	logs.Logger.Debug("Http GetTopRate:", film)
+	logs.Logger.Debug("films_http GetTopRate:", film)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{

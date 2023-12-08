@@ -26,6 +26,11 @@ const SelectAllQuery = `
 		JOIN favourite AS f ON video_id = v.id
 	WHERE f.user_id = $1
 `
+const favouriteExistsQuery = `
+	SELECT EXISTS(SELECT 1
+				  FROM favourite
+				  WHERE video_id = $1 AND user_id = $2)
+`
 
 type favouritesUsecasePostgresqlRepository struct {
 	db  domain.PgxPoolIface
@@ -106,4 +111,16 @@ func (r *favouritesUsecasePostgresqlRepository) SelectAllFavourites(userID int) 
 	logs.Logger.Debug("SelectAllFavourites videos:", videos)
 
 	return videos, nil
+}
+
+func (r *favouritesUsecasePostgresqlRepository) Exists(videoID, userID int) (bool, error) {
+	result := r.db.QueryRow(r.ctx, favouriteExistsQuery, videoID, userID)
+
+	var exist bool
+	if err := result.Scan(&exist); err != nil {
+		logs.LogError(logs.Logger, "postgresql", "Exists", err, err.Error())
+		return false, err
+	}
+
+	return exist, nil
 }

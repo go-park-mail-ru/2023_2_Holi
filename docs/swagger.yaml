@@ -1,4 +1,7 @@
-basePath: /api/v1/films/ & /api/v1/series/
+<<<<<<< HEAD
+=======
+basePath: /
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 definitions:
   domain.Cast:
     properties:
@@ -23,12 +26,15 @@ definitions:
       name:
         type: string
     type: object
+<<<<<<< HEAD
+=======
   domain.Response:
     properties:
       body: {}
       err:
         type: string
     type: object
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
   domain.User:
     properties:
       email:
@@ -112,17 +118,22 @@ definitions:
       releaseYear:
         type: integer
     type: object
+<<<<<<< HEAD
+info:
+  contact: {}
+=======
 host: 127.0.0.1
 info:
   contact:
-    email: 3592703@gmail.com
-    name: Aleksej Moldovanov
-    url: https://vk.com/yepkekw
-  description: API of the nelfix film and series service
+    email: ax.chinaev@yandex.ru
+    name: Alex Chinaev
+    url: https://vk.com/l.chinaev
+  description: API of the nelfix project by holi
   license:
     name: AS IS (NO WARRANTY)
   title: Netfilx API
   version: "1.0"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 paths:
   /api/v1/auth/check:
     post:
@@ -384,11 +395,11 @@ paths:
       summary: Get cast page
       tags:
       - Films
-  /api/v1/films/genre/{genre}:
+  /api/v1/films/genre/{genreId}:
     get:
       description: Get a list of films based on the specified genre.
       parameters:
-      - description: The genre of the Films you want to retrieve.
+      - description: The Films of the genre you want to retrieve.
         in: path
         name: genre
         required: true
@@ -649,11 +660,11 @@ paths:
       summary: Get cast page series
       tags:
       - Series
-  /api/v1/series/genre/{genre}:
+  /api/v1/series/genre/{genreId}:
     get:
       description: Get a list of series based on the specified genre.
       parameters:
-      - description: The genre of the Series you want to retrieve.
+      - description: The Series of the genre you want to retrieve.
         in: path
         name: genre
         required: true
@@ -664,6 +675,21 @@ paths:
         "200":
           description: OK
           schema:
+<<<<<<< HEAD
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+=======
             properties:
               body:
                 properties:
@@ -683,7 +709,39 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/domain.Response'
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
       summary: Get series by genre
+      tags:
+      - Series
+  /api/v1/series/top/rate:
+    get:
+      description: Get information about the most rated series.
+      parameters:
+      - description: The top rate Series  you want to retrieve.
+        in: path
+        name: rate
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get top rate information
       tags:
       - Series
   /api/v1/video/favourites/{id}:
@@ -781,7 +839,7 @@ paths:
       summary: Adds a video to favourites.
       tags:
       - Favourites
-  /v1/genres:
+  /v1/genres/films:
     get:
       description: Get a list of genres.
       produces:
@@ -807,7 +865,74 @@ paths:
             type: json
       summary: Get genres
       tags:
-      - genres
+      - Genres
+  /v1/genres/series:
+    get:
+      description: Get a list of genres.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Genre'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+      summary: Get genres of series
+      tags:
+      - Genres
+<<<<<<< HEAD
+=======
+  /v1/video/favourites/check/{id}:
+    post:
+      description: check if video is in favourites of user
+      parameters:
+      - description: The id of the video you want to delete.
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  isFavourite:
+                    type: boolean
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: check is in favourites
+      tags:
+      - Favourites
 schemes:
 - http
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 swagger: "2.0"
