@@ -42,7 +42,7 @@ services:
   auth:
     container_name: auth
     build:
-      context: ../backend
+      context: ../
       dockerfile: cmd/auth_service/Dockerfile
     networks:
       local_area:
@@ -60,7 +60,7 @@ services:
   profile:
     container_name: profile
     build:
-      context: ../backend
+      context: ../
       dockerfile: cmd/profile_service/Dockerfile
     networks:
       local_area:
@@ -76,7 +76,7 @@ services:
   film_series:
     container_name: films_series
     build:
-      context: ../backend
+      context: ../
       dockerfile: cmd/films_series_service/Dockerfile
     networks:
       local_area:
@@ -92,7 +92,7 @@ services:
   backend:
     container_name: backend
     build:
-      context: ../backend
+      context: ../
       dockerfile: cmd/netflix/Dockerfile
     networks:
       local_area:
@@ -159,7 +159,7 @@ services:
 
   fill_db:
     build:
-      context: ../backend/cmd/fill_db
+      context: ../cmd/fill_db
       dockerfile: Dockerfile
     networks:
       local_area:
