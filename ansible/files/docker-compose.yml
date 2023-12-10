@@ -43,13 +43,13 @@ services:
     image: holi2023/auth:latest
     container_name: auth
     build:
-      context: ../
-      dockerfile: cmd/auth_service/Dockerfile
+      context: ../..
+      dockerfile: ../../cmd/auth_service/Dockerfile
     networks:
       local_area:
     restart: unless-stopped
     env_file:
-      - .env
+      - ../../deploy/.env
     depends_on:
       postgres_usr:
         condition: service_started
@@ -62,13 +62,13 @@ services:
     container_name: profile
     image: holi2023/profile:latest
     build:
-      context: ../
-      dockerfile: cmd/profile_service/Dockerfile
+      context: ../..
+      dockerfile: ../../cmd/profile_service/Dockerfile
     networks:
       local_area:
     restart: unless-stopped
     env_file:
-      - .env
+      - ../../deploy/.env
     depends_on:
       auth:
         condition: service_started
@@ -79,13 +79,13 @@ services:
     container_name: films_series
     image: holi2023/films_series:latest
     build:
-      context: ../
-      dockerfile: cmd/films_series_service/Dockerfile
+      context: ../..
+      dockerfile: ../../cmd/films_series_service/Dockerfile
     networks:
       local_area:
     restart: unless-stopped
     env_file:
-      - .env
+      - ../../deploy/.env
     depends_on:
       auth:
         condition: service_started
@@ -96,13 +96,13 @@ services:
     container_name: backend
     image: holi2023/main:latest
     build:
-      context: ../
-      dockerfile: cmd/netflix/Dockerfile
+      context: ../..
+      dockerfile: ../../cmd/netflix/Dockerfile
     networks:
       local_area:
     restart: unless-stopped
     env_file:
-      - .env
+      - ../../deploy/.env
     depends_on:
       auth:
         condition: service_started
@@ -112,8 +112,8 @@ services:
   fill_db:
     image: holi2023/fill:latest
     build:
-      context: ../
-      dockerfile: cmd/fill_db/Dockerfile
+      context: ../..
+      dockerfile: ../../cmd/fill_db/Dockerfile
     networks:
       local_area:
     container_name: fill_db

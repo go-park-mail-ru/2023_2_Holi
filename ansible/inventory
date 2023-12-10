@@ -1,2 +1,2 @@
 [web]
-37.139.41.28 ansible_user=ubuntu ansible_ssh_private_key_file=~/Downloads/deploy-WCtoLUXu.pem
+109.120.190.212 ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=Ubuntu-Basic-1-1-10GB-NPoiOtR2.pem

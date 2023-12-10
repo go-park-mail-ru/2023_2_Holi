@@ -86,13 +86,13 @@ jobs:
             sudo docker pull holi2023/main:latest
             sudo docker pull holi2023/fill:latest
 
-#      - name: Run backend
-#        uses: appleboy/ssh-action@master
-#        with:
-#          host: 109.120.190.212
-#          username: ubuntu
-#          key: ${{ secrets.PRIVATE_KEY }}
-#          script: |
-#            cd /home/ubuntu
-#            sudo docker-compose stop
-#            sudo docker-compose up -d
+      - name: Run backend
+        uses: appleboy/ssh-action@master
+        with:
+          host: 109.120.190.212
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu
+            sudo docker-compose stop
+            sudo docker-compose up -d
