@@ -12,8 +12,39 @@ jobs:
       - name: Login to DockerHub Registry
         run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
 
-      - name: ls
-        run: ls
+#      - name: 'Create env file'
+#        run: |
+#            echo "${{ secrets.ENV_FILE }}" > .env
+
+
+      - name: 'Create env file'
+        run: |
+          "APP_PORT=80
+          SERVER_PORT=3005
+          LOG_LEVEL=info
+    
+          PROFILEMS_HTTP_SERVER_PORT=3003
+          FILM_SERIES_HTTP_SERVER_PORT=3002
+    
+          AUTHMS_HTTP_SERVER_PORT=3001
+          AUTHMS_GRPC_SERVER_PORT=4001
+          AUTHMS_GRPC_SERVER_HOST=auth
+    
+          REDIS_PASSWORD=123
+          REDIS_HOST=redis
+          REDIS_PORT=6379
+    
+          POSTGRES_PASSWORD=123
+          POSTGRES_USER=postgres
+          POSTGRES_DB=netflix
+          POSTGRES_HOST=postgres
+          POSTGRES_PORT=5432
+    
+          POSTGRES_USR_PASSWORD=123
+          POSTGRES_USR_USER=postgres
+          POSTGRES_USR_DB=netflix_auth
+          POSTGRES_USR_HOST=postgres_usr
+          POSTGRES_USR_PORT=5432" > .env
 
       - name: Build Docker image
         run: docker compose --file ./deploy/docker-compose.yml build
