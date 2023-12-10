@@ -77,7 +77,7 @@ services:
 
   film_series:
     container_name: films_series
-    image: holi2023/films:latest
+    image: holi2023/films_series:latest
     build:
       context: ../
       dockerfile: cmd/films_series_service/Dockerfile
