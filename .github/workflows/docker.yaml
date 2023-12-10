@@ -46,6 +46,9 @@ jobs:
           POSTGRES_USR_HOST=postgres_usr
           POSTGRES_USR_PORT=5432" > .env
 
+      - name: Cat env
+        run: cat .env
+
       - name: Build Docker image
         run: docker compose --file ./deploy/docker-compose.yml build
 
