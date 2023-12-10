@@ -19,7 +19,7 @@ jobs:
 
       - name: 'Create env file'
         run: |
-          "APP_PORT=80
+          echo "APP_PORT=80
           SERVER_PORT=3005
           LOG_LEVEL=info
     
