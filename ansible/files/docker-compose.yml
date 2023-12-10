@@ -144,7 +144,7 @@ services:
     command:
       --config.file=/etc/prometheus/prometheus.yml
     volumes:
-      - ../backend/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ../../prometheus.yml:/etc/prometheus/prometheus.yml:ro
     ports:
       - 9090:9090
 
