@@ -54,7 +54,7 @@ jobs:
       - name: Push Auth Docker images
         run:
           docker push holi2023/auth:latest &&
-          docker push holi2023/auth:${GITHUB_SHA::8
+          docker push holi2023/auth:${GITHUB_SHA::8}
 #
 #  deploy:
 #    runs-on: ubuntu-latest
