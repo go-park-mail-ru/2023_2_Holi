@@ -40,6 +40,7 @@ services:
       POSTGRES_DB: ${POSTGRES_USR_DB}
 
   auth:
+    image: holi2023/auth:latest
     container_name: auth
     build:
       context: ../
@@ -59,6 +60,7 @@ services:
 
   profile:
     container_name: profile
+    image: holi2023/profile:latest
     build:
       context: ../
       dockerfile: cmd/profile_service/Dockerfile
@@ -75,6 +77,7 @@ services:
 
   film_series:
     container_name: films_series
+    image: holi2023/films:latest
     build:
       context: ../
       dockerfile: cmd/films_series_service/Dockerfile
@@ -91,6 +94,7 @@ services:
 
   backend:
     container_name: backend
+    image: holi2023/main:latest
     build:
       context: ../
       dockerfile: cmd/netflix/Dockerfile
@@ -158,6 +162,7 @@ services:
       - 9100
 
   fill_db:
+    image: holi2023/fill:latest
     build:
       context: ../cmd/fill_db
       dockerfile: Dockerfile

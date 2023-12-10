@@ -46,31 +46,35 @@ jobs:
           POSTGRES_USR_HOST=postgres_usr
           POSTGRES_USR_PORT=5432" > ./deploy/.env
 
-      - name: Build Docker image
-        run: docker compose --file ./deploy/docker-compose.yml build
+      - name: Build Auth Docker images
+        run:
+          sudo docker build -t holi2023/auth:${GITHUB_SHA::8} -f ./cmd/auth_service/Dockerfile . &&
+          sudo docker tag holi2023/auth:${GITHUB_SHA::8} holi2023/auth:latest
 
-      - name: Push the image
-        run: docker push holi2023/2023:latest
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: pull docker image
-        uses: appleboy/ssh-action@master
-        with:
-          envs: GITHUB_SHA
-          host: 109.120.190.212
-          username: ubuntu
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: sudo docker pull dmitrydorofeev/godeploy:${GITHUB_SHA::8}
-      - name: deploy docker image
-        uses: appleboy/ssh-action@master
-        with:
-          envs: GITHUB_SHA
-          host: 37.139.41.28
-          username: ubuntu
-          key: ${{ secrets.PRIVATE_KEY }}
-          script: |
-            sudo docker rm -f $(sudo docker ps -aq)
-            sudo docker run -e VERSION=${GITHUB_SHA::8} -d -p 8080:8080 dmitrydorofeev/godeploy:${GITHUB_SHA::8}
+      - name: Push Auth Docker images
+        run:
+          docker push holi2023/auth:latest &&
+          docker push holi2023/auth:${GITHUB_SHA::8
+#
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: build
+#    steps:
+#      - name: pull docker image
+#        uses: appleboy/ssh-action@master
+#        with:
+#          envs: GITHUB_SHA
+#          host: 109.120.190.212
+#          username: ubuntu
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          script: sudo docker pull dmitrydorofeev/godeploy:${GITHUB_SHA::8}
+#      - name: deploy docker image
+#        uses: appleboy/ssh-action@master
+#        with:
+#          envs: GITHUB_SHA
+#          host: 37.139.41.28
+#          username: ubuntu
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          script: |
+#            sudo docker rm -f $(sudo docker ps -aq)
+#            sudo docker run -e VERSION=${GITHUB_SHA::8} -d -p 8080:8080 dmitrydorofeev/godeploy:${GITHUB_SHA::8}
