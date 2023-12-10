@@ -16,10 +16,10 @@ jobs:
         run: ls
 
       - name: Build Docker image
-        run: docker compose build -t holi/deploy:${GITHUB_SHA::8} ./deploy
+        run: docker compose build
 
       - name: Push the image
-        run: docker-compose push holi/deploy:${GITHUB_SHA::8}
+        run: docker-compose push
 
   deploy:
     runs-on: ubuntu-latest
