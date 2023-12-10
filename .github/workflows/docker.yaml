@@ -16,7 +16,7 @@ jobs:
         run: ls
 
       - name: Build Docker image
-        run: docker compose build --file ./deploy
+        run: docker compose --file ./deploy/docker-compose.yml build
 
       - name: Push the image
         run: docker-compose push
