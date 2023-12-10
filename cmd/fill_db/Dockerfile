@@ -8,6 +8,8 @@ RUN go mod download
 
 COPY . .
 
+RUN ls
+
 RUN go build -o fill_db
 
 FROM gcr.io/distroless/base-debian11 AS fill_db_stage
