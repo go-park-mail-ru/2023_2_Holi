@@ -50,7 +50,7 @@ jobs:
         run: docker compose --file ./deploy/docker-compose.yml build
 
       - name: Push the image
-        run: docker-compose push
+        run: docker-compose --file ./deploy/docker-compose.yml push
 
   deploy:
     runs-on: ubuntu-latest
