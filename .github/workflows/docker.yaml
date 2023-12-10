@@ -50,7 +50,7 @@ jobs:
         run: docker compose --file ./deploy/docker-compose.yml build
 
       - name: Push the image
-        run: docker-compose --file ./deploy/docker-compose.yml push holi2023/2023:latest
+        run: docker push holi2023/2023:latest
 
   deploy:
     runs-on: ubuntu-latest
