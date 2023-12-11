@@ -27,7 +27,7 @@
         state: present
     - name: "Copy nginx config"
       copy:
-        src: files/netflix_s3.conf
+        src: files/netflix_local.conf
         dest: /etc/nginx/conf.d/
     - name: "Reload nginx"
       command: "systemctl restart nginx"
