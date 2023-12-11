@@ -94,5 +94,5 @@ jobs:
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
             cd /home/ubuntu
-            sudo docker-compose stop
-            sudo docker-compose up -d
+            sudo docker compose stop
+            sudo docker compose up -d
