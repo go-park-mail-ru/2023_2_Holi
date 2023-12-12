@@ -29,6 +29,8 @@
       copy:
         src: files/netflix_local.conf
         dest: /etc/nginx/conf.d/
+    - name: "Giving access for nginx"
+      command: "usermod -a -G ubuntu www-data"
     - name: "Reload nginx"
       command: "systemctl restart nginx"
 
