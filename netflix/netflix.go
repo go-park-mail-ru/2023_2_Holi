@@ -25,6 +25,10 @@ import (
 	favourites_postgres "2023_2_Holi/favourites/repository/postgresql"
 	favourites_usecase "2023_2_Holi/favourites/usecase"
 
+	subscription_http "2023_2_Holi/subscription/delivery/http"
+	subscription_postgres "2023_2_Holi/subscription/repository/postgresql"
+	subscription_usecase "2023_2_Holi/subscription/usecase"
+
 	grpc_connector "2023_2_Holi/connectors/grpc"
 	"2023_2_Holi/connectors/postgres"
 	logs "2023_2_Holi/logger"
@@ -64,6 +68,7 @@ func StartServer() {
 	//fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	gr := genre_postgres.GenrePostgresqlRepository(pc, ctx)
 	sr := search_postgres.NewSearchPostgresqlRepository(pc, ctx)
+	subr := subscription_postgres.NewSubsPostgresqlRepository(pc, ctx)
 	//pr := profile_postgres.NewProfilePostgresqlRepository(pc, ctx)
 	fvr := favourites_postgres.NewFavouritesPostgresqlRepository(pc, ctx)
 	//serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
@@ -72,6 +77,7 @@ func StartServer() {
 	//fu := films_usecase.NewFilmsUsecase(fr)
 	gu := genre_usecase.NewGenreUsecase(gr)
 	su := search_usecase.NewSearchUsecase(sr)
+	subu := subscription_usecase.NewSubsUsecase(subr)
 	//uu := utils_usecase.NewUtilsUsecase(ur)
 	fvu := favourites_usecase.NewFavouritesUsecase(fvr)
 	//seru := series_usecase.NewSeriesUsecase(serr)
@@ -87,6 +93,7 @@ func StartServer() {
 	//films_http.NewFilmsHandler(authMiddlewareRouter, fu)
 	genre_http.NewGenreHandler(authMiddlewareRouter, gu)
 	search_http.NewSearchHandler(authMiddlewareRouter, su)
+	subscription_http.NewSubsHandler(authMiddlewareRouter, subu)
 	//profile_http.NewProfileHandler(authMiddlewareRouter, pu, sanitizer)
 	//series_http.NewSeriesHandler(authMiddlewareRouter, seru)
 	//search_http.NewSearchHandler(authMiddlewareRouter, su)
@@ -96,11 +103,11 @@ func StartServer() {
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
-	authMiddlewareRouter.Use(mw.IsAuth)
+	//authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
-	mainRouter.Use(mw.CSRFProtection)
+	//mainRouter.Use(mw.CSRFProtection)
 	//mainRouter.Use(mw.Metrics)
 
 	serverPort := ":" + os.Getenv("SERVER_PORT")
