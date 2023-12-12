@@ -21,3 +21,5 @@
 .env
 ansible/*.pem
 coverage.out.tmp
+*.conf
+*.pem

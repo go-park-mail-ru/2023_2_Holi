@@ -236,7 +236,7 @@ func main() {
 	}
 	for {
 		count++
-		if count == 22 {
+		if count == 21 {
 			break
 		}
 		genres := strings.Split(records[i][1], ",")
