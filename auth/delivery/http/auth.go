@@ -112,7 +112,7 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 func (a *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	auth, err := a.auth(r)
 	if auth != true {
-		domain.WriteError(w, "you must be unauthorised", domain.GetHttpStatusCode(err))
+		domain.WriteError(w, "you must be authorised", domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "auth_http", "Register.auth", err, "user is authorised")
 		return
 	}
