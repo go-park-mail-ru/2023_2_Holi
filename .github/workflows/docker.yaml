@@ -1,0 +1,40 @@
+#name: Docker Build
+#
+#on:
+#  push:
+#    branches: [dev]
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+#      - name: Login to DockerHub Registry
+#        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+#      - name: Build Docker image
+#        run: docker-compose build -t holi/deploy:${GITHUB_SHA::8}
+#      - name: Push the image
+#        run: docker-compose push holi/deploy:${GITHUB_SHA::8}
+#
+#  deploy:
+#    runs-on: ubuntu-latest
+#    needs: build
+#    steps:
+#      - name: pull docker image
+#        uses: appleboy/ssh-action@master
+#        with:
+#          envs: GITHUB_SHA
+#          host: 109.120.190.212
+#          username: ubuntu
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          script: sudo docker pull dmitrydorofeev/godeploy:${GITHUB_SHA::8}
+#      - name: deploy docker image
+#        uses: appleboy/ssh-action@master
+#        with:
+#          envs: GITHUB_SHA
+#          host: 37.139.41.28
+#          username: ubuntu
+#          key: ${{ secrets.PRIVATE_KEY }}
+#          script: |
+#            sudo docker rm -f $(sudo docker ps -aq)
+#            sudo docker run -e VERSION=${GITHUB_SHA::8} -d -p 8080:8080 dmitrydorofeev/godeploy:${GITHUB_SHA::8}

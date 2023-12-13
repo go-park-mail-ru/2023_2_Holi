@@ -1,4 +1,7 @@
+<<<<<<< HEAD
+=======
 basePath: /
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 definitions:
   domain.Cast:
     properties:
@@ -23,12 +26,15 @@ definitions:
       name:
         type: string
     type: object
+<<<<<<< HEAD
+=======
   domain.Response:
     properties:
       body: {}
       err:
         type: string
     type: object
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
   domain.User:
     properties:
       email:
@@ -112,6 +118,10 @@ definitions:
       releaseYear:
         type: integer
     type: object
+<<<<<<< HEAD
+info:
+  contact: {}
+=======
 host: 127.0.0.1
 info:
   contact:
@@ -123,6 +133,7 @@ info:
     name: AS IS (NO WARRANTY)
   title: Netfilx API
   version: "1.0"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 paths:
   /api/v1/auth/check:
     post:
@@ -664,6 +675,21 @@ paths:
         "200":
           description: OK
           schema:
+<<<<<<< HEAD
+            type: json
+        "400":
+          description: Bad Request
+          schema:
+            type: json
+        "404":
+          description: Not Found
+          schema:
+            type: json
+        "500":
+          description: Internal Server Error
+          schema:
+            type: json
+=======
             properties:
               body:
                 properties:
@@ -683,6 +709,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/domain.Response'
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
       summary: Get series by genre
       tags:
       - Series
@@ -866,6 +893,8 @@ paths:
       summary: Get genres of series
       tags:
       - Genres
+<<<<<<< HEAD
+=======
   /v1/video/favourites/check/{id}:
     post:
       description: check if video is in favourites of user
@@ -905,4 +934,5 @@ paths:
       - Favourites
 schemes:
 - http
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 swagger: "2.0"

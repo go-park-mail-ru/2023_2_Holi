@@ -1,4 +1,10 @@
 {
+<<<<<<< HEAD
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+=======
     "schemes": [
         "http"
     ],
@@ -18,6 +24,7 @@
     },
     "host": "127.0.0.1",
     "basePath": "/",
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
     "paths": {
         "/api/v1/auth/check": {
             "post": {
@@ -808,6 +815,9 @@
                     "200": {
                         "description": "OK",
                         "schema": {
+<<<<<<< HEAD
+                            "type": "json"
+=======
                             "type": "object",
                             "properties": {
                                 "body": {
@@ -819,24 +829,37 @@
                                     }
                                 }
                             }
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
+<<<<<<< HEAD
+                            "type": "json"
+=======
                             "$ref": "#/definitions/domain.Response"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
+<<<<<<< HEAD
+                            "type": "json"
+=======
                             "$ref": "#/definitions/domain.Response"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
+<<<<<<< HEAD
+                            "type": "json"
+=======
                             "$ref": "#/definitions/domain.Response"
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     }
                 }
@@ -1164,6 +1187,8 @@
                     }
                 }
             }
+<<<<<<< HEAD
+=======
         },
         "/v1/video/favourites/check/{id}": {
             "post": {
@@ -1222,6 +1247,7 @@
                     }
                 }
             }
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         }
     },
     "definitions": {
@@ -1261,6 +1287,8 @@
                 }
             }
         },
+<<<<<<< HEAD
+=======
         "domain.Response": {
             "type": "object",
             "properties": {
@@ -1270,6 +1298,7 @@
                 }
             }
         },
+>>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         "domain.User": {
             "type": "object",
             "properties": {

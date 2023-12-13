@@ -3,7 +3,7 @@ module 2023_2_Holi
 go 1.21.1
 
 require (
-	github.com/aws/aws-sdk-go v1.48.7
+	github.com/aws/aws-sdk-go v1.48.10
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/google/go-cmp v0.6.0

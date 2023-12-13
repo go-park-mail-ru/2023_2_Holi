@@ -263,7 +263,6 @@ func main() {
 
 		for {
 			if records[i][4] != "Episode" {
-				i--
 				break
 			}
 			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"

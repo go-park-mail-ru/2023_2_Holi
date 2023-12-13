@@ -31,10 +31,12 @@ func NewSeriesHandler(router *mux.Router, su domain.SeriesUsecase) {
 // @Tags 			Series
 // @Param 			genre path string true "The Series of the genre you want to retrieve."
 // @Produce 		json
-// @Success         200  {object} object{body=object{film=domain.Video}}
-// @Failure         400  {object} domain.Response
-// @Failure         404  {object} domain.Response
-// @Failure         500  {object} domain.Response
+//
+//	@Success		200		{json}	object{body=object{[]domain.Video}}
+//	@Failure		400		{json}	object{err=string}
+//	@Failure		404		{json}	object{err=string}
+//	@Failure		500		{json}	object{err=string}
+//
 // @Router 			/api/v1/series/genre/{genreId} [get]
 func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -68,10 +70,12 @@ func (h *SeriesHandler) GetSeriesByGenre(w http.ResponseWriter, r *http.Request)
 // @Tags 			Series
 // @Param 			id path int true "Id series you want to get."
 // @Produce 		json
-// @Success 		200 {json} domain.Video, []domain.Cast, []domain.Episode
-// @Failure 		400 {json} domain.Response
-// @Failure 		404 {json} domain.Response
-// @Failure 		500 {json} domain.Response
+//
+//	@Success		200		{json}	object{body=object{{domain.Video, []domain.Cast, []domain.Episode}}
+//	@Failure		400		{json}	object{err=string}
+//	@Failure		404		{json}	object{err=string}
+//	@Failure		500		{json}	object{err=string}
+//
 // @Router 			/api/v1/series/{id} [get]
 func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -109,10 +113,12 @@ func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 // @Tags 			Series
 // @Param 			cast path string true "The Series of the Cast you want to retrieve."
 // @Produce 		json
-// @Success 		200 {json} []domain.Video
-// @Failure			400 {json} domain.Response
-// @Failure 		404 {json} domain.Response
-// @Failure 		500 {json} domain.Response
+//
+//	@Success		200		{json}	object{body=object{[]domain.Video}}
+//	@Failure		400		{json}	object{err=string}
+//	@Failure		404		{json}	object{err=string}
+//	@Failure		500		{json}	object{err=string}
+//
 // @Router 			/api/v1/series/cast/{id} [get]
 func (h *SeriesHandler) GetCastPageSeries(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -149,10 +155,10 @@ func (h *SeriesHandler) GetCastPageSeries(w http.ResponseWriter, r *http.Request
 //	@Param			rate	path	string	true	"The top rate Series  you want to retrieve."
 //	@Produce		json
 //
-// @Success 		200 {json} []domain.Video
-// @Failure 		400 {json} domain.Response
-// @Failure 		404 {json} domain.Response
-// @Failure 		500 {json} domain.Response
+//	@Success		200		{json}	object{body=object{[]domain.Video}}
+//	@Failure		400		{json}	object{err=string}
+//	@Failure		404		{json}	object{err=string}
+//	@Failure		500		{json}	object{err=string}
 //
 //	@Router			/api/v1/series/top/rate [get]
 func (h *SeriesHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
