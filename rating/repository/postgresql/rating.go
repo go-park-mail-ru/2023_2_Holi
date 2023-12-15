@@ -48,6 +48,9 @@ func (r *ratingPostgresqlRepository) Insert(rate domain.Rate) error {
 		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
 			return domain.ErrOutOfRange
 		}
+		if errors.As(err, &pgErr) && pgErr.Code == "23514" {
+			return domain.ErrBadRequest
+		}
 
 		return err
 	}
