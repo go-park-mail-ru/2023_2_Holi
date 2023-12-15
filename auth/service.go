@@ -79,7 +79,7 @@ func StartService() {
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
-	mainRouter.Use(mw.CSRFProtection)
+	//mainRouter.Use(mw.CSRFProtection)
 
 	serverPort := ":" + os.Getenv("AUTHMS_HTTP_SERVER_PORT")
 	logs.Logger.Info("starting auth http server at ", serverPort)

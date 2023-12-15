@@ -9,7 +9,7 @@ type Video struct {
 	PreviewPath      string          `json:"previewPath"`
 	MediaPath        string          `json:"mediaPath,omitempty"`
 	ReleaseYear      int             `json:"releaseYear"`
-	Rating           float64         `json:"rating"`
+	Rating           float64         `json:"rating.go"`
 	AgeRestriction   int             `json:"ageRestriction"`
 	Duration         pgtype.Interval `json:"-"`
 	PreviewVideoPath string          `json:"previewVideoPath"`

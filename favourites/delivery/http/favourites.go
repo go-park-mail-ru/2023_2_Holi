@@ -140,7 +140,7 @@ func (h *FavouritesHandler) GetAllFavourites(w http.ResponseWriter, r *http.Requ
 //	@Summary		check is in favourites
 //	@Description	check if video is in favourites of user
 //	@Tags			Favourites
-//	@Param			id	path	int	true	"The id of the video you want to delete."
+//	@Param			id	path	int	true	"The id of the video you want to check."
 //	@Success		200	{object}	object{body=object{isFavourite=bool}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}

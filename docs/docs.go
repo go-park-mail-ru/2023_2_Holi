@@ -9,9 +9,6 @@ const docTemplate = `{
     "info": {
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
-<<<<<<< HEAD
-        "contact": {},
-=======
         "contact": {
             "name": "Alex Chinaev",
             "url": "https://vk.com/l.chinaev",
@@ -20,7 +17,6 @@ const docTemplate = `{
         "license": {
             "name": "AS IS (NO WARRANTY)"
         },
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         "version": "{{.Version}}"
     },
     "host": "{{.Host}}",
@@ -815,51 +811,25 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-<<<<<<< HEAD
                             "type": "json"
-=======
-                            "type": "object",
-                            "properties": {
-                                "body": {
-                                    "type": "object",
-                                    "properties": {
-                                        "film": {
-                                            "$ref": "#/definitions/domain.Video"
-                                        }
-                                    }
-                                }
-                            }
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-<<<<<<< HEAD
                             "type": "json"
-=======
-                            "$ref": "#/definitions/domain.Response"
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-<<<<<<< HEAD
                             "type": "json"
-=======
-                            "$ref": "#/definitions/domain.Response"
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-<<<<<<< HEAD
                             "type": "json"
-=======
-                            "$ref": "#/definitions/domain.Response"
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
                         }
                     }
                 }
@@ -1106,6 +1076,109 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/video/rating": {
+            "post": {
+                "description": "Adds the rate to the video.",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "Adds the rate to the video.",
+                "parameters": [
+                    {
+                        "description": "user credentials",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Rate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/video/rating/{id}": {
+            "delete": {
+                "description": "Deletes the user rate for the video.",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "Deletes the rate.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/v1/genres/films": {
             "get": {
                 "description": "Get a list of genres.",
@@ -1187,8 +1260,6 @@ const docTemplate = `{
                     }
                 }
             }
-<<<<<<< HEAD
-=======
         },
         "/v1/video/favourites/check/{id}": {
             "post": {
@@ -1200,7 +1271,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "The id of the video you want to delete.",
+                        "description": "The id of the video you want to check.",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -1247,7 +1318,64 @@ const docTemplate = `{
                     }
                 }
             }
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
+        },
+        "/v1/video/rating/check/{id}": {
+            "post": {
+                "description": "checks if the video was rated by the user",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "checks is rated",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "isRated": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -1287,18 +1415,17 @@ const docTemplate = `{
                 }
             }
         },
-<<<<<<< HEAD
-=======
-        "domain.Response": {
+        "domain.Rate": {
             "type": "object",
             "properties": {
-                "body": {},
-                "err": {
-                    "type": "string"
+                "rate": {
+                    "type": "integer"
+                },
+                "videoId": {
+                    "type": "integer"
                 }
             }
         },
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
         "domain.User": {
             "type": "object",
             "properties": {
@@ -1378,7 +1505,7 @@ const docTemplate = `{
                 "previewVideoPath": {
                     "type": "string"
                 },
-                "rating": {
+                "rating.go": {
                     "type": "number"
                 },
                 "releaseYear": {
@@ -1416,7 +1543,7 @@ const docTemplate = `{
                 "previewVideoPath": {
                     "type": "string"
                 },
-                "rating": {
+                "rating.go": {
                     "type": "number"
                 },
                 "releaseYear": {
@@ -1429,21 +1556,12 @@ const docTemplate = `{
 
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
-<<<<<<< HEAD
-	Version:          "",
-	Host:             "",
-	BasePath:         "",
-	Schemes:          []string{},
-	Title:            "",
-	Description:      "",
-=======
 	Version:          "1.0",
 	Host:             "127.0.0.1",
 	BasePath:         "/",
 	Schemes:          []string{"http"},
 	Title:            "Netfilx API",
 	Description:      "API of the nelfix project by holi",
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

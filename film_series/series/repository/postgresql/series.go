@@ -10,7 +10,7 @@ import (
 )
 
 const getSeriesByGenreQuery = `
-    SELECT DISTINCT v.id, v.name, v.preview_path, v.rating, v.preview_video_path, v.seasons_count
+    SELECT DISTINCT v.id, v.name, v.preview_path, v.rating.go, v.preview_video_path, v.seasons_count
     FROM video AS v
         JOIN video_cast AS vc ON v.id = vc.video_id
         JOIN "cast" AS c ON vc.cast_id = c.id
@@ -21,7 +21,7 @@ const getSeriesByGenreQuery = `
 `
 
 const getSeriesDataQuery = `
-    SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating, age_restriction
+    SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating.go, age_restriction
     FROM video
         JOIN episode AS e ON video.id = e.video_id
     WHERE video.id = $1 AND video.seasons_count > 0;
@@ -43,7 +43,7 @@ const getSeriesEpisodesQuery = `
 `
 
 const getCastPageQuery = `
-    SELECT video.id, video.name, video.preview_path, video.rating, video.preview_video_path
+    SELECT video.id, video.name, video.preview_path, video.rating.go, video.preview_video_path
     FROM video
     WHERE video.id IN (
         SELECT vc.video_id
@@ -63,7 +63,7 @@ const getTopRateSeriesQuery = `
     FROM video
     JOIN episode AS e ON video.id = e.video_id
     WHERE video.seasons_count > 0
-    ORDER BY rating DESC
+    ORDER BY rating.go DESC
     LIMIT 1;
 `
 
