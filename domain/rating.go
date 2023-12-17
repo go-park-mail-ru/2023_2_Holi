@@ -9,11 +9,11 @@ type Rate struct {
 type RatingRepository interface {
 	Insert(rate Rate) error
 	Delete(rate Rate) error
-	Exists(rate Rate) (bool, error)
+	Exists(rate Rate) (bool, int, error)
 }
 
 type RatingUsecase interface {
 	Add(rate Rate) error
 	Remove(rate Rate) error
-	Rated(rete Rate) (bool, error)
+	Rated(rete Rate) (bool, int, error)
 }

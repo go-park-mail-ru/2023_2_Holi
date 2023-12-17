@@ -889,6 +889,8 @@ paths:
             properties:
               body:
                 properties:
+                  ' rate':
+                    type: integer
                   isRated:
                     type: boolean
                 type: object

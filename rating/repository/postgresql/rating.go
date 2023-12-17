@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"2023_2_Holi/domain"
@@ -23,9 +24,9 @@ const deleteQuery = `
 `
 
 const existsQuery = `
-	SELECT EXISTS(SELECT 1
-				  FROM video_estimation
-				  WHERE video_id = $1 AND user_id = $2)
+	SELECT rate
+	FROM video_estimation
+	WHERE video_id = $1 AND user_id = $2)
 `
 
 type ratingPostgresqlRepository struct {
@@ -73,14 +74,19 @@ func (r *ratingPostgresqlRepository) Delete(rate domain.Rate) error {
 	return nil
 }
 
-func (r *ratingPostgresqlRepository) Exists(rate domain.Rate) (bool, error) {
+func (r *ratingPostgresqlRepository) Exists(rate domain.Rate) (bool, int, error) {
 	result := r.db.QueryRow(r.ctx, existsQuery, rate.VideoID, rate.UserID)
 
-	var exist bool
-	if err := result.Scan(&exist); err != nil {
+	var rateNumber int
+	err := result.Scan(&rateNumber)
+
+	if err == pgx.ErrNoRows {
+		return false, 0, nil
+	}
+	if err != nil {
 		logs.LogError(logs.Logger, "postgresql(rating)", "Exists", err, err.Error())
-		return false, err
+		return false, 0, err
 	}
 
-	return exist, nil
+	return true, rateNumber, nil
 }

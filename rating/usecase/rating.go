@@ -35,13 +35,13 @@ func (u *RatingUsecase) Remove(rate domain.Rate) error {
 	return nil
 }
 
-func (u *RatingUsecase) Rated(rate domain.Rate) (bool, error) {
-	r, err := u.RatingRepo.Exists(rate)
+func (u *RatingUsecase) Rated(rate domain.Rate) (bool, int, error) {
+	r, rn, err := u.RatingRepo.Exists(rate)
 	logs.Logger.Debug("Usecase Rated rated: ", r)
 	if err != nil {
 		logs.LogError(logs.Logger, "usecase", "Rated", err, err.Error())
-		return false, err
+		return false, 0, err
 	}
 
-	return r, nil
+	return r, rn, nil
 }

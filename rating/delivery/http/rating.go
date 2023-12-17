@@ -119,7 +119,7 @@ func (h *RatingHandler) DeleteRate(w http.ResponseWriter, r *http.Request) {
 //	@Description	checks if the video was rated by the user
 //	@Tags			Rating
 //	@Param			id	path	int	true	"The id of the video."
-//	@Success		200	{object}	object{body=object{isRated=bool}}
+//	@Success		200	{object}	object{body=object{isRated=bool, rate=int}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/video/rating/check/{id} [post]
@@ -145,7 +145,7 @@ func (h *RatingHandler) Rated(w http.ResponseWriter, r *http.Request) {
 	}
 	logs.Logger.Debug("Rated user id: ", userID)
 
-	rated, err := h.RatingUsecase.Rated(domain.Rate{UserID: userID, VideoID: videoID})
+	rated, rateNumber, err := h.RatingUsecase.Rated(domain.Rate{UserID: userID, VideoID: videoID})
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Rated", err, err.Error())
@@ -156,6 +156,7 @@ func (h *RatingHandler) Rated(w http.ResponseWriter, r *http.Request) {
 		w,
 		map[string]interface{}{
 			"isRated": rated,
+			"rate":    rateNumber,
 		},
 		http.StatusOK,
 	)

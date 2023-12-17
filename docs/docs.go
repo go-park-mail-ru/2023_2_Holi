@@ -1148,6 +1148,9 @@ const docTemplate = `{
                                 "body": {
                                     "type": "object",
                                     "properties": {
+                                        " rate": {
+                                            "type": "integer"
+                                        },
                                         "isRated": {
                                             "type": "boolean"
                                         }
