@@ -46,7 +46,8 @@ func (h *FavouritesHandler) AddToFavourites(w http.ResponseWriter, r *http.Reque
 	}
 	logs.Logger.Debug("AddToFavourites path param id: ", videoID)
 
-	userID, err := strconv.Atoi(context.Get(r, "userID").(string))
+	cr := context.Get(r, "userID")
+	userID, err := strconv.Atoi(cr.(string))
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
