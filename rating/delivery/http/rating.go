@@ -122,7 +122,7 @@ func (h *RatingHandler) DeleteRate(w http.ResponseWriter, r *http.Request) {
 //	@Success		200	{object}	object{body=object{isRated=bool}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
-//	@Router			/v1/video/rating/check/{id} [post]
+//	@Router			/api/v1/video/rating/check/{id} [post]
 func (h *RatingHandler) Rated(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	videoID, err := strconv.Atoi(vars["id"])

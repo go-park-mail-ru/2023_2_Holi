@@ -83,7 +83,7 @@ definitions:
         type: string
       previewVideoPath:
         type: string
-      rating.go:
+      rating:
         type: number
       releaseYear:
         type: integer
@@ -108,7 +108,7 @@ definitions:
         type: string
       previewVideoPath:
         type: string
-      rating.go:
+      rating:
         type: number
       releaseYear:
         type: integer
@@ -873,6 +873,43 @@ paths:
       summary: Deletes the rate.
       tags:
       - Rating
+  /api/v1/video/rating/check/{id}:
+    post:
+      description: checks if the video was rated by the user
+      parameters:
+      - description: The id of the video.
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  isRated:
+                    type: boolean
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: checks is rated
+      tags:
+      - Rating
   /v1/genres/films:
     get:
       description: Get a list of genres.
@@ -964,43 +1001,6 @@ paths:
       summary: check is in favourites
       tags:
       - Favourites
-  /v1/video/rating/check/{id}:
-    post:
-      description: checks if the video was rated by the user
-      parameters:
-      - description: The id of the video.
-        in: path
-        name: id
-        required: true
-        type: integer
-      responses:
-        "200":
-          description: OK
-          schema:
-            properties:
-              body:
-                properties:
-                  isRated:
-                    type: boolean
-                type: object
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            properties:
-              err:
-                type: string
-            type: object
-        "500":
-          description: Internal Server Error
-          schema:
-            properties:
-              err:
-                type: string
-            type: object
-      summary: checks is rated
-      tags:
-      - Rating
 schemes:
 - http
 swagger: "2.0"

@@ -1123,6 +1123,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/v1/video/rating/check/{id}": {
+            "post": {
+                "description": "checks if the video was rated by the user",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "checks is rated",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "isRated": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/v1/video/rating/{id}": {
             "delete": {
                 "description": "Deletes the user rate for the video.",
@@ -1318,64 +1376,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/v1/video/rating/check/{id}": {
-            "post": {
-                "description": "checks if the video was rated by the user",
-                "tags": [
-                    "Rating"
-                ],
-                "summary": "checks is rated",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "The id of the video.",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "body": {
-                                    "type": "object",
-                                    "properties": {
-                                        "isRated": {
-                                            "type": "boolean"
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "err": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "err": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -1505,7 +1505,7 @@ const docTemplate = `{
                 "previewVideoPath": {
                     "type": "string"
                 },
-                "rating.go": {
+                "rating": {
                     "type": "number"
                 },
                 "releaseYear": {
@@ -1543,7 +1543,7 @@ const docTemplate = `{
                 "previewVideoPath": {
                     "type": "string"
                 },
-                "rating.go": {
+                "rating": {
                     "type": "number"
                 },
                 "releaseYear": {
