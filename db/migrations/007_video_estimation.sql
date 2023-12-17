@@ -16,8 +16,9 @@ CREATE TRIGGER modify_video_estimation_updated_at
     FOR EACH ROW
 EXECUTE PROCEDURE public.moddatetime(updated_at);
 
-CREATE OR REPLACE FUNCTION update_video_rating()
-    RETURNS TRIGGER AS
+CREATE FUNCTION update_video_rating() RETURNS TRIGGER
+    LANGUAGE plpgsql
+AS
 $$
 BEGIN
     UPDATE video v
@@ -29,7 +30,8 @@ BEGIN
 
     RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
+
 
 CREATE OR REPLACE TRIGGER insert_update_delete_vide_estimation_rate
     AFTER INSERT OR UPDATE OF rate OR DELETE

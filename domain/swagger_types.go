@@ -16,7 +16,7 @@ type VideoResponse struct {
 	PreviewPath      string  `json:"previewPath"`
 	MediaPath        string  `json:"mediaPath"`
 	ReleaseYear      int     `json:"releaseYear"`
-	Rating           float64 `json:"rating.go"`
+	Rating           float64 `json:"rating"`
 	AgeRestriction   int     `json:"ageRestriction"`
 	Duration         string  `json:"duration"`
 	PreviewVideoPath string  `json:"previewVideoPath"`
