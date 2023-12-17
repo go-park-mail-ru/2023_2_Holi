@@ -26,7 +26,7 @@ const deleteQuery = `
 const existsQuery = `
 	SELECT rate
 	FROM video_estimation
-	WHERE video_id = $1 AND user_id = $2)
+	WHERE video_id = $1 AND user_id = $2
 `
 
 type ratingPostgresqlRepository struct {
