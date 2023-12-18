@@ -12,12 +12,12 @@ import (
 
 const getByIDFilmData = `
 	SELECT e.name, e.description, e.duration,
-		e.preview_path, e.media_path, preview_video_path, release_year, rating.go, age_restriction
+		e.preview_path, e.media_path, preview_video_path, release_year, rating, age_restriction
 	FROM video
 		JOIN episode AS e ON video.id = video_id
 `
 
-const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating.go , v.preview_video_path 
+const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating, v.preview_video_path 
 FROM video AS v 
 JOIN video_cast AS vc ON v.id = vc.video_id 
 JOIN "cast" AS c ON vc.cast_id = c.id 
@@ -74,7 +74,7 @@ func TestGetFilmsByGenre(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating.go", "preview_video_path"})
+			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating", "preview_video_path"})
 
 			for _, film := range test.films {
 				rows.AddRow(film.ID, film.Name, film.PreviewPath, film.Rating, film.PreviewVideoPath)
@@ -156,7 +156,7 @@ func TestGetFilmData(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 
 			row := mockDB.NewRows([]string{"id", "name", "duration", "preview_path", "media_path",
-				"preview_video_path", "release_year", "rating.go", "age_restriction"}).
+				"preview_video_path", "release_year", "rating", "age_restriction"}).
 				AddRow(test.film.Name, test.film.Description, test.film.Duration, test.film.PreviewPath,
 					test.film.MediaPath, test.film.PreviewVideoPath, test.film.ReleaseYear, test.film.Rating,
 					test.film.AgeRestriction)

@@ -9,7 +9,7 @@ import (
 )
 
 const getSeriesByGenreQueryTest = `
-    SELECT DISTINCT v.id, v.name, v.preview_path, v.rating.go, v.preview_video_path, v.seasons_count
+    SELECT DISTINCT v.id, v.name, v.preview_path, v.rating, v.preview_video_path, v.seasons_count
     FROM video AS v
         JOIN video_cast AS vc ON v.id = vc.video_id
         JOIN "cast" AS c ON vc.cast_id = c.id
@@ -20,7 +20,7 @@ const getSeriesByGenreQueryTest = `
 `
 
 const getSeriesDataQueryTest = `
-    SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating.go, age_restriction
+    SELECT DISTINCT video.name, video.description, video.preview_path, preview_video_path, release_year, rating, age_restriction
     FROM video
         JOIN episode AS e ON video.id = e.video_id
     WHERE video.id = \$1 AND video.seasons_count > 0;
@@ -41,7 +41,7 @@ const getSeriesEpisodesQueryTest = `
 `
 
 const getCastPageQueryTest = `
-    SELECT video.id, video.name, video.preview_path, video.rating.go, video.preview_video_path
+    SELECT video.id, video.name, video.preview_path, video.rating, video.preview_video_path
     FROM video
     WHERE video.id IN \(
         SELECT vc.video_id
@@ -104,7 +104,7 @@ func TestGetSeriesByGenre(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating.go", "preview_video_path", "seasons_count"})
+			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating", "preview_video_path", "seasons_count"})
 
 			for _, series := range test.films {
 				rows.AddRow(series.ID, series.Name, series.PreviewPath, series.Rating, series.PreviewVideoPath, series.SeasonsCount)
@@ -170,7 +170,7 @@ func TestGetSeriesData(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			row := mockDB.NewRows([]string{"name", "description", "preview_path", "preview_video_path", "release_year", "rating.go", "age_restriction"}).
+			row := mockDB.NewRows([]string{"name", "description", "preview_path", "preview_video_path", "release_year", "rating", "age_restriction"}).
 				AddRow(test.series.Name, test.series.Description, test.series.PreviewPath, test.series.PreviewVideoPath, test.series.ReleaseYear, test.series.Rating, test.series.AgeRestriction)
 
 			eq := mockDB.ExpectQuery(getSeriesDataQueryTest).WithArgs(test.id)
@@ -375,7 +375,7 @@ func TestGetCastPageSeries(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 
-			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating.go", "preview_video_path"})
+			rows := mockDB.NewRows([]string{"id", "name", "preview_path", "rating", "preview_video_path"})
 
 			for _, series := range test.series {
 				rows.AddRow(series.ID, series.Name, series.PreviewPath, series.Rating, series.PreviewVideoPath)
