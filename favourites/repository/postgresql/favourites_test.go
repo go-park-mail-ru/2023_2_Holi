@@ -25,7 +25,7 @@ package postgres
 //
 //const testSelectAllQuery = `
 //	SELECT v.id, v.name, v.description,
-//		v.preview_path, v.preview_video_path, v.release_year, v.rating, v.age_restriction
+//		v.preview_path, v.preview_video_path, v.release_year, v.rating.go, v.age_restriction
 //	FROM video AS v
 //		JOIN favourite AS f ON video_id = v.id
 //	WHERE f.user_id = \$1
@@ -203,7 +203,7 @@ package postgres
 //	for _, test := range tests {
 //		t.Run(test.name, func(t *testing.T) {
 //			rows := mockDB.NewRows([]string{"id", "name", "description", "preview_path",
-//				"preview_video_path", "release_year", "rating", "age_restriction"}).
+//				"preview_video_path", "release_year", "rating.go", "age_restriction"}).
 //				AddRow(test.videos[0].ID, test.videos[0].Name, test.videos[0].Description,
 //					test.videos[0].PreviewPath, test.videos[0].PreviewVideoPath, test.videos[0].ReleaseYear,
 //					test.videos[0].Rating, test.videos[0].AgeRestriction).

@@ -23,7 +23,6 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
-
 }
 
 // GetFilmsByGenre godoc
@@ -79,7 +78,7 @@ func (h *FilmsHandler) GetFilmsByGenre(w http.ResponseWriter, r *http.Request) {
 // @Failure 		404 {json} domain.Response
 // @Failure 		500 {json} domain.Response
 //
-//	@Router			/api/v1/films/{id} [get]
+// @Router			/api/v1/films/{id} [get]
 func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	filmID, err := strconv.Atoi(vars["id"])
