@@ -3,11 +3,18 @@ package postgres
 import (
 	"context"
 	"errors"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 )
+
+const selectRatingQuery = `
+	SELECT rating
+	FROM video
+	WHERE video_id = $1
+`
 
 const insertQuery = `
 	INSERT INTO video_estimation(rate, video_id, user_id)
@@ -38,6 +45,28 @@ func NewRatingPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 		db:  pool,
 		ctx: ctx,
 	}
+}
+
+func (r *ratingPostgresqlRepository) SelectRating(videoID int) (int, error) {
+	row := r.db.QueryRow(r.ctx, selectRatingQuery, videoID)
+
+	logs.Logger.Debug("selectRatingQuery query result:", row)
+
+	var rating int
+	err := row.Scan(
+		&rating,
+	)
+
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "postgresql(rating)", "SelectRating", err, "No rows")
+		return 0, domain.ErrNotFound
+	}
+	if err != nil {
+		logs.LogError(logs.Logger, "postgresql(rating)", "SelectRating", err, err.Error())
+		return 0, err
+	}
+
+	return rating, nil
 }
 
 func (r *ratingPostgresqlRepository) Insert(rate domain.Rate) error {
