@@ -32,7 +32,7 @@ func NewRatingHandler(router *mux.Router, fu domain.RatingUsecase) {
 //	@Description	Adds the rate to the video.
 //	@Tags			Rating
 //	@Param			body	body		domain.Rate	true	"user credentials"
-//	@Success		204
+//	@Success		200	{object}	object{body=object{rating=float}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
 //	@Router			/api/v1/video/rating [post]
@@ -60,14 +60,20 @@ func (h *RatingHandler) AddRate(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("AddRate user id: ", userID)
 	rate.UserID = userID
 
-	err = h.RatingUsecase.Add(rate)
+	rating, err := h.RatingUsecase.Add(rate)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "Add", err, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"rating": rating,
+		},
+		http.StatusOK,
+	)
 }
 
 // DeleteRate godoc
@@ -76,7 +82,7 @@ func (h *RatingHandler) AddRate(w http.ResponseWriter, r *http.Request) {
 //	@Description	Deletes the user rate for the video.
 //	@Tags			Rating
 //	@Param			id	path	int	true	"The id of the video."
-//	@Success		204
+//	@Success		200	{object}	object{body=object{rating=float}}
 //	@Failure		400	{object}	object{err=string}
 //	@Failure		404	{object}	object{err=string}
 //	@Failure		500	{object}	object{err=string}
@@ -103,14 +109,20 @@ func (h *RatingHandler) DeleteRate(w http.ResponseWriter, r *http.Request) {
 	}
 	logs.Logger.Debug("DeleteRate user id: ", userID)
 
-	err = h.RatingUsecase.Remove(domain.Rate{UserID: userID, VideoID: videoID})
+	rating, err := h.RatingUsecase.Remove(domain.Rate{UserID: userID, VideoID: videoID})
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "http", "DeleteRate", err, err.Error())
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"rating": rating,
+		},
+		http.StatusOK,
+	)
 }
 
 // Rated godoc
