@@ -17,10 +17,11 @@ func NewSubsHandler(router *mux.Router, su domain.SubsUsecase) {
 		SubsUsecase: su,
 	}
 
-	router.HandleFunc("/v1/subs/sub/{id}/{flag}", handler.Subscribe).Methods(http.MethodPost, http.MethodOptions)
-	router.HandleFunc("/v1/subs/unsub/{id}", handler.UnSubscribe).Methods(http.MethodDelete, http.MethodOptions)
+	router.HandleFunc("/v1/subs/take_request", handler.TakeRequest).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/v1/subs/pay/{id}", handler.Pay).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/subs/sub/{id}", handler.Subscribe).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/v1/subs/unsub/{id}", handler.UnSubscribe).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/v1/subs/check/{id}", handler.CheckSub).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/subs/info/{id}", handler.GetSubInfo).Methods(http.MethodGet, http.MethodOptions)
 }
 
 func (h *SubsHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +32,8 @@ func (h *SubsHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "subs_http", "Subscribe", err, err.Error())
 		return
 	}
-	flag, err := strconv.Atoi(vars["flag"])
-	if err != nil {
-		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "subs_http", "Subscribe", err, err.Error())
-		return
-	}
 
-	err = h.SubsUsecase.Subscribe(subID, flag)
+	err = h.SubsUsecase.Subscribe(subID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "subs_http", "Subscribe", err, "Failed to sub")
@@ -49,7 +44,7 @@ func (h *SubsHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
-			"responce": "successful Subscription",
+			"responce": "sucsesfull sibscribe",
 		},
 		http.StatusOK,
 	)
@@ -90,7 +85,7 @@ func (h *SubsHandler) CheckSub(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.SubsUsecase.UnSubscribe(subID)
+	subUpTo, status, err := h.SubsUsecase.CheckSub(subID)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
 		logs.LogError(logs.Logger, "subs_http", "CheckSub", err, "Failed to CheckSub")
@@ -102,32 +97,64 @@ func (h *SubsHandler) CheckSub(w http.ResponseWriter, r *http.Request) {
 		w,
 		map[string]interface{}{
 			"responce": "user is sub",
+			"subUpTo":  subUpTo,
+			"status":   status,
 		},
 		http.StatusOK,
 	)
 }
 
-func (h *SubsHandler) GetSubInfo(w http.ResponseWriter, r *http.Request) {
+func (h *SubsHandler) Pay(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	subID, err := strconv.Atoi(vars["id"])
+	userId, err := strconv.Atoi(vars["id"])
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "subs_http", "CheckSub", err, err.Error())
 		return
 	}
 
-	suber, err := h.SubsUsecase.GetSubInfo(subID)
-	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
-		logs.LogError(logs.Logger, "subs_http", "CheckSub", err, "Failed to CheckSub")
-		return
-	}
-
-	logs.Logger.Debug("suber:", suber)
+	payment := domain.Payment(userId)
+	logs.Logger.Debug("payment:", payment)
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
-			"suber": suber,
+			"payment": payment,
+		},
+		http.StatusOK,
+	)
+
+}
+
+func (h *SubsHandler) TakeRequest(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	receivedHash := r.FormValue("sha1_hash")
+	if receivedHash == "" {
+		http.Error(w, "sha1_hash not provided", http.StatusBadRequest)
+		return
+	}
+
+	parametersString := domain.CreateParametersString(r)
+
+	sha1Hash, err := domain.CalculateSHA1Hash(parametersString)
+	if err != nil {
+		http.Error(w, "Error calculating SHA-1 hash", http.StatusInternalServerError)
+		return
+	}
+
+	if sha1Hash != receivedHash {
+		http.Error(w, "Invalid sha1_hash", http.StatusForbidden)
+		return
+	}
+	_, err = http.Post("http://localhost:3006/api/v1/subs/sub/1", "application/json", nil)
+	if err != nil {
+		http.Error(w, "Error sending HTTP request", http.StatusInternalServerError)
+		return
+	}
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"status": "successful",
 		},
 		http.StatusOK,
 	)

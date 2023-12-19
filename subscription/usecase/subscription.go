@@ -3,20 +3,21 @@ package usecase
 import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
+	"time"
 )
 
-type subsUsecase struct {
+type SubsUsecase struct {
 	subsRepo domain.SubsRepository
 }
 
 func NewSubsUsecase(sr domain.SubsRepository) domain.SubsUsecase {
-	return &subsUsecase{
+	return &SubsUsecase{
 		subsRepo: sr,
 	}
 }
 
-func (u *subsUsecase) Subscribe(subID int, flag int) error {
-	err := u.subsRepo.Subscribe(subID, flag)
+func (u *SubsUsecase) Subscribe(subID int) error {
+	err := u.subsRepo.Subscribe(subID)
 	if err != nil {
 		logs.LogError(logs.Logger, "subs_usecase", "Subscribe", err, err.Error())
 		return err
@@ -25,7 +26,7 @@ func (u *subsUsecase) Subscribe(subID int, flag int) error {
 	return nil
 }
 
-func (u *subsUsecase) UnSubscribe(subID int) error {
+func (u *SubsUsecase) UnSubscribe(subID int) error {
 	err := u.subsRepo.UnSubscribe(subID)
 	if err != nil {
 		logs.LogError(logs.Logger, "subs_usecase", "UnSubscribe", err, err.Error())
@@ -35,22 +36,20 @@ func (u *subsUsecase) UnSubscribe(subID int) error {
 	return nil
 }
 
-func (u *subsUsecase) CheckSub(subID int) error {
-	err := u.subsRepo.CheckSub(subID)
+func (u *SubsUsecase) CheckSub(subID int) (sub time.Time, status bool, error error) {
+	timeNow := time.Now()
+
+	subUpTo, err := u.subsRepo.CheckSub(subID)
 	if err != nil {
 		logs.LogError(logs.Logger, "subs_usecase", "CheckSub", err, err.Error())
-		return err
+		return timeNow, false, err
 	}
-	logs.Logger.Debug("Usecase CheckSub:", err)
-	return nil
-}
 
-func (u *subsUsecase) GetSubInfo(subID int) (domain.SubInfo, error) {
-	subInfo, err := u.subsRepo.GetSubInfo(subID)
-	if err != nil {
-		logs.LogError(logs.Logger, "subs_usecase", "GetSubInfo", err, err.Error())
-		return domain.SubInfo{}, err
+	logs.Logger.Debug("Usecase CheckSub:", subUpTo)
+
+	if timeNow.Before(subUpTo) {
+		return timeNow, true, nil
+	} else {
+		return timeNow, false, nil
 	}
-	logs.Logger.Debug("Usecase GetSubInfo:", err)
-	return subInfo, nil
 }

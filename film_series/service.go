@@ -59,7 +59,7 @@ func StartService() {
 
 	err = http.ListenAndServe(serverPort, mainRouter)
 	if err != nil {
-		logs.LogFatal(logs.Logger, "profile", "StartService", err, err.Error())
+		logs.LogFatal(logs.Logger, "films_series", "StartService", err, err.Error())
 	}
 	logs.Logger.Info("server stopped")
 }

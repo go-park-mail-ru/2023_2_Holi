@@ -3,36 +3,26 @@ package postgresql
 import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-	"time"
-
 	"context"
+	"github.com/jackc/pgx/v5"
+	"time"
 )
 
 const subQuery = `
-    INSERT INTO user_subscription (user_id, subscription_start, subscription_up_to)
-	VALUES ($1, $2, $3)
+	UPDATE "user_subscription"
+		SET subscription_up_to = $1
+		WHERE user_id = $2;
 `
 const subDeleteQuery = `
-	UPDATE user_subscription
-	SET subscription_start = NULL, subscription_up_to = NULL
-	WHERE user_id = $1;
+	UPDATE "user_subscription"
+		SET subscription_up_to = '01-01-0001'
+		WHERE user_id = $1;
 `
 
 const checkSubQuery = `
-	SELECT subscription_start, subscription_up_to
-	FROM user_subscription
-	WHERE user_id = $1;
-`
-
-const checkExistQuery = `
-	INSERT INTO user_subscription (user_id, subscription_start, subscription_up_to)
-	VALUES ($1, $2, $3)
-`
-
-const getInfoSubQuery = `
-	SELECT subscription_start, subscription_up_to, user_id
-	FROM user_subscription
-	WHERE user_id = $1;
+	SELECT subscription_up_to
+		FROM "user_subscription"
+		WHERE user_id = $1;
 `
 
 type subsPostgresqlRepository struct {
@@ -47,59 +37,53 @@ func NewSubsPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) 
 	}
 }
 
-func (r *subsPostgresqlRepository) Subscribe(subId int, flag int) error {
-	currentTime := time.Now()
+func (r *subsPostgresqlRepository) Subscribe(subId int) error {
 	subTime := time.Now()
-	if flag == 1 {
-		subTime = currentTime.AddDate(0, 1, 0)
-	}
-	if flag == 6 {
-		subTime = currentTime.AddDate(0, 6, 0)
-	}
-	rows := r.db.QueryRow(r.ctx, subQuery, subId, currentTime, subTime)
 
-	logs.Logger.Debug("Subscribe query result:", rows)
+	subTime = subTime.AddDate(0, 1, 0)
 
-	var id int
-	if err := rows.Scan(&id); err != nil {
-		logs.LogError(logs.Logger, "subs_postgres", "Subscribe", err, err.Error())
+	logs.Logger.Debug("until sub time:", subTime)
+
+	row, err := r.db.Exec(r.ctx, subQuery, subTime, subId)
+
+	if err != nil {
+		logs.LogError(logs.Logger, "subc_postgres", "GetSubData", err, err.Error())
 		return err
 	}
+
+	logs.Logger.Debug("subscribe query result:", row)
+
 	return nil
 }
 
 func (r *subsPostgresqlRepository) UnSubscribe(subId int) error {
-	rows, err := r.db.Query(r.ctx, subQuery, subId)
+	row, err := r.db.Exec(r.ctx, subDeleteQuery, subId)
 	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
+		logs.LogError(logs.Logger, "subs_postgresql", "UnSubscribe", err, err.Error())
 		return err
 	}
-	defer rows.Close()
-	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
+	logs.Logger.Debug("UnSubscribe query result:", row)
 
 	return nil
 }
 
-func (r *subsPostgresqlRepository) CheckSub(subId int) error {
-	rows, err := r.db.Query(r.ctx, subQuery, subId)
-	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
-		return err
+func (r *subsPostgresqlRepository) CheckSub(subId int) (sub time.Time, error error) {
+	row := r.db.QueryRow(r.ctx, checkSubQuery, subId)
+
+	logs.Logger.Debug("GetSubData query result:", row)
+
+	var subUpTo *time.Time
+
+	err := row.Scan(&subUpTo)
+
+	if err == pgx.ErrNoRows {
+		logs.LogError(logs.Logger, "subc_postgres", "GetSubData", err, err.Error())
+		return *subUpTo, domain.ErrNotFound
 	}
-	defer rows.Close()
-	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
-
-	return nil
-}
-
-func (r *subsPostgresqlRepository) GetSubInfo(subId int) (domain.SubInfo, error) {
-	rows, err := r.db.Query(r.ctx, subQuery, subId)
 	if err != nil {
-		logs.LogError(logs.Logger, "films_postgresql", "GetFilmsByGenre", err, err.Error())
-		return domain.SubInfo{}, err
+		logs.LogError(logs.Logger, "subc_postgres", "GetSubData", err, err.Error())
+		return *subUpTo, err
 	}
-	defer rows.Close()
-	logs.Logger.Debug("GetFilmsByGenre query result:", rows)
 
-	return domain.SubInfo{}, nil
+	return *subUpTo, err
 }
