@@ -118,7 +118,7 @@ func TestGetSeriesByGenre(t *testing.T) {
 				eq.WillReturnError(test.err)
 			}
 
-			films, err := r.GetSeriesByGenre(test.genre)
+			films, err := r.GetSeriesByGenre(test.id)
 			if test.good {
 				require.Nil(t, err)
 				require.Len(t, films, len(test.films))
