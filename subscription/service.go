@@ -49,7 +49,7 @@ func StartService() {
 	mainRouter.Use(mw.CORS)
 	//mainRouter.Use(mw.CSRFProtection)
 
-	serverPort := ":" + os.Getenv("SUB_HTTP_SERVER_PORT")
+	serverPort := ":" + os.Getenv("SUBMS_HTTP_SERVER_PORT")
 	logs.Logger.Info("starting service at ", serverPort)
 
 	err = http.ListenAndServe(serverPort, mainRouter)
