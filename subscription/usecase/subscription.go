@@ -47,8 +47,8 @@ func (u *SubsUsecase) CheckSub(subID int) (sub time.Time, status bool, error err
 
 	logs.Logger.Debug("Usecase CheckSub:", subUpTo)
 
-	if timeNow.Before(subUpTo) {
-		return timeNow, true, nil
+	if timeNow.Before(subUpTo) || timeNow == subUpTo {
+		return subUpTo, true, nil
 	} else {
 		return timeNow, false, nil
 	}

@@ -96,9 +96,8 @@ func (h *SubsHandler) CheckSub(w http.ResponseWriter, r *http.Request) {
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
-			"responce": "user is sub",
-			"subUpTo":  subUpTo,
-			"status":   status,
+			"subUpTo": subUpTo,
+			"status":  status,
 		},
 		http.StatusOK,
 	)
