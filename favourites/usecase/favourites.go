@@ -49,7 +49,7 @@ func (u *FavouritesUsecase) Favourite(videoID, userID int) (bool, error) {
 	f, err := u.favouritesRepo.Exists(videoID, userID)
 	logs.Logger.Debug("Usecase Favourite favourite: ", f)
 	if err != nil {
-		logs.LogError(logs.Logger, "usecase", "GetAllFFavouriteavourites", err, err.Error())
+		logs.LogError(logs.Logger, "usecase", "Favourite", err, err.Error())
 		return false, err
 	}
 

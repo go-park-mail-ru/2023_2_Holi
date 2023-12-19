@@ -17,7 +17,7 @@ const getByIDFilmData = `
 		JOIN episode AS e ON video.id = video_id
 `
 
-const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating , v.preview_video_path 
+const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating, v.preview_video_path 
 FROM video AS v 
 JOIN video_cast AS vc ON v.id = vc.video_id 
 JOIN "cast" AS c ON vc.cast_id = c.id 

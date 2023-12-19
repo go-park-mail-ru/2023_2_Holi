@@ -80,15 +80,15 @@ func (_m *FilmsUsecase) GetFilmData(id int) (domain.Video, []domain.Cast, error)
 }
 
 // GetFilmsByGenre provides a mock function with given fields: genre
-func (_m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Video, error) {
+func (_m *FilmsUsecase) GetFilmsByGenre(genre int) ([]domain.Video, error) {
 	ret := _m.Called(genre)
 
 	var r0 []domain.Video
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) ([]domain.Video, error)); ok {
+	if rf, ok := ret.Get(0).(func(int) ([]domain.Video, error)); ok {
 		return rf(genre)
 	}
-	if rf, ok := ret.Get(0).(func(string) []domain.Video); ok {
+	if rf, ok := ret.Get(0).(func(int) []domain.Video); ok {
 		r0 = rf(genre)
 	} else {
 		if ret.Get(0) != nil {
@@ -96,7 +96,7 @@ func (_m *FilmsUsecase) GetFilmsByGenre(genre string) ([]domain.Video, error) {
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(string) error); ok {
+	if rf, ok := ret.Get(1).(func(int) error); ok {
 		r1 = rf(genre)
 	} else {
 		r1 = ret.Error(1)

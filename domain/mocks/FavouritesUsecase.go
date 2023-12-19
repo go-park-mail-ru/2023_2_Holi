@@ -27,6 +27,30 @@ func (_m *FavouritesUsecase) AddToFavourites(videoID int, userID int) error {
 	return r0
 }
 
+// Favourite provides a mock function with given fields: videoID, userID
+func (_m *FavouritesUsecase) Favourite(videoID int, userID int) (bool, error) {
+	ret := _m.Called(videoID, userID)
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, int) (bool, error)); ok {
+		return rf(videoID, userID)
+	}
+	if rf, ok := ret.Get(0).(func(int, int) bool); ok {
+		r0 = rf(videoID, userID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(videoID, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetAllFavourites provides a mock function with given fields: userID
 func (_m *FavouritesUsecase) GetAllFavourites(userID int) ([]domain.Video, error) {
 	ret := _m.Called(userID)

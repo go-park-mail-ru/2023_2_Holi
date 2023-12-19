@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 basePath: /
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 definitions:
   domain.Cast:
     properties:
@@ -26,15 +23,13 @@ definitions:
       name:
         type: string
     type: object
-<<<<<<< HEAD
-=======
-  domain.Response:
+  domain.Rate:
     properties:
-      body: {}
-      err:
-        type: string
+      rate:
+        type: integer
+      videoId:
+        type: integer
     type: object
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
   domain.User:
     properties:
       email:
@@ -118,10 +113,6 @@ definitions:
       releaseYear:
         type: integer
     type: object
-<<<<<<< HEAD
-info:
-  contact: {}
-=======
 host: 127.0.0.1
 info:
   contact:
@@ -133,7 +124,6 @@ info:
     name: AS IS (NO WARRANTY)
   title: Netfilx API
   version: "1.0"
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 paths:
   /api/v1/auth/check:
     post:
@@ -675,7 +665,6 @@ paths:
         "200":
           description: OK
           schema:
-<<<<<<< HEAD
             type: json
         "400":
           description: Bad Request
@@ -689,27 +678,6 @@ paths:
           description: Internal Server Error
           schema:
             type: json
-=======
-            properties:
-              body:
-                properties:
-                  film:
-                    $ref: '#/definitions/domain.Video'
-                type: object
-            type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/domain.Response'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/domain.Response'
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
       summary: Get series by genre
       tags:
       - Series
@@ -839,6 +807,111 @@ paths:
       summary: Adds a video to favourites.
       tags:
       - Favourites
+  /api/v1/video/rating:
+    post:
+      description: Adds the rate to the video.
+      parameters:
+      - description: user credentials
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Rate'
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Adds the rate to the video.
+      tags:
+      - Rating
+  /api/v1/video/rating/{id}:
+    delete:
+      description: Deletes the user rate for the video.
+      parameters:
+      - description: The id of the video.
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: Deletes the rate.
+      tags:
+      - Rating
+  /api/v1/video/rating/check/{id}:
+    post:
+      description: checks if the video was rated by the user
+      parameters:
+      - description: The id of the video.
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            properties:
+              body:
+                properties:
+                  ' rate':
+                    type: integer
+                  isRated:
+                    type: boolean
+                type: object
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            properties:
+              err:
+                type: string
+            type: object
+      summary: checks is rated
+      tags:
+      - Rating
   /v1/genres/films:
     get:
       description: Get a list of genres.
@@ -893,13 +966,11 @@ paths:
       summary: Get genres of series
       tags:
       - Genres
-<<<<<<< HEAD
-=======
   /v1/video/favourites/check/{id}:
     post:
       description: check if video is in favourites of user
       parameters:
-      - description: The id of the video you want to delete.
+      - description: The id of the video you want to check.
         in: path
         name: id
         required: true
@@ -934,5 +1005,4 @@ paths:
       - Favourites
 schemes:
 - http
->>>>>>> 87142617555a9c83eee773fbca2503ee0d74cd09
 swagger: "2.0"
