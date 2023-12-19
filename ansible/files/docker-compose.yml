@@ -55,6 +55,22 @@ services:
     ports:
       - ${AUTHMS_HTTP_SERVER_PORT}:${AUTHMS_HTTP_SERVER_PORT}
 
+  subscription:
+    image: holi2023/subscription:latest
+    container_name: subscription
+    networks:
+      local_area:
+    restart: unless-stopped
+    env_file:
+      - .env
+    depends_on:
+      postgres_usr:
+        condition: service_started
+      redis:
+        condition: service_started
+    ports:
+      - ${SUBMS_HTTP_SERVER_PORT}:${SUBMS_HTTP_SERVER_PORT}
+
   profile:
     container_name: profile
     image: holi2023/profile:latest

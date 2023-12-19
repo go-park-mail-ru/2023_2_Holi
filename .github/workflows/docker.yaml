@@ -21,6 +21,11 @@ jobs:
           sudo docker build -t holi2023/auth:${GITHUB_SHA::8} -f ./cmd/auth_service/Dockerfile . &&
           sudo docker tag holi2023/auth:${GITHUB_SHA::8} holi2023/auth:latest
 
+      - name: Build Sub Docker images
+        run:
+          sudo docker build -t holi2023/subscription:${GITHUB_SHA::8} -f ./cmd/subscription_service/Dockerfile . &&
+          sudo docker tag holi2023/subscription:${GITHUB_SHA::8} holi2023/subscription:latest
+
       - name: Build Profile Docker images
         run:
           sudo docker build -t holi2023/profile:${GITHUB_SHA::8} -f ./cmd/profile_service/Dockerfile . &&
@@ -46,6 +51,11 @@ jobs:
         run:
           docker push holi2023/auth:latest &&
           docker push holi2023/auth:${GITHUB_SHA::8}
+
+      - name: Push Sub Docker images
+        run:
+          docker push holi2023/subscription:latest &&
+          docker push holi2023/subscription:${GITHUB_SHA::8}
 
       - name: Push Profile Docker images
         run:
@@ -85,6 +95,7 @@ jobs:
             sudo docker pull holi2023/films_series:latest
             sudo docker pull holi2023/main:latest
             sudo docker pull holi2023/fill:latest
+            sudo docker pull holi2023/subscription:latest
 
       - name: Run backend
         uses: appleboy/ssh-action@master
