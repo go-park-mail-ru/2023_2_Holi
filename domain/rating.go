@@ -7,10 +7,10 @@ type Rate struct {
 }
 
 type RatingRepository interface {
-	Insert(rate Rate) error
-	Delete(rate Rate) error
+	Insert(rate Rate) (float64, error)
+	Delete(rate Rate) (float64, error)
 	Exists(rate Rate) (bool, int, error)
-	SelectRating(videoID int) (float64, error)
+	//SelectRating(videoID int) (float64, error)
 }
 
 type RatingUsecase interface {

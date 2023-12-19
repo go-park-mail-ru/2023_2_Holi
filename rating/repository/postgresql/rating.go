@@ -13,7 +13,7 @@ import (
 const selectRatingQuery = `
 	SELECT rating
 	FROM video
-	WHERE video_id = $1
+	WHERE id = $1
 `
 
 const insertQuery = `
@@ -47,8 +47,8 @@ func NewRatingPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 	}
 }
 
-func (r *ratingPostgresqlRepository) SelectRating(videoID int) (float64, error) {
-	row := r.db.QueryRow(r.ctx, selectRatingQuery, videoID)
+func (r *ratingPostgresqlRepository) SelectRating(videoID int, tx *pgx.Tx) (float64, error) {
+	row := (*tx).QueryRow(r.ctx, selectRatingQuery, videoID)
 
 	logs.Logger.Debug("selectRatingQuery query result:", row)
 
@@ -69,37 +69,69 @@ func (r *ratingPostgresqlRepository) SelectRating(videoID int) (float64, error) 
 	return rating, nil
 }
 
-func (r *ratingPostgresqlRepository) Insert(rate domain.Rate) error {
-	_, err := r.db.Exec(r.ctx, insertQuery, rate.Rate, rate.VideoID, rate.UserID)
+func (r *ratingPostgresqlRepository) Insert(rate domain.Rate) (float64, error) {
+	tx, err := r.db.Begin(r.ctx)
+	if err != nil {
+		return 0, domain.ErrInternalServerError
+	}
+	defer tx.Rollback(r.ctx)
+
+	_, err = tx.Exec(r.ctx, insertQuery, rate.Rate, rate.VideoID, rate.UserID)
 	if err != nil {
 		logs.LogError(logs.Logger, "postgresql(rating)", "Insert", err, err.Error())
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) && pgErr.Code == "23503" {
-			return domain.ErrOutOfRange
+			return 0, domain.ErrOutOfRange
 		}
 		if errors.As(err, &pgErr) && pgErr.Code == "23514" {
-			return domain.ErrBadRequest
+			return 0, domain.ErrBadRequest
 		}
 
-		return err
+		return 0, err
 	}
 
-	return nil
+	rating, err := r.SelectRating(rate.VideoID, &tx)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit(r.ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return rating, nil
 }
 
-func (r *ratingPostgresqlRepository) Delete(rate domain.Rate) error {
-	res, err := r.db.Exec(r.ctx, deleteQuery, rate.VideoID, rate.UserID)
+func (r *ratingPostgresqlRepository) Delete(rate domain.Rate) (float64, error) {
+	tx, err := r.db.Begin(r.ctx)
+	if err != nil {
+		return 0, domain.ErrInternalServerError
+	}
+	defer tx.Rollback(r.ctx)
+
+	res, err := tx.Exec(r.ctx, deleteQuery, rate.VideoID, rate.UserID)
 	if err != nil {
 		logs.LogError(logs.Logger, "postgresql(rating)", "Delete", err, err.Error())
-		return err
+		return 0, err
 	}
 
 	if res.RowsAffected() == 0 {
 		logs.LogError(logs.Logger, "postgresql(rating)", "Delete", domain.ErrOutOfRange, domain.ErrOutOfRange.Error())
-		return domain.ErrOutOfRange
+		return 0, domain.ErrOutOfRange
 	}
 
-	return nil
+	rating, err := r.SelectRating(rate.VideoID, &tx)
+	if err != nil {
+		return 0, err
+	}
+
+	err = tx.Commit(r.ctx)
+	if err != nil {
+		return 0, err
+	}
+
+	return rating, nil
 }
 
 func (r *ratingPostgresqlRepository) Exists(rate domain.Rate) (bool, int, error) {
