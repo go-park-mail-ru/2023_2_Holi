@@ -12,42 +12,28 @@ type SubsHandler struct {
 	SubsUsecase domain.SubsUsecase
 }
 
+type SubsHandlerNotAu struct {
+	SubsUsecase domain.SubsUsecase
+}
+
+const pay = `http://localhost/api/v1/subs/sub/`
+
+func NotAuthSubHandler(router *mux.Router, su domain.SubsUsecase) {
+	handlerNotAuth := &SubsHandlerNotAu{
+		SubsUsecase: su,
+	}
+
+	router.HandleFunc("/api/v1/subs/take_request", handlerNotAuth.TakeRequest).Methods(http.MethodPost, http.MethodOptions)
+}
+
 func NewSubsHandler(router *mux.Router, su domain.SubsUsecase) {
 	handler := &SubsHandler{
 		SubsUsecase: su,
 	}
 
-	router.HandleFunc("/v1/subs/take_request", handler.TakeRequest).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/v1/subs/pay/{id}", handler.Pay).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/subs/sub/{id}", handler.Subscribe).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/v1/subs/unsub/{id}", handler.UnSubscribe).Methods(http.MethodPost, http.MethodOptions)
 	router.HandleFunc("/v1/subs/check/{id}", handler.CheckSub).Methods(http.MethodGet, http.MethodOptions)
-}
-
-func (h *SubsHandler) Subscribe(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	subID, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		domain.WriteError(w, err.Error(), http.StatusBadRequest)
-		logs.LogError(logs.Logger, "subs_http", "Subscribe", err, err.Error())
-		return
-	}
-
-	err = h.SubsUsecase.Subscribe(subID)
-	if err != nil {
-		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
-		logs.LogError(logs.Logger, "subs_http", "Subscribe", err, "Failed to sub")
-		return
-	}
-
-	logs.Logger.Debug("subs:", err)
-	domain.WriteResponse(
-		w,
-		map[string]interface{}{
-			"responce": "sucsesfull sibscribe",
-		},
-		http.StatusOK,
-	)
 }
 
 func (h *SubsHandler) UnSubscribe(w http.ResponseWriter, r *http.Request) {
@@ -124,9 +110,20 @@ func (h *SubsHandler) Pay(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *SubsHandler) TakeRequest(w http.ResponseWriter, r *http.Request) {
+func (h *SubsHandlerNotAu) TakeRequest(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
+	subId := r.FormValue("label")
+	if subId == "" {
+		http.Error(w, "sha1_hash not provided", http.StatusBadRequest)
+		return
+	}
+	subIdInt, err := strconv.Atoi(subId)
+	if err != nil {
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "subs_http", "UnSubscribe", err, err.Error())
+		return
+	}
 	receivedHash := r.FormValue("sha1_hash")
 	if receivedHash == "" {
 		http.Error(w, "sha1_hash not provided", http.StatusBadRequest)
@@ -145,9 +142,10 @@ func (h *SubsHandler) TakeRequest(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Invalid sha1_hash", http.StatusForbidden)
 		return
 	}
-	_, err = http.Post("http://localhost:3006/api/v1/subs/sub/1", "application/json", nil)
+	err = h.SubsUsecase.Subscribe(subIdInt)
 	if err != nil {
-		http.Error(w, "Error sending HTTP request", http.StatusInternalServerError)
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "subs_http", "Subscribe", err, "Failed to sub")
 		return
 	}
 	domain.WriteResponse(

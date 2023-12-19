@@ -33,6 +33,8 @@ func StartService() {
 
 	subr := subscription_postgres.NewSubsPostgresqlRepository(pc, ctx)
 	subu := subscription_usecase.NewSubsUsecase(subr)
+
+	subscription_http.NotAuthSubHandler(mainRouter, subu)
 	subscription_http.NewSubsHandler(authMiddlewareRouter, subu)
 
 	//mainRouter.Handle("/metrics", promhttp.Handler())
@@ -41,7 +43,7 @@ func StartService() {
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
 	//mainRouter.Use(mw.Metrics)
-	//authMiddlewareRouter.Use(mw.IsAuth)
+	authMiddlewareRouter.Use(mw.IsAuth)
 	mainRouter.Use(accessLogger.AccessLogMiddleware)
 	mainRouter.Use(mux.CORSMethodMiddleware(mainRouter))
 	mainRouter.Use(mw.CORS)
