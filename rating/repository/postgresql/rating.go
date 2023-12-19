@@ -47,12 +47,12 @@ func NewRatingPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context
 	}
 }
 
-func (r *ratingPostgresqlRepository) SelectRating(videoID int) (int, error) {
+func (r *ratingPostgresqlRepository) SelectRating(videoID int) (float64, error) {
 	row := r.db.QueryRow(r.ctx, selectRatingQuery, videoID)
 
 	logs.Logger.Debug("selectRatingQuery query result:", row)
 
-	var rating int
+	var rating float64
 	err := row.Scan(
 		&rating,
 	)

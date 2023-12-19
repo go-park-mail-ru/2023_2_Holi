@@ -10,11 +10,11 @@ type RatingRepository interface {
 	Insert(rate Rate) error
 	Delete(rate Rate) error
 	Exists(rate Rate) (bool, error)
-	SelectRating(videID int) (int, error)
+	SelectRating(videID int) (float64, error)
 }
 
 type RatingUsecase interface {
-	Add(rate Rate) (int, error)
-	Remove(rate Rate) (int, error)
+	Add(rate Rate) (float64, error)
+	Remove(rate Rate) (float64, error)
 	Rated(rete Rate) (bool, error)
 }

@@ -15,24 +15,36 @@ func NewRatingUsecase(rr domain.RatingRepository) domain.RatingUsecase {
 	}
 }
 
-func (u *RatingUsecase) Add(rate domain.Rate) error {
+func (u *RatingUsecase) Add(rate domain.Rate) (float64, error) {
 	err := u.RatingRepo.Insert(rate)
 	if err != nil {
 		logs.LogError(logs.Logger, "usecase(rating)", "Add", err, err.Error())
-		return err
+		return 0, err
 	}
 
-	return nil
+	rating, err := u.RatingRepo.SelectRating(rate.VideoID)
+	if err != nil {
+		logs.LogError(logs.Logger, "usecase(rating)", "Add", err, err.Error())
+		return 0, err
+	}
+
+	return rating, nil
 }
 
-func (u *RatingUsecase) Remove(rate domain.Rate) error {
+func (u *RatingUsecase) Remove(rate domain.Rate) (float64, error) {
 	err := u.RatingRepo.Delete(rate)
 	if err != nil {
 		logs.LogError(logs.Logger, "usecase(rating)", "Remove", err, err.Error())
-		return err
+		return 0, err
 	}
 
-	return nil
+	rating, err := u.RatingRepo.SelectRating(rate.VideoID)
+	if err != nil {
+		logs.LogError(logs.Logger, "usecase(rating)", "Add", err, err.Error())
+		return 0, err
+	}
+
+	return rating, nil
 }
 
 func (u *RatingUsecase) Rated(rate domain.Rate) (bool, error) {
