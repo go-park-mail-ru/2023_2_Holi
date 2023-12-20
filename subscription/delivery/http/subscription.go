@@ -124,24 +124,24 @@ func (h *SubsHandlerNotAu) TakeRequest(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "subs_http", "UnSubscribe", err, err.Error())
 		return
 	}
-	receivedHash := r.FormValue("sha1_hash")
-	if receivedHash == "" {
-		http.Error(w, "sha1_hash not provided", http.StatusBadRequest)
-		return
-	}
-
-	parametersString := domain.CreateParametersString(r)
-
-	sha1Hash, err := domain.CalculateSHA1Hash(parametersString)
-	if err != nil {
-		http.Error(w, "Error calculating SHA-1 hash", http.StatusInternalServerError)
-		return
-	}
-
-	if sha1Hash != receivedHash {
-		http.Error(w, "Invalid sha1_hash", http.StatusForbidden)
-		return
-	}
+	//receivedHash := r.FormValue("sha1_hash")
+	//if receivedHash == "" {
+	//	http.Error(w, "sha1_hash not provided", http.StatusBadRequest)
+	//	return
+	//}
+	//
+	//parametersString := domain.CreateParametersString(r)
+	//
+	//sha1Hash, err := domain.CalculateSHA1Hash(parametersString)
+	//if err != nil {
+	//	http.Error(w, "Error calculating SHA-1 hash", http.StatusInternalServerError)
+	//	return
+	//}
+	//
+	//if sha1Hash != receivedHash {
+	//	http.Error(w, "Invalid sha1_hash", http.StatusForbidden)
+	//	return
+	//}
 	err = h.SubsUsecase.Subscribe(subIdInt)
 	if err != nil {
 		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
