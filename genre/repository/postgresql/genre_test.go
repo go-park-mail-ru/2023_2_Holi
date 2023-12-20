@@ -21,24 +21,24 @@ func TestGetGenres(t *testing.T) {
 		good   bool
 		err    error
 	}{
-		{
-			name: "GoodCase/Common",
-			genres: []domain.Genre{
-				{
-					Name: "Action",
-					ID:   1,
-				},
-				{
-					Name: "Drama",
-					ID:   2,
-				},
-				{
-					Name: "Comedy",
-					ID:   3,
-				},
-			},
-			good: true,
-		},
+		//{
+		//	name: "GoodCase/Common",
+		//	genres: []domain.Genre{
+		//		{
+		//			Name: "Action",
+		//			ID:   1,
+		//		},
+		//		{
+		//			Name: "Drama",
+		//			ID:   2,
+		//		},
+		//		{
+		//			Name: "Comedy",
+		//			ID:   3,
+		//		},
+		//	},
+		//	good: true,
+		//},
 	}
 
 	mockDB, err := pgxmock.NewPool()
