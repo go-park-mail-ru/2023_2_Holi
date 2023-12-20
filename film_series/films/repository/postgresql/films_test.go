@@ -1,4 +1,5 @@
-//package postgres
+package postgres
+
 //
 //import (
 //	"2023_2_Holi/domain"
