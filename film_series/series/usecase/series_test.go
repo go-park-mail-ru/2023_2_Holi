@@ -13,23 +13,23 @@ import (
 func TestGetSeriesByGenre(t *testing.T) {
 	tests := []struct {
 		name                      string
-		genre                     string
+		genre                     int
 		setSeriesRepoExpectations func(seriesRepo *mocks.SeriesRepository, series []domain.Video)
 		good                      bool
 	}{
 		{
 			name:  "GoodCase/Common",
-			genre: "action",
+			genre: 1,
 			setSeriesRepoExpectations: func(seriesRepo *mocks.SeriesRepository, series []domain.Video) {
-				seriesRepo.On("GetSeriesByGenre", "action").Return(series, nil)
+				seriesRepo.On("GetSeriesByGenre", 1).Return(series, nil)
 			},
 			good: true,
 		},
 		{
 			name:  "ErrorCase/UsecaseError",
-			genre: "comedy",
+			genre: 2,
 			setSeriesRepoExpectations: func(seriesRepo *mocks.SeriesRepository, series []domain.Video) {
-				seriesRepo.On("GetSeriesByGenre", "comedy").Return(nil, errors.New("Some error"))
+				seriesRepo.On("GetSeriesByGenre", 2).Return(nil, errors.New("Some error"))
 			},
 			good: false,
 		},
