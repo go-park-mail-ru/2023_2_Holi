@@ -1,29 +1,29 @@
 module 2023_2_Holi
 
-go 1.21.1
+go 1.21.0
 
 require (
-	github.com/aws/aws-sdk-go v1.48.10
+	github.com/aws/aws-sdk-go v1.49.6
 	github.com/bxcodec/faker v2.0.1+incompatible
 	github.com/go-redis/redismock/v9 v9.2.0
 	github.com/google/go-cmp v0.6.0
-	github.com/google/uuid v1.4.0
+	github.com/google/uuid v1.5.0
 	github.com/gorilla/context v1.1.2
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx v3.6.2+incompatible
-	github.com/jackc/pgx/v5 v5.5.0
+	github.com/jackc/pgx/v5 v5.5.1
 	github.com/joho/godotenv v1.5.1
 	github.com/lib/pq v1.10.9
 	github.com/mailru/easyjson v0.7.7
 	github.com/microcosm-cc/bluemonday v1.0.26
 	github.com/pashagolub/pgxmock/v3 v3.2.0
 	github.com/prometheus/client_golang v1.17.0
-	github.com/redis/go-redis/v9 v9.3.0
+	github.com/redis/go-redis/v9 v9.3.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/stretchr/testify v1.8.4
 	github.com/swaggo/swag v1.16.2
-	golang.org/x/crypto v0.16.0
-	google.golang.org/grpc v1.59.0
+	golang.org/x/crypto v0.17.0
+	google.golang.org/grpc v1.60.1
 	google.golang.org/protobuf v1.31.0
 )
 
@@ -59,11 +59,11 @@ require (
 	github.com/shopspring/decimal v1.3.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	golang.org/x/net v0.17.0 // indirect
-	golang.org/x/sync v0.3.0 // indirect
+	golang.org/x/sync v0.4.0 // indirect
 	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/tools v0.7.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230822172742-b8732ec3820d // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231002182017-d307bd883b97 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
