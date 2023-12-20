@@ -1,6 +1,6 @@
 module 2023_2_Holi
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/aws/aws-sdk-go v1.49.6
