@@ -5,6 +5,26 @@ on:
     branches: [deploy]
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install golint
+        run: go install golang.org/x/lint/golint@latest
+
+      - name: Run golint
+        run: golint ./...
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run tests with coverage
+        run:
+          go test -coverpkg=./... -coverprofile=cover ./... && cat cover | grep -v "mock" | grep -v "easyjson" | grep -v "proto" > cover.out &&
+          go tool cover -func=cover.out
+
   build:
     runs-on: ubuntu-latest
     steps:
