@@ -1,12 +1,15 @@
 package domain
 
 import (
+	"github.com/mailru/easyjson"
 	"time"
 )
 
+//easyjson:json
 type Credentials struct {
-	Password []byte `json:"password"`
-	Email    string `json:"email"`
+	Password easyjson.RawMessage `json:"password"`
+	//Password []byte `json:"password"`
+	Email string `json:"email"`
 }
 
 type AuthUsecase interface {

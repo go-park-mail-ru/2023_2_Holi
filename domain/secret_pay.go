@@ -3,16 +3,26 @@ package domain
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"fmt"
+	"github.com/joho/godotenv"
+	"log"
 	"net/http"
+	"os"
 	"sort"
 	"strings"
 )
 
-const secret = `L9KkXz48oYV2+zpEer9DPy7/`
-
+func dbParamsfromEnvUsr() string {
+	secret := os.Getenv("SECRET_YOOMONEY")
+	return fmt.Sprintf("secret=%s", secret)
+}
 func CreateParametersString(r *http.Request) string {
 	values := r.URL.Query()
-
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+	secret := dbParamsfromEnvUsr()
 	var keys []string
 	for key := range values {
 		keys = append(keys, key)

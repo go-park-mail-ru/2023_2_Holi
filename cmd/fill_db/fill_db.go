@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -35,6 +37,26 @@ func ageRes(age string) int {
 	default:
 		return 16
 	}
+}
+
+func generateRandomRating() int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(10) + 1
+}
+
+func dbParamsfromEnvUsr() string {
+	host := os.Getenv("POSTGRES_USR_HOST")
+	port := os.Getenv("POSTGRES_USR_PORT")
+	user := os.Getenv("POSTGRES_USR_USER")
+	pass := os.Getenv("POSTGRES_USR_PASSWORD")
+	dbname := os.Getenv("POSTGRES_USR_DB")
+	host = "postgres_usr"
+	port = "5432"
+	user = "postgres"
+	pass = "123"
+	dbname = "netflix_auth"
+
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
 
 func dbParamsfromEnv() string {
@@ -319,6 +341,38 @@ func main() {
 	_, err = db.Exec(`UPDATE "cast" SET tsv = setweight(to_tsvector(name), 'A');`)
 	if err != nil {
 		log.Printf("Ошибка при создании вектора для cast.name: %v", err)
+	}
+
+	dbUsr, err := sql.Open("postgres", dbParamsfromEnvUsr())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbUsr.Close()
+
+	err = dbUsr.Ping()
+	if err != nil {
+		log.Fatalf("Ошибка подключения к базе данных: %v", err)
+	}
+
+	for userID := 30; userID <= 40; userID++ {
+		username := fmt.Sprintf("user%d", userID)
+		email := fmt.Sprintf("user%d@example.com", userID)
+		password := fmt.Sprintf("password%d", userID)
+
+		_, err := dbUsr.Exec(`INSERT INTO "user" (id ,name, email, password) VALUES ($1, $2, $3, $4)`, userID, username, email, password)
+		if err != nil {
+			log.Printf("Ошибка при вставке пользователя: %v", err)
+			continue
+		}
+
+		for videoID := 1; videoID <= 20; videoID++ {
+			rating := generateRandomRating()
+			_, err := db.Exec(`INSERT INTO video_estimation (rate, video_id, user_id) VALUES ($1, $2, $3)`, rating, videoID, userID)
+			if err != nil {
+				log.Printf("Ошибка при вставке оценки: %v", err)
+				continue
+			}
+		}
 	}
 
 	fmt.Println("Данные из CSV-файла успешно вставлены в таблицу films.")

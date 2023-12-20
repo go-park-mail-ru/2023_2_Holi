@@ -1,7 +1,8 @@
 package http
 
 import (
-	"encoding/json"
+	"fmt"
+	"github.com/mailru/easyjson"
 	"io"
 	"net/http"
 	"net/mail"
@@ -56,7 +57,8 @@ func (a *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	var credentials domain.Credentials
 
-	err = json.NewDecoder(r.Body).Decode(&credentials)
+	//err = json.NewDecoder(r.Body).Decode(&credentials)
+	err = easyjson.UnmarshalFromReader(r.Body, &credentials)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "auth_http", "Login", err, "Failed to decode json from body")
@@ -161,7 +163,9 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user domain.User
-	err = json.NewDecoder(r.Body).Decode(&user)
+	err = easyjson.UnmarshalFromReader(r.Body, &user)
+	//err = json.NewDecoder(r.Body).Decode(&user)
+	fmt.Println(err)
 	if err != nil {
 		domain.WriteError(w, "you must be unauthorised", http.StatusBadRequest)
 		logs.LogError(logs.Logger, "auth_http", "Register.decode", err, "Failed to decode json from body")

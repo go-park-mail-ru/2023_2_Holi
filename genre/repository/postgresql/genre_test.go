@@ -10,7 +10,7 @@ import (
 )
 
 const getGenresQueryTest = `
-    SELECT name 
+    SELECT id,name 
     FROM genre
 `
 
@@ -26,12 +26,15 @@ func TestGetGenres(t *testing.T) {
 			genres: []domain.Genre{
 				{
 					Name: "Action",
+					ID:   1,
 				},
 				{
 					Name: "Drama",
+					ID:   2,
 				},
 				{
 					Name: "Comedy",
+					ID:   3,
 				},
 			},
 			good: true,

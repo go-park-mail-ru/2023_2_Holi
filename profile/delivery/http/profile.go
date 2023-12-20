@@ -3,7 +3,7 @@ package http
 import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"io"
 	"net/http"
 	"strconv"
@@ -84,7 +84,8 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var newUser domain.User
 
-	err := json.NewDecoder(r.Body).Decode(&newUser)
+	err := easyjson.UnmarshalFromReader(r.Body, &newUser)
+	//err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "http", "UpdateProfile", err, "Failed to decode json from body")
