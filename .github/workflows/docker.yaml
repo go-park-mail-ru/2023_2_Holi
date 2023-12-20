@@ -55,7 +55,7 @@ jobs:
 
       - name: Run tests with coverage
         run:
-          go test -coverprofile=coverage.out.tmp ./... | grep -v "domain" coverage.out.tmp > coverage.out &&
+          go test -coverprofile=cover ./... | grep -v "domain" > coverage.out &&
           go tool cover -func=coverage.out
 
 #  build:
