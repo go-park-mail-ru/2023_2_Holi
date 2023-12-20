@@ -2,6 +2,7 @@ package redis
 
 import (
 	"2023_2_Holi/domain"
+	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 
@@ -115,49 +116,94 @@ func TestDeleteByToken(t *testing.T) {
 	}
 }
 
+//func TestSessionExists(t *testing.T) {
+//	tests := []struct {
+//		name  string
+//		token string
+//		good  bool
+//		err   error
+//	}{
+//		{
+//			name:  "GoodCase/Common",
+//			token: "12312dcdscsad",
+//			good:  true,
+//			err:   nil,
+//		},
+//		{
+//			name:  "BadCase/EmptyToken",
+//			token: "",
+//			err:   domain.ErrInvalidToken,
+//		},
+//	}
+//	db, mock := redismock.NewClientMock()
+//	r := NewSessionRedisRepository(db)
+//
+//	for _, test := range tests {
+//		t.Run(test.name, func(t *testing.T) {
+//			if test.good {
+//				mock.ExpectGet(test.token).SetVal(1)
+//			}
+//			_, err := r.SessionExists(test.token)
+//
+//			if test.good {
+//				if err != nil {
+//					t.Errorf("Unexpected error: %v", err)
+//				}
+//			} else {
+//				if err == nil || err.Error() != test.err.Error() {
+//					t.Errorf("Expected error: %v, got: %v", test.err, err)
+//				}
+//			}
+//
+//			err = mock.ExpectationsWereMet()
+//			if err != nil {
+//				t.Errorf("Unfulfilled expectations: %v", err)
+//			}
+//		})
+//	}
+//}
+
 func TestSessionExists(t *testing.T) {
 	tests := []struct {
 		name  string
 		token string
+		id    string
 		good  bool
-		err   error
 	}{
 		{
 			name:  "GoodCase/Common",
-			token: "12312dcdscsad",
+			id:    "1",
+			token: "fo4380cnu3inciou4",
 			good:  true,
-			err:   nil,
 		},
 		{
 			name:  "BadCase/EmptyToken",
 			token: "",
-			err:   domain.ErrInvalidToken,
+		},
+		{
+			name:  "BadCase/InappropriateToken",
+			token: "123",
 		},
 	}
-	db, mock := redismock.NewClientMock()
+	db, rm := redismock.NewClientMock()
 	r := NewSessionRedisRepository(db)
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			if test.good {
-				mock.ExpectExists(test.token).SetVal(1)
+				rm.ExpectGet(test.token).SetVal(test.id)
 			}
-			_, err := r.SessionExists(test.token)
+			id, err := r.SessionExists(test.token)
 
 			if test.good {
-				if err != nil {
-					t.Errorf("Unexpected error: %v", err)
-				}
+				assert.Equal(t, test.id, id)
+				assert.Nil(t, err)
 			} else {
-				if err == nil || err.Error() != test.err.Error() {
-					t.Errorf("Expected error: %v, got: %v", test.err, err)
-				}
+				assert.NotNil(t, err)
 			}
 
-			err = mock.ExpectationsWereMet()
-			if err != nil {
-				t.Errorf("Unfulfilled expectations: %v", err)
-			}
+			err = rm.ExpectationsWereMet()
+			assert.Nil(t, err)
 		})
 	}
 }

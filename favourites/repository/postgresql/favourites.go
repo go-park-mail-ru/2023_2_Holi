@@ -26,20 +26,25 @@ const SelectAllQuery = `
 		JOIN favourite AS f ON video_id = v.id
 	WHERE f.user_id = $1
 `
+const favouriteExistsQuery = `
+	SELECT EXISTS(SELECT 1
+				  FROM favourite
+				  WHERE video_id = $1 AND user_id = $2)
+`
 
-type favouritesUsecasePostgresqlRepository struct {
+type favouritesPostgresqlRepository struct {
 	db  domain.PgxPoolIface
 	ctx context.Context
 }
 
 func NewFavouritesPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) domain.FavouritesRepository {
-	return &favouritesUsecasePostgresqlRepository{
+	return &favouritesPostgresqlRepository{
 		db:  pool,
 		ctx: ctx,
 	}
 }
 
-func (r *favouritesUsecasePostgresqlRepository) InsertIntoFavourites(videoID, userID int) error {
+func (r *favouritesPostgresqlRepository) InsertIntoFavourites(videoID, userID int) error {
 	_, err := r.db.Exec(r.ctx, addToFavouritesQuery, videoID, userID)
 	if err != nil {
 		logs.LogError(logs.Logger, "postgresql", "InsertIntoFavourites", err, err.Error())
@@ -57,7 +62,7 @@ func (r *favouritesUsecasePostgresqlRepository) InsertIntoFavourites(videoID, us
 	return nil
 }
 
-func (r *favouritesUsecasePostgresqlRepository) DeleteFromFavourites(videoID, userID int) error {
+func (r *favouritesPostgresqlRepository) DeleteFromFavourites(videoID, userID int) error {
 	res, err := r.db.Exec(r.ctx, DeleteFromFavouritesQuery, videoID, userID)
 	if err != nil {
 		logs.LogError(logs.Logger, "postgresql", "DeleteFromFavourites", err, err.Error())
@@ -72,7 +77,7 @@ func (r *favouritesUsecasePostgresqlRepository) DeleteFromFavourites(videoID, us
 	return nil
 }
 
-func (r *favouritesUsecasePostgresqlRepository) SelectAllFavourites(userID int) ([]domain.Video, error) {
+func (r *favouritesPostgresqlRepository) SelectAllFavourites(userID int) ([]domain.Video, error) {
 	rows, err := r.db.Query(r.ctx, SelectAllQuery, userID)
 	if err != nil {
 		logs.LogError(logs.Logger, "postgresql", "SelectAllFavourites", err, err.Error())
@@ -106,4 +111,16 @@ func (r *favouritesUsecasePostgresqlRepository) SelectAllFavourites(userID int) 
 	logs.Logger.Debug("SelectAllFavourites videos:", videos)
 
 	return videos, nil
+}
+
+func (r *favouritesPostgresqlRepository) Exists(videoID, userID int) (bool, error) {
+	result := r.db.QueryRow(r.ctx, favouriteExistsQuery, videoID, userID)
+
+	var exist bool
+	if err := result.Scan(&exist); err != nil {
+		logs.LogError(logs.Logger, "postgresql", "Exists", err, err.Error())
+		return false, err
+	}
+
+	return exist, nil
 }

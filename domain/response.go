@@ -1,10 +1,11 @@
 package domain
 
 import (
-	"encoding/json"
+	"github.com/mailru/easyjson"
 	"net/http"
 )
 
+//easyjson:json
 type Response struct {
 	Body interface{} `json:"body,omitempty"`
 	Err  string      `json:"err,omitempty"`
@@ -12,10 +13,12 @@ type Response struct {
 
 func WriteError(w http.ResponseWriter, errString string, status int) {
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(&Response{Err: errString})
+	response := &Response{Err: errString}
+	easyjson.MarshalToHTTPResponseWriter(easyjson.Marshaler(response), w)
 }
 
 func WriteResponse(w http.ResponseWriter, result map[string]interface{}, status int) {
 	w.WriteHeader(status)
-	json.NewEncoder(w).Encode(&Response{Body: result})
+	response := &Response{Body: result}
+	easyjson.MarshalToHTTPResponseWriter(easyjson.Marshaler(response), w)
 }

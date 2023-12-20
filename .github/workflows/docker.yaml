@@ -1,0 +1,108 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [deploy]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Login to DockerHub Registry
+        run: echo ${{ secrets.DOCKERHUB_PASSWORD }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+
+      - name: 'Create env file'
+        run: |
+            echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Build Auth Docker images
+        run:
+          sudo docker build -t holi2023/auth:${GITHUB_SHA::8} -f ./cmd/auth_service/Dockerfile . &&
+          sudo docker tag holi2023/auth:${GITHUB_SHA::8} holi2023/auth:latest
+
+      - name: Build Sub Docker images
+        run:
+          sudo docker build -t holi2023/subscription:${GITHUB_SHA::8} -f ./cmd/subscription_service/Dockerfile . &&
+          sudo docker tag holi2023/subscription:${GITHUB_SHA::8} holi2023/subscription:latest
+
+      - name: Build Profile Docker images
+        run:
+          sudo docker build -t holi2023/profile:${GITHUB_SHA::8} -f ./cmd/profile_service/Dockerfile . &&
+          sudo docker tag holi2023/profile:${GITHUB_SHA::8} holi2023/profile:latest
+
+      - name: Build Films-Series Docker images
+        run:
+          sudo docker build -t holi2023/films_series:${GITHUB_SHA::8} -f ./cmd/films_series_service/Dockerfile . &&
+          sudo docker tag holi2023/films_series:${GITHUB_SHA::8} holi2023/films_series:latest
+
+      - name: Build Main Docker images
+        run:
+          sudo docker build -t holi2023/main:${GITHUB_SHA::8} -f ./cmd/netflix/Dockerfile . &&
+          sudo docker tag holi2023/main:${GITHUB_SHA::8} holi2023/main:latest
+
+      - name: Build Fill DB Docker images
+        run:
+          sudo docker build -t holi2023/fill:${GITHUB_SHA::8} -f ./cmd/fill_db/Dockerfile . &&
+          sudo docker tag holi2023/fill:${GITHUB_SHA::8} holi2023/fill:latest
+
+
+      - name: Push Auth Docker images
+        run:
+          docker push holi2023/auth:latest &&
+          docker push holi2023/auth:${GITHUB_SHA::8}
+
+      - name: Push Sub Docker images
+        run:
+          docker push holi2023/subscription:latest &&
+          docker push holi2023/subscription:${GITHUB_SHA::8}
+
+      - name: Push Profile Docker images
+        run:
+          docker push holi2023/profile:latest &&
+          docker push holi2023/profile:${GITHUB_SHA::8}
+
+      - name: Push Films-Series Docker images
+        run:
+          docker push holi2023/films_series:latest &&
+          docker push holi2023/films_series:${GITHUB_SHA::8}
+
+      - name: Push Main Docker images
+        run:
+          docker push holi2023/main:latest &&
+          docker push holi2023/main:${GITHUB_SHA::8}
+
+      - name: Push Fill DB Docker images
+        run:
+          docker push holi2023/fill:latest &&
+          docker push holi2023/fill:${GITHUB_SHA::8}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: pull docker image
+        uses: appleboy/ssh-action@master
+        with:
+          envs: GITHUB_SHA
+          host: 212.233.73.20
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: | 
+            sudo docker pull holi2023/auth:latest
+            sudo docker pull holi2023/profile:latest
+            sudo docker pull holi2023/films_series:latest
+            sudo docker pull holi2023/main:latest
+            sudo docker pull holi2023/fill:latest
+            sudo docker pull holi2023/subscription:latest
+
+      - name: Run backend
+        uses: appleboy/ssh-action@master
+        with:
+          host: 212.233.73.20
+          username: ubuntu
+          key: ${{ secrets.PRIVATE_KEY }}
+          script: |
+            cd /home/ubuntu
+            sudo docker compose stop
+            sudo docker compose up -d

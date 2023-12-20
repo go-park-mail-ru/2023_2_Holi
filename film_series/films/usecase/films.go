@@ -15,7 +15,7 @@ func NewFilmsUsecase(fr domain.FilmsRepository) domain.FilmsUsecase {
 	}
 }
 
-func (u *filmsUsecase) GetFilmsByGenre(genre string) ([]domain.Video, error) {
+func (u *filmsUsecase) GetFilmsByGenre(genre int) ([]domain.Video, error) {
 	films, err := u.filmRepo.GetFilmsByGenre(genre)
 	if err != nil {
 		logs.LogError(logs.Logger, "films_usecase", "GetFilmsByGenre", err, err.Error())
@@ -54,11 +54,11 @@ func (u *filmsUsecase) GetFilmData(id int) (domain.Video, []domain.Cast, error) 
 }
 
 func (u *filmsUsecase) GetTopRate() (domain.Video, error) {
-	genres, err := u.filmRepo.GetTopRate()
+	topRate, err := u.filmRepo.GetTopRate()
 	if err != nil {
 		return domain.Video{}, err
 	}
-	//logger.Debug("Usecase GetGenres:", genres)
+	logs.Logger.Debug("films_usecase GetTopRate:", topRate)
 
-	return genres, nil
+	return topRate, nil
 }

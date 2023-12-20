@@ -1,0 +1,67 @@
+- name: "Update systemd unit"
+  become: yes
+  hosts: web
+  tasks:
+    - name: "Provide latest unit file"
+      copy:
+        src: files/api.service
+        dest: /etc/systemd/system/api.service
+    - name: "Systemctl daemon reload"
+      command: systemctl daemon-reload
+
+
+- name: "Install docker"
+  become: yes
+  hosts: web
+  roles:
+    - role: geerlingguy.docker
+
+
+- name: "Install nginx"
+  become: yes
+  hosts: web
+  tasks:
+    - name: "Install nginx package"
+      apt:
+        name: nginx
+        state: present
+    - name: "Copy nginx config"
+      copy:
+        src: files/netflix_local.conf
+        dest: /etc/nginx/conf.d/
+    - name: "Giving access for nginx"
+      command: "usermod -a -G ubuntu www-data"
+    - name: "Reload nginx"
+      command: "systemctl restart nginx"
+
+
+- name: "Provide configs for db's"
+  hosts: web
+  become: yes
+  tasks:
+    - name: "Copy postgres init"
+      copy:
+        src: files/init.sql
+        dest: /home/ubuntu
+    - name: "Copy postgres usr init"
+      copy:
+        src: files/init_usr.sql
+        dest: /home/ubuntu
+    - name: "Copy redis conf"
+      copy:
+        src: files/redis.conf
+        dest: /home/ubuntu
+
+
+- name: "Provide docker-compose"
+  hosts: web
+  become: yes
+  tasks:
+    - name: "Copy docker-compose"
+      copy:
+        src: files/docker-compose.yml
+        dest: /home/ubuntu
+
+
+
+

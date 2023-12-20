@@ -55,7 +55,7 @@ func TestGetGenres(t *testing.T) {
 			mockUsecase := new(mocks.GenreUsecase)
 			test.setUCaseExpectations(mockUsecase)
 
-			req, err := http.NewRequest("GET", "/v1/genres", nil)
+			req, err := http.NewRequest("GET", "/v1/genres/films", nil)
 			assert.NoError(t, err)
 
 			rec := httptest.NewRecorder()

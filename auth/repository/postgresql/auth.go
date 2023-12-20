@@ -20,6 +20,11 @@ const addUserQuery = `
 	RETURNING id
 `
 
+const addSubQuery = `
+    INSERT INTO "user_subscription" (user_id)
+	VALUES ($1)
+`
+
 const userExistsQuery = `
 	SELECT EXISTS(SELECT 1
 				  FROM "user"
@@ -80,6 +85,8 @@ func (r *authPostgresqlRepository) AddUser(user domain.User) (int, error) {
 		logs.LogError(logs.Logger, "auth_postgres", "AddUser", err, err.Error())
 		return 0, err
 	}
+	result = r.db.QueryRow(r.ctx, addSubQuery, id)
+	logs.Logger.Debug("AddSub queryRow result:", result)
 	return id, nil
 }
 

@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-WORKDIR /app/cmd/survay_service
+WORKDIR /app/cmd/subscription_service
 
 RUN go build -o main
 
@@ -16,6 +16,7 @@ FROM gcr.io/distroless/base-debian11 AS build-release-stage
 
 WORKDIR /
 
-COPY --from=build-stage /app/cmd/survay_service/main /main
+COPY --from=build-stage /app/cmd/subscription_service/main /main
 
 ENTRYPOINT ["/main"]
+

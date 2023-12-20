@@ -27,6 +27,30 @@ func (_m *FavouritesRepository) DeleteFromFavourites(videoID int, userID int) er
 	return r0
 }
 
+// Exists provides a mock function with given fields: videoID, userID
+func (_m *FavouritesRepository) Exists(videoID int, userID int) (bool, error) {
+	ret := _m.Called(videoID, userID)
+
+	var r0 bool
+	var r1 error
+	if rf, ok := ret.Get(0).(func(int, int) (bool, error)); ok {
+		return rf(videoID, userID)
+	}
+	if rf, ok := ret.Get(0).(func(int, int) bool); ok {
+		r0 = rf(videoID, userID)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	if rf, ok := ret.Get(1).(func(int, int) error); ok {
+		r1 = rf(videoID, userID)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // InsertIntoFavourites provides a mock function with given fields: videoID, userID
 func (_m *FavouritesRepository) InsertIntoFavourites(videoID int, userID int) error {
 	ret := _m.Called(videoID, userID)

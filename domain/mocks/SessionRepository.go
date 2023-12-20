@@ -42,18 +42,18 @@ func (_m *SessionRepository) DeleteByToken(token string) error {
 }
 
 // SessionExists provides a mock function with given fields: token
-func (_m *SessionRepository) SessionExists(token string) (bool, error) {
+func (_m *SessionRepository) SessionExists(token string) (string, error) {
 	ret := _m.Called(token)
 
-	var r0 bool
+	var r0 string
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (bool, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (string, error)); ok {
 		return rf(token)
 	}
-	if rf, ok := ret.Get(0).(func(string) bool); ok {
+	if rf, ok := ret.Get(0).(func(string) string); ok {
 		r0 = rf(token)
 	} else {
-		r0 = ret.Get(0).(bool)
+		r0 = ret.Get(0).(string)
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {

@@ -10,9 +10,9 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "Aleksej Moldovanov",
-            "url": "https://vk.com/yepkekw",
-            "email": "3592703@gmail.com"
+            "name": "Alex Chinaev",
+            "url": "https://vk.com/l.chinaev",
+            "email": "ax.chinaev@yandex.ru"
         },
         "license": {
             "name": "AS IS (NO WARRANTY)"
@@ -380,7 +380,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/films/genre/{genre}": {
+        "/api/v1/films/genre/{genreId}": {
             "get": {
                 "description": "Get a list of films based on the specified genre.",
                 "produces": [
@@ -393,7 +393,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The genre of the Films you want to retrieve.",
+                        "description": "The Films of the genre you want to retrieve.",
                         "name": "genre",
                         "in": "path",
                         "required": true
@@ -788,7 +788,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/v1/series/genre/{genre}": {
+        "/api/v1/series/genre/{genreId}": {
             "get": {
                 "description": "Get a list of series based on the specified genre.",
                 "produces": [
@@ -801,7 +801,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The genre of the Series you want to retrieve.",
+                        "description": "The Series of the genre you want to retrieve.",
                         "name": "genre",
                         "in": "path",
                         "required": true
@@ -811,35 +811,72 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "body": {
-                                    "type": "object",
-                                    "properties": {
-                                        "film": {
-                                            "$ref": "#/definitions/domain.Video"
-                                        }
-                                    }
-                                }
-                            }
+                            "type": "json"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/domain.Response"
+                            "type": "json"
                         }
                     },
                     "404": {
                         "description": "Not Found",
                         "schema": {
-                            "$ref": "#/definitions/domain.Response"
+                            "type": "json"
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
                         "schema": {
-                            "$ref": "#/definitions/domain.Response"
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/series/top/rate": {
+            "get": {
+                "description": "Get information about the most rated series.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Series"
+                ],
+                "summary": "Get top rate information",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The top rate Series  you want to retrieve.",
+                        "name": "rate",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
                         }
                     }
                 }
@@ -1039,14 +1076,178 @@ const docTemplate = `{
                 }
             }
         },
-        "/v1/genres": {
+        "/api/v1/video/rating": {
+            "post": {
+                "description": "Adds the rate to the video.",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "Adds the rate to the video.",
+                "parameters": [
+                    {
+                        "description": "user credentials",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Rate"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/video/rating/check/{id}": {
+            "post": {
+                "description": "checks if the video was rated by the user",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "checks is rated",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        " rate": {
+                                            "type": "integer"
+                                        },
+                                        "isRated": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/video/rating/{id}": {
+            "delete": {
+                "description": "Deletes the user rate for the video.",
+                "tags": [
+                    "Rating"
+                ],
+                "summary": "Deletes the rate.",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No Content"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/genres/films": {
             "get": {
                 "description": "Get a list of genres.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "genres"
+                    "Genres"
                 ],
                 "summary": "Get genres",
                 "responses": {
@@ -1075,6 +1276,105 @@ const docTemplate = `{
                         "description": "Internal Server Error",
                         "schema": {
                             "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/genres/series": {
+            "get": {
+                "description": "Get a list of genres.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Genres"
+                ],
+                "summary": "Get genres of series",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/domain.Genre"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "json"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "json"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/video/favourites/check/{id}": {
+            "post": {
+                "description": "check if video is in favourites of user",
+                "tags": [
+                    "Favourites"
+                ],
+                "summary": "check is in favourites",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The id of the video you want to check.",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "body": {
+                                    "type": "object",
+                                    "properties": {
+                                        "isFavourite": {
+                                            "type": "boolean"
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "err": {
+                                    "type": "string"
+                                }
+                            }
                         }
                     }
                 }
@@ -1118,12 +1418,14 @@ const docTemplate = `{
                 }
             }
         },
-        "domain.Response": {
+        "domain.Rate": {
             "type": "object",
             "properties": {
-                "body": {},
-                "err": {
-                    "type": "string"
+                "rate": {
+                    "type": "integer"
+                },
+                "videoId": {
+                    "type": "integer"
                 }
             }
         },
@@ -1259,10 +1561,10 @@ const docTemplate = `{
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0",
 	Host:             "127.0.0.1",
-	BasePath:         "/api/v1/films/ & /api/v1/series/",
+	BasePath:         "/",
 	Schemes:          []string{"http"},
 	Title:            "Netfilx API",
-	Description:      "API of the nelfix film and series service",
+	Description:      "API of the nelfix project by holi",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

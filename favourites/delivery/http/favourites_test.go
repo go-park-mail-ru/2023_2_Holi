@@ -2,6 +2,8 @@ package http
 
 import (
 	"2023_2_Holi/domain"
+	"2023_2_Holi/domain/mocks"
+	"github.com/gorilla/context"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -10,22 +12,28 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 
-	"2023_2_Holi/domain/mocks"
-
 	"github.com/gorilla/mux"
 )
+
+const userID = "1"
+
+func userIdMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		context.Set(r, "userID", userID)
+		next.ServeHTTP(w, r)
+	})
+}
 
 func TestAddToFavourites(t *testing.T) {
 	tests := []struct {
 		name            string
-		setExpectations func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase)
+		setExpectations func(fvu *mocks.FavouritesUsecase)
 		videoID         string
 		status          int
 	}{
 		{
 			name: "GoodCase/Common",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {
 				fvu.On("AddToFavourites", mock.Anything, mock.Anything).Return(nil)
 			},
 			videoID: "1",
@@ -33,20 +41,19 @@ func TestAddToFavourites(t *testing.T) {
 		},
 		{
 			name:            "BadCase/InvalidVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {},
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {},
 			videoID:         "ubivgroie",
 			status:          http.StatusBadRequest,
 		},
 		{
 			name:            "BadCase/EmptyVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {},
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {},
 			videoID:         "",
 			status:          http.StatusNotFound,
 		},
 		{
 			name: "BadCase/OutOfRangeVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {
 				fvu.On("AddToFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "1234563456789",
@@ -54,8 +61,7 @@ func TestAddToFavourites(t *testing.T) {
 		},
 		{
 			name: "BadCase/NegativeVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {
 				fvu.On("AddToFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "-3",
@@ -68,10 +74,8 @@ func TestAddToFavourites(t *testing.T) {
 			//t.Parallel()
 
 			mfvu := new(mocks.FavouritesUsecase)
-			muu := new(mocks.UtilsUsecase)
-			test.setExpectations(mfvu, muu)
-
-			req, err := http.NewRequest("POST", "/api/v1/video/favourites/"+test.videoID, nil)
+			test.setExpectations(mfvu)
+			req, err := http.NewRequest("POST", "/v1/video/favourites/"+test.videoID, nil)
 			assert.NoError(t, err)
 			req.AddCookie(&http.Cookie{
 				Name:     "session_token",
@@ -83,17 +87,12 @@ func TestAddToFavourites(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			router := mux.NewRouter()
-			NewFavouritesHandler(router, mfvu, muu)
-			handler := &FavouritesHandler{
-				FavouritesUsecase: mfvu,
-				UtilsUsecase:      muu,
-			}
-			router.HandleFunc("/api/v1/video/favourites/{id}", handler.AddToFavourites).Methods("POST")
+			router.Use(userIdMiddleware)
+			NewFavouritesHandler(router, mfvu)
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
 			mfvu.AssertExpectations(t)
-			muu.AssertExpectations(t)
 		})
 	}
 }
@@ -101,14 +100,13 @@ func TestAddToFavourites(t *testing.T) {
 func TestRemoveFromFavourites(t *testing.T) {
 	tests := []struct {
 		name            string
-		setExpectations func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase)
+		setExpectations func(fvu *mocks.FavouritesUsecase)
 		videoID         string
 		status          int
 	}{
 		{
 			name: "GoodCase/Common",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {
 				fvu.On("RemoveFromFavourites", mock.Anything, mock.Anything).Return(nil)
 			},
 			videoID: "1",
@@ -116,20 +114,19 @@ func TestRemoveFromFavourites(t *testing.T) {
 		},
 		{
 			name:            "BadCase/InvalidVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {},
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {},
 			videoID:         "ubivgroie",
 			status:          http.StatusBadRequest,
 		},
 		{
 			name:            "BadCase/EmptyVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {},
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {},
 			videoID:         "",
 			status:          http.StatusNotFound,
 		},
 		{
 			name: "BadCase/OutOfRangeVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {
 				fvu.On("RemoveFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "1234563456789",
@@ -137,8 +134,7 @@ func TestRemoveFromFavourites(t *testing.T) {
 		},
 		{
 			name: "BadCase/NegativeVideoId",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase) {
 				fvu.On("RemoveFromFavourites", mock.Anything, mock.Anything).Return(domain.ErrOutOfRange)
 			},
 			videoID: "-3",
@@ -151,10 +147,9 @@ func TestRemoveFromFavourites(t *testing.T) {
 			//t.Parallel()
 
 			mfvu := new(mocks.FavouritesUsecase)
-			muu := new(mocks.UtilsUsecase)
-			test.setExpectations(mfvu, muu)
+			test.setExpectations(mfvu)
 
-			req, err := http.NewRequest("DELETE", "/api/v1/video/favourites/"+test.videoID, nil)
+			req, err := http.NewRequest("DELETE", "/v1/video/favourites/"+test.videoID, nil)
 			assert.NoError(t, err)
 			req.AddCookie(&http.Cookie{
 				Name:     "session_token",
@@ -166,17 +161,18 @@ func TestRemoveFromFavourites(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			router := mux.NewRouter()
-			NewFavouritesHandler(router, mfvu, muu)
-			handler := &FavouritesHandler{
-				FavouritesUsecase: mfvu,
-				UtilsUsecase:      muu,
-			}
-			router.HandleFunc("/api/v1/video/favourites/{id}", handler.RemoveFromFavourites).Methods("DELETE")
+			router.Use(userIdMiddleware)
+			//context.Set(req, "userID", userID)
+
+			NewFavouritesHandler(router, mfvu)
+			//handler := &FavouritesHandler{
+			//	FavouritesUsecase: mfvu,
+			//}
+			//router.HandleFunc("/api/v1/video/favourites/{id}", handler.RemoveFromFavourites).Methods("DELETE")
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
 			mfvu.AssertExpectations(t)
-			muu.AssertExpectations(t)
 		})
 	}
 }
@@ -184,14 +180,13 @@ func TestRemoveFromFavourites(t *testing.T) {
 func TestGetAllFavourites(t *testing.T) {
 	tests := []struct {
 		name            string
-		setExpectations func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase, videos []domain.Video)
+		setExpectations func(fvu *mocks.FavouritesUsecase, videos []domain.Video)
 		videos          []domain.Video
 		status          int
 	}{
 		{
 			name: "GoodCase/Common",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase, videos []domain.Video) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase, videos []domain.Video) {
 				fvu.On("GetAllFavourites", mock.Anything).Return(videos, nil)
 			},
 			videos: []domain.Video{
@@ -220,8 +215,7 @@ func TestGetAllFavourites(t *testing.T) {
 		},
 		{
 			name: "GoodCase/EmptyFavourites",
-			setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase, videos []domain.Video) {
-				uu.On("GetIdBy", mock.Anything).Return(1, nil)
+			setExpectations: func(fvu *mocks.FavouritesUsecase, videos []domain.Video) {
 				fvu.On("GetAllFavourites", mock.Anything).Return(videos, nil)
 			},
 			videos: []domain.Video{},
@@ -229,7 +223,7 @@ func TestGetAllFavourites(t *testing.T) {
 		},
 		//{
 		//	name:            "BadCase/InvalidVideoId",
-		//	setExpectations: func(fvu *mocks.FavouritesUsecase, uu *mocks.UtilsUsecase) {},
+		//	setExpectations: func(fvu *mocks.RatingUsecase, uu *mocks.UtilsUsecase) {},
 		//	videoID:         "ubivgroie",
 		//	status:          http.StatusBadRequest,
 		//},
@@ -240,10 +234,9 @@ func TestGetAllFavourites(t *testing.T) {
 			//t.Parallel()
 
 			mfvu := new(mocks.FavouritesUsecase)
-			muu := new(mocks.UtilsUsecase)
-			test.setExpectations(mfvu, muu, test.videos)
+			test.setExpectations(mfvu, test.videos)
 
-			req, err := http.NewRequest("GET", "/api/v1/video/favourites", nil)
+			req, err := http.NewRequest("GET", "/v1/video/favourites", nil)
 			assert.NoError(t, err)
 			req.AddCookie(&http.Cookie{
 				Name:     "session_token",
@@ -255,17 +248,12 @@ func TestGetAllFavourites(t *testing.T) {
 			rec := httptest.NewRecorder()
 
 			router := mux.NewRouter()
-			NewFavouritesHandler(router, mfvu, muu)
-			handler := &FavouritesHandler{
-				FavouritesUsecase: mfvu,
-				UtilsUsecase:      muu,
-			}
-			router.HandleFunc("/api/v1/video/favourites", handler.GetAllFavourites).Methods("GET")
+			router.Use(userIdMiddleware)
+			NewFavouritesHandler(router, mfvu)
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)
 			mfvu.AssertExpectations(t)
-			muu.AssertExpectations(t)
 		})
 	}
 }

@@ -17,14 +17,14 @@ const getByIDFilmData = `
 		JOIN episode AS e ON video.id = video_id
 `
 
-const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating , v.preview_video_path 
+const getFilmsByGenreQueryTest = `SELECT DISTINCT v.id, e.name, e.preview_path, v.rating, v.preview_video_path 
 FROM video AS v 
 JOIN video_cast AS vc ON v.id = vc.video_id 
 JOIN "cast" AS c ON vc.cast_id = c.id 
 JOIN episode AS e ON e.video_id = v.id 
 JOIN video_genre AS vg ON v.id = vg.video_id 
 JOIN genre AS g ON vg.genre_id = g.id 
-WHERE g.name = \$1\;
+WHERE g.name = \$1\ AND video.seasons_count = 0;
 `
 
 func TestGetFilmsByGenre(t *testing.T) {

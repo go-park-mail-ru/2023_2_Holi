@@ -15,7 +15,7 @@ func NewSeriesUsecase(sr domain.SeriesRepository) domain.SeriesUsecase {
 	}
 }
 
-func (u *seriesUsecase) GetSeriesByGenre(genre string) ([]domain.Video, error) {
+func (u *seriesUsecase) GetSeriesByGenre(genre int) ([]domain.Video, error) {
 	films, err := u.seriesRepo.GetSeriesByGenre(genre)
 	if err != nil {
 		logs.LogError(logs.Logger, "series_usecase", "GetSeriesByGenre", err, err.Error())
@@ -57,12 +57,12 @@ func (u *seriesUsecase) GetCastPageSeries(id int) ([]domain.Video, domain.Cast, 
 	return series, artist, nil
 }
 
-//func (u *seriesUsecase) GetTopRate() (domain.Video, error) {
-//	genres, err := u.seriesRepo.GetTopRate()
-//	if err != nil {
-//		return domain.Video{}, err
-//	}
-//	//logger.Debug("Usecase GetGenres:", genres)
-//
-//	return genres, nil
-//}
+func (u *seriesUsecase) GetTopRate() (domain.Video, error) {
+	topRate, err := u.seriesRepo.GetTopRate()
+	if err != nil {
+		return domain.Video{}, err
+	}
+	logs.Logger.Debug("series_usecase GetTopRate:", topRate)
+
+	return topRate, nil
+}
