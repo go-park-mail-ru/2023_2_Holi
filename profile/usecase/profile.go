@@ -5,6 +5,7 @@ import (
 	logs "2023_2_Holi/logger"
 	"bytes"
 	"crypto/rand"
+	"github.com/mailru/easyjson"
 	"strconv"
 
 	auth_usecase "2023_2_Holi/auth/usecase"
@@ -67,7 +68,7 @@ const (
 	directory             = "User_Images"
 )
 
-func (u *profileUseCase) UploadImage(userID int, imageData []byte) (string, error) {
+func (u *profileUseCase) UploadImage(userID int, imageData easyjson.RawMessage) (string, error) {
 	uploadInput := &s3.PutObjectInput{
 		Bucket:      aws.String(bucketName),
 		Body:        bytes.NewReader(imageData),

@@ -27,7 +27,7 @@ func SanitizeUser(u User, s *bluemonday.Policy) User {
 type ProfileUsecase interface {
 	GetUserData(userID int) (User, error)
 	UpdateUser(newUser User) (User, error)
-	UploadImage(userID int, imageData []byte) (string, error)
+	UploadImage(userID int, imageData easyjson.RawMessage) (string, error)
 }
 
 type ProfileRepository interface {

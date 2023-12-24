@@ -86,6 +86,7 @@ func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 
 	err := easyjson.UnmarshalFromReader(r.Body, &newUser)
 	//err := json.NewDecoder(r.Body).Decode(&newUser)
+	//fmt.Println(err)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)
 		logs.LogError(logs.Logger, "http", "UpdateProfile", err, "Failed to decode json from body")

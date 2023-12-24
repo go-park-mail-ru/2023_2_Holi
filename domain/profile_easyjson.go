@@ -47,12 +47,7 @@ func easyjson521a5691Decode20232HoliDomain(in *jlexer.Lexer, out *User) {
 		case "imagePath":
 			out.ImagePath = string(in.String())
 		case "imageData":
-			if in.IsNull() {
-				in.Skip()
-				out.ImageData = nil
-			} else {
-				out.ImageData = in.Bytes()
-			}
+			(out.ImageData).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -95,7 +90,7 @@ func easyjson521a5691Encode20232HoliDomain(out *jwriter.Writer, in User) {
 	{
 		const prefix string = ",\"imageData\":"
 		out.RawString(prefix)
-		out.Base64Bytes(in.ImageData)
+		(in.ImageData).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
