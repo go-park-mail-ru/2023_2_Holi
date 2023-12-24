@@ -13,7 +13,8 @@ type User struct {
 	Password  easyjson.RawMessage `json:"password"`
 	Email     string              `json:"email"`
 	ImagePath string              `json:"imagePath"`
-	ImageData []byte              `json:"imageData"`
+	//ImageData []byte              `json:"imageData"`
+	ImageData easyjson.RawMessage `json:"imageData"`
 }
 
 func SanitizeUser(u User, s *bluemonday.Policy) User {
