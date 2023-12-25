@@ -7,7 +7,7 @@ import (
 )
 
 const getSuitableFilmQuery = `
-	SELECT id, name, preview_path, seasons_count
+	SELECT id, name, preview_path, seasons_count, rating
 	FROM "video"
 	WHERE name ILIKE $1
 `
@@ -48,6 +48,7 @@ func (r *searchPostgresqlRepository) GetSuitableFilms(searchStr string) ([]domai
 			&film.Name,
 			&film.PreviewPath,
 			&film.SeasonsCount,
+			&film.Rating,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "search_postgresql", "GetSuitableFilms", err, err.Error())
