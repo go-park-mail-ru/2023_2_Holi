@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"github.com/mailru/easyjson"
 	"github.com/microcosm-cc/bluemonday"
 )
 
@@ -10,10 +9,10 @@ type User struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 	//Password  []byte             `json:"-"`
-	Password  easyjson.RawMessage `json:"password"`
-	Email     string              `json:"email"`
-	ImagePath string              `json:"imagePath"`
-	ImageData []byte              `json:"imageData"`
+	Password  []byte `json:"password"`
+	Email     string `json:"email"`
+	ImagePath string `json:"imagePath"`
+	ImageData []byte `json:"imageData"`
 	//ImageData easyjson.RawMessage `json:"imageData"`
 }
 

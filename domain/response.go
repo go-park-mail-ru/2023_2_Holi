@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/mailru/easyjson"
+	"encoding/json"
 	"net/http"
 )
 
@@ -12,13 +12,19 @@ type Response struct {
 }
 
 func WriteError(w http.ResponseWriter, errString string, status int) {
+	//w.WriteHeader(status)
+	//response := &Response{Err: errString}
+	//easyjson.MarshalToHTTPResponseWriter(easyjson.Marshaler(response), w)
+
 	w.WriteHeader(status)
-	response := &Response{Err: errString}
-	easyjson.MarshalToHTTPResponseWriter(easyjson.Marshaler(response), w)
+	json.NewEncoder(w).Encode(&Response{Err: errString})
 }
 
 func WriteResponse(w http.ResponseWriter, result map[string]interface{}, status int) {
+	//w.WriteHeader(status)
+	//response := &Response{Body: result}
+	//easyjson.MarshalToHTTPResponseWriter(easyjson.Marshaler(response), w)
+
 	w.WriteHeader(status)
-	response := &Response{Body: result}
-	easyjson.MarshalToHTTPResponseWriter(easyjson.Marshaler(response), w)
+	json.NewEncoder(w).Encode(&Response{Body: result})
 }
