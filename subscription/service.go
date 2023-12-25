@@ -3,12 +3,17 @@ package subscription
 import (
 	grpc_connector "2023_2_Holi/connectors/grpc"
 	"2023_2_Holi/connectors/postgres"
+	"2023_2_Holi/domain"
 	g_sess "2023_2_Holi/domain/grpc/session"
+	"2023_2_Holi/domain/grpc/subscription"
 	logs "2023_2_Holi/logger"
 	"2023_2_Holi/middleware"
+	sub_grpc "2023_2_Holi/subscription/delivery/grpc"
 	"context"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"google.golang.org/grpc"
+	"net"
 	"net/http"
 	"os"
 
@@ -16,6 +21,22 @@ import (
 	subscription_postgres "2023_2_Holi/subscription/repository/postgresql"
 	subscription_usecase "2023_2_Holi/subscription/usecase"
 )
+
+func startRpcServer(su domain.SubsUsecase) {
+	port := ":" + os.Getenv("SUBMS_GRPC_SERVER_PORT")
+	lis, err := net.Listen("tcp", port)
+	if err != nil {
+		logs.Logger.Info(logs.Logger, "subscription", "startRpcServer", err, err.Error())
+	}
+
+	server := grpc.NewServer()
+
+	subscription.RegisterSubCheckerServer(server, sub_grpc.NewSubHandler(su))
+
+	logs.Logger.Info("starting auth grpc server at ", port)
+	server.Serve(lis)
+	logs.Logger.Info("auth grpc server stopped")
+}
 
 func StartService() {
 	err := godotenv.Load()
@@ -33,6 +54,8 @@ func StartService() {
 
 	subr := subscription_postgres.NewSubsPostgresqlRepository(pc, ctx)
 	subu := subscription_usecase.NewSubsUsecase(subr)
+
+	go startRpcServer(subu)
 
 	subscription_http.NotAuthSubHandler(mainRouter, subu)
 	subscription_http.NewSubsHandler(authMiddlewareRouter, subu)

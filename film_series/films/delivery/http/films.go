@@ -1,6 +1,9 @@
 package http
 
 import (
+	"2023_2_Holi/domain/grpc/subscription"
+	"context"
+	gorilla_ctx "github.com/gorilla/context"
 	"net/http"
 	"strconv"
 
@@ -12,11 +15,13 @@ import (
 
 type FilmsHandler struct {
 	FilmsUsecase domain.FilmsUsecase
+	SubClient    subscription.SubCheckerClient
 }
 
-func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase) {
+func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase, subClient subscription.SubCheckerClient) {
 	handler := &FilmsHandler{
 		FilmsUsecase: fu,
+		SubClient:    subClient,
 	}
 
 	router.HandleFunc("/v1/films/genre/{id}", handler.GetFilmsByGenre).Methods(http.MethodGet, http.MethodOptions)
@@ -97,6 +102,29 @@ func (h *FilmsHandler) GetFilmData(w http.ResponseWriter, r *http.Request) {
 
 	logs.Logger.Debug("film:", film)
 	logs.Logger.Debug("artists:", artists)
+
+	userID, err := strconv.Atoi(gorilla_ctx.Get(r, "userID").(string))
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
+	}
+
+	isSub, err := h.SubClient.CheckSub(
+		context.Background(),
+		&subscription.UserID{
+			ID: strconv.Itoa(userID),
+		},
+	)
+
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetFilmData.checkSub", err, err.Error())
+	}
+
+	if isSub.Status != true {
+		film.MediaPath = ""
+	}
+
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
