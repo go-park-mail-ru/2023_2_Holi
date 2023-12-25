@@ -13,8 +13,8 @@ type User struct {
 	Password  easyjson.RawMessage `json:"password"`
 	Email     string              `json:"email"`
 	ImagePath string              `json:"imagePath"`
-	//ImageData []byte              `json:"imageData"`
-	ImageData easyjson.RawMessage `json:"imageData"`
+	ImageData []byte              `json:"imageData"`
+	//ImageData easyjson.RawMessage `json:"imageData"`
 }
 
 func SanitizeUser(u User, s *bluemonday.Policy) User {
@@ -27,7 +27,7 @@ func SanitizeUser(u User, s *bluemonday.Policy) User {
 type ProfileUsecase interface {
 	GetUserData(userID int) (User, error)
 	UpdateUser(newUser User) (User, error)
-	UploadImage(userID int, imageData easyjson.RawMessage) (string, error)
+	UploadImage(userID int, imageData []byte) (string, error)
 }
 
 type ProfileRepository interface {
