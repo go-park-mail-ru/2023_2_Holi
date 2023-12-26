@@ -42,7 +42,7 @@ func StartService() {
 
 	serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
 	seru := series_usecase.NewSeriesUsecase(serr)
-	series_http.NewSeriesHandler(authMiddlewareRouter, seru)
+	series_http.NewSeriesHandler(authMiddlewareRouter, seru, g_sub.NewSubCheckerClient(subCli))
 
 	mainRouter.Handle("/metrics", promhttp.Handler())
 
