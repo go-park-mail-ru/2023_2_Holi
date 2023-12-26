@@ -173,6 +173,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 	//logs.Logger.Debug("Register user:", user)
 	defer a.CloseAndAlert(r.Body)
+	fmt.Println(1)
 
 	user.Email = strings.TrimSpace(user.Email)
 	if err = checkCredentials(domain.Credentials{Email: user.Email, Password: user.Password}); err != nil {
@@ -180,6 +181,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Register.credentials", err, "creds are invalid")
 		return
 	}
+	fmt.Println(2)
 
 	var id int
 	if id, err = a.AuthUsecase.Register(user); err != nil {
@@ -187,6 +189,7 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Register.register", err, "Failed to register")
 		return
 	}
+	fmt.Println(3)
 
 	session, _, err := a.AuthUsecase.Login(domain.Credentials{Email: user.Email, Password: user.Password})
 	if err != nil {
@@ -194,6 +197,8 @@ func (a *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		logs.LogError(logs.Logger, "auth_http", "Register.login", err, "Failed to login")
 		return
 	}
+	fmt.Println(4)
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    session.Token,
