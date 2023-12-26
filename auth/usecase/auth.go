@@ -3,6 +3,7 @@ package usecase
 import (
 	"bytes"
 	"crypto/rand"
+	"fmt"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
@@ -65,13 +66,19 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 		return 0, domain.ErrBadRequest
 	}
 
-	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
+	exists, err := u.authRepo.UserExists(user.Email)
+	if !exists {
 		return 0, domain.ErrAlreadyExists
 	}
-
+	if err != nil {
+		return 0, err
+	}
 	salt := make([]byte, 8)
+	fmt.Println(11)
 	rand.Read(salt)
+	fmt.Println(12)
 	user.Password = HashPassword(salt, user.Password)
+	fmt.Println(13)
 	if id, err := u.authRepo.AddUser(user); err != nil {
 		return 0, err
 	} else {
