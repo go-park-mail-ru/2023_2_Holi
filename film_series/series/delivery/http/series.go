@@ -122,8 +122,8 @@ func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 
 	if isSub.Status != true {
 		series.MediaPath = ""
-		for _, i := range episodes {
-			i.MediaPath = ""
+		for i := 0; i < len(episodes); i++ {
+			episodes[i].MediaPath = ""
 		}
 	}
 
