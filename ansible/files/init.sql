@@ -41,7 +41,7 @@ CREATE TABLE "cast"
     birthday TEXT,
     place TEXT,
     carier TEXT,
-    imgPath TEXT,
+    imgPath TEXT
 );
 
 ALTER TABLE "cast" ADD COLUMN tsv tsvector;
