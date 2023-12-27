@@ -19,6 +19,7 @@ import (
 const pathPreview = "https://static_holi.hb.ru-msk.vkcs.cloud/Preview_Film/"
 const pathMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Files/"
 const pathPreviewMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Preview/"
+const actorsImg = "https://static_holi.hb.ru-msk.vkcs.cloud/Actors_Image/"
 
 func ageRes(age string) int {
 	switch age {
@@ -84,6 +85,41 @@ func main() {
 		log.Fatalf("Ошибка подключения к базе данных: %v", err)
 	}
 
+	fileActors, err := os.Open("Actors.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fileActors.Close()
+
+	readerActors := csv.NewReader(fileActors)
+	readerActors.Comma = ';'
+	readerActors.LazyQuotes = true
+
+	_, err = readerActors.Read()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for actorID := 1; actorID <= 100; actorID++ {
+		row, err := readerActors.Read()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		name := row[0]
+		birthday := row[1]
+		place := row[2]
+		career := row[3]
+		img := actorsImg + strconv.Itoa(actorID) + ".jpg"
+
+		_, err = db.Exec(`INSERT INTO "cast" (id, name, birthday, place, carier, imgPath) VALUES ($1, $2, $3, $4, $5, $6)`,
+			actorID, name, birthday, place, career, img)
+		if err != nil {
+			log.Printf("Ошибка при вставке актера: %v", err)
+			continue
+		}
+	}
+
 	file, err := os.Open("Netflix_Dataset.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -93,10 +129,6 @@ func main() {
 	reader := csv.NewReader(file)
 
 	genreMap := make(map[string]int)
-
-	castMap := make(map[string]int)
-
-	castCount := 1
 
 	genreCount := 1
 
@@ -135,29 +167,6 @@ func main() {
 					}
 				}
 				genreMap[genre] = idToInsert
-			}
-		}
-		casts := strings.Split(row[10], ",")
-		for _, cast := range casts {
-			cast = strings.TrimSpace(cast)
-
-			idToInsert, castExists := castMap[cast]
-
-			if !castExists {
-				er := db.QueryRow(`SELECT id FROM "cast" WHERE name = $1`, cast).Scan(&idToInsert)
-				if er != nil {
-					_, er = db.Exec(`INSERT INTO "cast" (id, name) VALUES ($1, $2)`, castCount, cast)
-					castCount++
-					if er != nil {
-						continue
-					}
-
-					er = db.QueryRow(`SELECT id FROM "cast" WHERE name = $1`, cast).Scan(&idToInsert)
-					if er != nil {
-						continue
-					}
-				}
-				castMap[cast] = idToInsert
 			}
 		}
 	}

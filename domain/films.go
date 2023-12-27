@@ -1,8 +1,12 @@
 package domain
 
 type Cast struct {
-	ID   int    `json:"id"`
-	Name string `json:"name"`
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Brithday string `json:"brithday"`
+	Place    string `json:"place"`
+	Carier   string `json:"carier"`
+	ImgPath  string `json:"imgPath"`
 }
 
 type FilmsRepository interface {

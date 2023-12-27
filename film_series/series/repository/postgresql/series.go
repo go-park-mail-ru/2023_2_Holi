@@ -53,7 +53,7 @@ const getCastPageQuery = `
 `
 
 const getCastNameQuery = `
-    SELECT "cast".name
+    SELECT "cast".name, "cast".brithday, "cast".place, "cast".carier, "cast".imgpath
     FROM "cast" 
     WHERE "cast".id = $1;
 `
@@ -247,6 +247,10 @@ func (r *seriesPostgresqlRepository) GetCastNameSeries(id int) (domain.Cast, err
 	var cast domain.Cast
 	err := rows.Scan(
 		&cast.Name,
+		&cast.Brithday,
+		&cast.Place,
+		&cast.Carier,
+		&cast.ImgPath,
 	)
 
 	if err == pgx.ErrNoRows {
