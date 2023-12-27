@@ -13,7 +13,7 @@ const getSuitableFilmQuery = `
 `
 
 const getSuitableCastQuery = `
-	SELECT id, name
+	SELECT id, name, imgPath
 	FROM "cast"
 	WHERE name ILIKE $1
 `
@@ -79,6 +79,7 @@ func (r *searchPostgresqlRepository) GetSuitableCast(searchStr string) ([]domain
 		err = rows.Scan(
 			&person.ID,
 			&person.Name,
+			&person.ImgPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "search_postgresql", "GetSuitableCast", err, err.Error())
