@@ -16,4 +16,4 @@ https://kek-wait-w.github.io/Page/
 https://www.figma.com/file/PEfIZ5K8ox9OKbxckS0KPo/NetflixHoliProject?type=design&mode=design&t=4cJlsuXjjVJnori5-1
 
 #### Netfix
-http://212.233.122.175
+[https://hooli-smotrim.ru/](https://hooli-smotrim.ru/feed)hooli-smotrim.ru
