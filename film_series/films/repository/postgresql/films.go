@@ -29,7 +29,7 @@ const getFilmDataQuery = `
 `
 
 const getFilmCastQuery = `
-    SELECT id, name, imppath
+    SELECT id, name, imgpath
     FROM "cast"
         JOIN video_cast AS vc ON id = cast_id
     WHERE vc.video_id = $1;

@@ -28,7 +28,7 @@ const getSeriesDataQuery = `
 `
 
 const getSeriesCastQuery = `
-    SELECT c.id, c.name, c.imppath
+    SELECT c.id, c.name, c.imgpath
     FROM "cast" c
         JOIN video_cast vc ON c.id = vc.cast_id
         JOIN video v ON vc.video_id = v.id
