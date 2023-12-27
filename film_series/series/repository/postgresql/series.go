@@ -159,6 +159,7 @@ func (r *seriesPostgresqlRepository) GetSeriesCast(SeriesId int) ([]domain.Cast,
 		err = rows.Scan(
 			&artist.ID,
 			&artist.Name,
+			&artist.ImgPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "series_postgresql", "GetSeriesCast", err, err.Error())

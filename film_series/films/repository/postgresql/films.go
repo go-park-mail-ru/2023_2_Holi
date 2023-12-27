@@ -155,6 +155,7 @@ func (r *filmsPostgresqlRepository) GetFilmCast(filmId int) ([]domain.Cast, erro
 		err = rows.Scan(
 			&artist.ID,
 			&artist.Name,
+			&artist.ImgPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
