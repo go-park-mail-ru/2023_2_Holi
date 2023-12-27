@@ -100,7 +100,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for actorID := 1; actorID <= 100; actorID++ {
+	for actorID := 1; actorID <= 155; actorID++ {
 		row, err := readerActors.Read()
 		if err != nil {
 			log.Fatal(err)
@@ -183,7 +183,7 @@ func main() {
 
 	for {
 		count++
-		if count == 20 {
+		if count == 40 {
 			break
 		}
 		row, err := reader.Read()
@@ -259,7 +259,7 @@ func main() {
 
 	i := 0
 	count--
-	countEpisode := 20
+	countEpisode := 40
 	records, err := reader.ReadAll()
 	if err != nil {
 		fmt.Println("Error reading CSV:", err)
@@ -267,7 +267,7 @@ func main() {
 	}
 	for {
 		count++
-		if count == 21 {
+		if count == 41 {
 			break
 		}
 		genres := strings.Split(records[i][1], ",")
