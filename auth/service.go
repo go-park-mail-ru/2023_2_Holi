@@ -56,8 +56,6 @@ func StartService() {
 	rc := redis.Connect()
 	defer rc.Close()
 
-	//authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
-
 	sr := auth_redis.NewSessionRedisRepository(rc)
 	ar := auth_postgres.NewAuthPostgresqlRepository(pc, ctx)
 

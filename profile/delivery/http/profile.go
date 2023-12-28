@@ -84,6 +84,7 @@ func (h *ProfileHandler) GetUserData(w http.ResponseWriter, r *http.Request) {
 func (h *ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 	var newUser domain.User
 
+	//err := easyjson.UnmarshalFromReader(r.Body, &newUser)
 	err := json.NewDecoder(r.Body).Decode(&newUser)
 	if err != nil {
 		domain.WriteError(w, err.Error(), http.StatusBadRequest)

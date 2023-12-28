@@ -7,13 +7,13 @@ import (
 )
 
 const getSuitableFilmQuery = `
-	SELECT id, name, preview_path, seasons_count
+	SELECT id, name, preview_path, seasons_count, rating
 	FROM "video"
 	WHERE name ILIKE $1
 `
 
 const getSuitableCastQuery = `
-	SELECT id, name
+	SELECT id, name, imgPath
 	FROM "cast"
 	WHERE name ILIKE $1
 `
@@ -48,6 +48,7 @@ func (r *searchPostgresqlRepository) GetSuitableFilms(searchStr string) ([]domai
 			&film.Name,
 			&film.PreviewPath,
 			&film.SeasonsCount,
+			&film.Rating,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "search_postgresql", "GetSuitableFilms", err, err.Error())
@@ -78,6 +79,7 @@ func (r *searchPostgresqlRepository) GetSuitableCast(searchStr string) ([]domain
 		err = rows.Scan(
 			&person.ID,
 			&person.Name,
+			&person.ImgPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "search_postgresql", "GetSuitableCast", err, err.Error())

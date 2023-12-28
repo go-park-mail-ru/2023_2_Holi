@@ -28,7 +28,7 @@ const getSeriesDataQuery = `
 `
 
 const getSeriesCastQuery = `
-    SELECT c.id, c.name
+    SELECT c.id, c.name, c.imgpath
     FROM "cast" c
         JOIN video_cast vc ON c.id = vc.cast_id
         JOIN video v ON vc.video_id = v.id
@@ -36,7 +36,7 @@ const getSeriesCastQuery = `
 `
 
 const getSeriesEpisodesQuery = `
-    SELECT e.id, e.name, e.description, e.media_path, e.number, e.season_number
+    SELECT e.id, e.name, e.description, e.media_path, e.number, e.season_number, e.preview_path
     FROM episode AS e
     JOIN video AS v ON e.video_id = v.id
     WHERE v.id = $1 AND v.seasons_count > 0;
@@ -53,7 +53,7 @@ const getCastPageQuery = `
 `
 
 const getCastNameQuery = `
-    SELECT "cast".name
+    SELECT "cast".name, "cast".birthday, "cast".place, "cast".carier, "cast".imgpath
     FROM "cast" 
     WHERE "cast".id = $1;
 `
@@ -159,6 +159,7 @@ func (r *seriesPostgresqlRepository) GetSeriesCast(SeriesId int) ([]domain.Cast,
 		err = rows.Scan(
 			&artist.ID,
 			&artist.Name,
+			&artist.ImgPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "series_postgresql", "GetSeriesCast", err, err.Error())
@@ -192,6 +193,7 @@ func (r *seriesPostgresqlRepository) GetSeriesEpisodes(SeriesId int) ([]domain.E
 			&episode.MediaPath,
 			&episode.Number,
 			&episode.Season,
+			&episode.PreviewPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "series_postgresql", "GetSeriesEpisodes", err, err.Error())
@@ -247,6 +249,10 @@ func (r *seriesPostgresqlRepository) GetCastNameSeries(id int) (domain.Cast, err
 	var cast domain.Cast
 	err := rows.Scan(
 		&cast.Name,
+		&cast.Brithday,
+		&cast.Place,
+		&cast.Carier,
+		&cast.ImgPath,
 	)
 
 	if err == pgx.ErrNoRows {

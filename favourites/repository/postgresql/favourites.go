@@ -26,6 +26,7 @@ const SelectAllQuery = `
 		JOIN favourite AS f ON video_id = v.id
 	WHERE f.user_id = $1
 `
+
 const favouriteExistsQuery = `
 	SELECT EXISTS(SELECT 1
 				  FROM favourite

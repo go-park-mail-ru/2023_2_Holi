@@ -65,10 +65,13 @@ func (u *authUsecase) Register(user domain.User) (int, error) {
 		return 0, domain.ErrBadRequest
 	}
 
-	if exists, err := u.authRepo.UserExists(user.Email); exists && err == nil {
+	exists, err := u.authRepo.UserExists(user.Email)
+	if exists {
 		return 0, domain.ErrAlreadyExists
 	}
-
+	if err != nil {
+		return 0, err
+	}
 	salt := make([]byte, 8)
 	rand.Read(salt)
 	user.Password = HashPassword(salt, user.Password)
@@ -99,7 +102,8 @@ func HashPassword(salt []byte, password []byte) []byte {
 }
 
 func checkPasswords(passHash []byte, plainPassword []byte) bool {
-	salt := passHash[0:8]
+	salt := make([]byte, 8)
+	_ = copy(salt, passHash)
 	userPassHash := HashPassword(salt, plainPassword)
 	return bytes.Equal(userPassHash, passHash)
 }

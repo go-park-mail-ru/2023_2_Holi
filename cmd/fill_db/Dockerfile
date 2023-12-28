@@ -18,5 +18,6 @@ WORKDIR /
 
 COPY --from=build-stage /fill/cmd/fill_db/fill_db /fill_db
 COPY --from=build-stage /fill/cmd/fill_db/Netflix_Dataset.csv /Netflix_Dataset.csv
+COPY --from=build-stage /fill/cmd/fill_db/Actors.csv /Actors.csv
 
 ENTRYPOINT ["/fill_db"]

@@ -4,7 +4,9 @@ import (
 	"time"
 )
 
+//easyjson:json
 type Credentials struct {
+	//Password easyjson.RawMessage `json:"password"`
 	Password []byte `json:"password"`
 	Email    string `json:"email"`
 }

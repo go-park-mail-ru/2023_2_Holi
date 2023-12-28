@@ -29,7 +29,7 @@ const getFilmDataQuery = `
 `
 
 const getFilmCastQuery = `
-    SELECT id, name
+    SELECT id, name, imgpath
     FROM "cast"
         JOIN video_cast AS vc ON id = cast_id
     WHERE vc.video_id = $1;
@@ -47,7 +47,7 @@ const getCastPageQuery = `
 `
 
 const getCastNameQuery = `
-    SELECT "cast".name
+    SELECT "cast".name, "cast".birthday, "cast".place, "cast".carier, "cast".imgpath
     FROM "cast" 
     WHERE "cast".id = $1;
 `
@@ -155,6 +155,7 @@ func (r *filmsPostgresqlRepository) GetFilmCast(filmId int) ([]domain.Cast, erro
 		err = rows.Scan(
 			&artist.ID,
 			&artist.Name,
+			&artist.ImgPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "films_postgresql", "GetFilmCast", err, err.Error())
@@ -210,6 +211,10 @@ func (r *filmsPostgresqlRepository) GetCastName(FilmId int) (domain.Cast, error)
 	var cast domain.Cast
 	err := rows.Scan(
 		&cast.Name,
+		&cast.Brithday,
+		&cast.Place,
+		&cast.Carier,
+		&cast.ImgPath,
 	)
 
 	if err == pgx.ErrNoRows {

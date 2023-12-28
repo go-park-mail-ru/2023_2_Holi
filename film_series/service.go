@@ -4,6 +4,7 @@ import (
 	grpc_connector "2023_2_Holi/connectors/grpc"
 	"2023_2_Holi/connectors/postgres"
 	g_sess "2023_2_Holi/domain/grpc/session"
+	g_sub "2023_2_Holi/domain/grpc/subscription"
 	films_http "2023_2_Holi/film_series/films/delivery/http"
 	films_postgres "2023_2_Holi/film_series/films/repository/postgresql"
 	films_usecase "2023_2_Holi/film_series/films/usecase"
@@ -36,15 +37,17 @@ func StartService() {
 
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
 	fu := films_usecase.NewFilmsUsecase(fr)
-	films_http.NewFilmsHandler(authMiddlewareRouter, fu)
+	subCli := grpc_connector.Connect(os.Getenv("SUBMS_GRPC_SERVER_HOST") + ":" + os.Getenv("SUBMS_GRPC_SERVER_PORT"))
+	films_http.NewFilmsHandler(authMiddlewareRouter, fu, g_sub.NewSubCheckerClient(subCli))
 
 	serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
 	seru := series_usecase.NewSeriesUsecase(serr)
-	series_http.NewSeriesHandler(authMiddlewareRouter, seru)
+	series_http.NewSeriesHandler(authMiddlewareRouter, seru, g_sub.NewSubCheckerClient(subCli))
 
 	mainRouter.Handle("/metrics", promhttp.Handler())
 
 	gc := grpc_connector.Connect(os.Getenv("AUTHMS_GRPC_SERVER_HOST") + ":" + os.Getenv("AUTHMS_GRPC_SERVER_PORT"))
+
 	mw := middleware.InitMiddleware(g_sess.NewAuthCheckerClient(gc), nil)
 
 	mainRouter.Use(mw.Metrics)

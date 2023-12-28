@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,8 +70,9 @@ func TestGetMoviesByGenre(t *testing.T) {
 			mockUsecase := new(mocks.FilmsUsecase)
 			test.setUCaseExpectations(mockUsecase)
 
-			req, err := http.NewRequest("GET", "/api/v1/films/genre/{genre}", nil)
-			assert.NoError(t, err)
+			genreID := 1
+
+			req := httptest.NewRequest("GET", "/api/v1/films/genre/"+strconv.Itoa(genreID), nil)
 
 			rec := httptest.NewRecorder()
 
@@ -80,7 +82,7 @@ func TestGetMoviesByGenre(t *testing.T) {
 				FilmsUsecase: mockUsecase,
 			}
 
-			router.HandleFunc("/api/v1/films/genre/{genre}", handler.GetFilmsByGenre).Methods("GET")
+			router.HandleFunc("/api/v1/films/genre/{id}", handler.GetFilmsByGenre).Methods("GET")
 			router.ServeHTTP(rec, req)
 
 			assert.Equal(t, test.status, rec.Code)

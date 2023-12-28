@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -17,6 +19,8 @@ import (
 const pathPreview = "https://static_holi.hb.ru-msk.vkcs.cloud/Preview_Film/"
 const pathMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Files/"
 const pathPreviewMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Preview/"
+const actorsImg = "https://static_holi.hb.ru-msk.vkcs.cloud/Actors_Image/"
+const episodeIMG = "https://static_holi.hb.ru-msk.vkcs.cloud/Episode_IMG/"
 
 func ageRes(age string) int {
 	switch age {
@@ -35,6 +39,26 @@ func ageRes(age string) int {
 	default:
 		return 16
 	}
+}
+
+func generateRandomRating() int {
+	rand.Seed(time.Now().UnixNano())
+	return rand.Intn(10) + 1
+}
+
+func dbParamsfromEnvUsr() string {
+	host := os.Getenv("POSTGRES_USR_HOST")
+	port := os.Getenv("POSTGRES_USR_PORT")
+	user := os.Getenv("POSTGRES_USR_USER")
+	pass := os.Getenv("POSTGRES_USR_PASSWORD")
+	dbname := os.Getenv("POSTGRES_USR_DB")
+	host = "postgres_usr"
+	port = "5432"
+	user = "postgres"
+	pass = "123"
+	dbname = "netflix_auth"
+
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", host, port, user, pass, dbname)
 }
 
 func dbParamsfromEnv() string {
@@ -62,6 +86,41 @@ func main() {
 		log.Fatalf("Ошибка подключения к базе данных: %v", err)
 	}
 
+	fileActors, err := os.Open("Actors.csv")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer fileActors.Close()
+
+	readerActors := csv.NewReader(fileActors)
+	readerActors.Comma = ';'
+	readerActors.LazyQuotes = true
+
+	_, err = readerActors.Read()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for actorID := 1; actorID <= 157; actorID++ {
+		row, err := readerActors.Read()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		name := row[0]
+		birthday := row[1]
+		place := row[2]
+		career := row[3]
+		img := actorsImg + strconv.Itoa(actorID) + ".jpg"
+
+		_, err = db.Exec(`INSERT INTO "cast" (id, name, birthday, place, carier, imgPath) VALUES ($1, $2, $3, $4, $5, $6)`,
+			actorID, name, birthday, place, career, img)
+		if err != nil {
+			log.Printf("Ошибка при вставке актера: %v", err)
+			continue
+		}
+	}
+
 	file, err := os.Open("Netflix_Dataset.csv")
 	if err != nil {
 		log.Fatal(err)
@@ -71,10 +130,6 @@ func main() {
 	reader := csv.NewReader(file)
 
 	genreMap := make(map[string]int)
-
-	castMap := make(map[string]int)
-
-	castCount := 1
 
 	genreCount := 1
 
@@ -115,29 +170,6 @@ func main() {
 				genreMap[genre] = idToInsert
 			}
 		}
-		casts := strings.Split(row[10], ",")
-		for _, cast := range casts {
-			cast = strings.TrimSpace(cast)
-
-			idToInsert, castExists := castMap[cast]
-
-			if !castExists {
-				er := db.QueryRow(`SELECT id FROM "cast" WHERE name = $1`, cast).Scan(&idToInsert)
-				if er != nil {
-					_, er = db.Exec(`INSERT INTO "cast" (id, name) VALUES ($1, $2)`, castCount, cast)
-					castCount++
-					if er != nil {
-						continue
-					}
-
-					er = db.QueryRow(`SELECT id FROM "cast" WHERE name = $1`, cast).Scan(&idToInsert)
-					if er != nil {
-						continue
-					}
-				}
-				castMap[cast] = idToInsert
-			}
-		}
 	}
 
 	_, err = file.Seek(0, 0)
@@ -152,7 +184,7 @@ func main() {
 
 	for {
 		count++
-		if count == 20 {
+		if count == 38 {
 			break
 		}
 		row, err := reader.Read()
@@ -228,7 +260,7 @@ func main() {
 
 	i := 0
 	count--
-	countEpisode := 20
+	countEpisode := 40
 	records, err := reader.ReadAll()
 	if err != nil {
 		fmt.Println("Error reading CSV:", err)
@@ -236,7 +268,7 @@ func main() {
 	}
 	for {
 		count++
-		if count == 21 {
+		if count == 39 {
 			break
 		}
 		genres := strings.Split(records[i][1], ",")
@@ -246,6 +278,7 @@ func main() {
 		name := strings.Replace(records[i][5], " ", "_", -1)
 		pr_Path := pathPreview + name + ".jpg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
+		fmt.Println(count)
 		release := records[i][19][:4]
 		releaseInt, err := strconv.Atoi(release)
 		if err != nil {
@@ -266,7 +299,7 @@ func main() {
 				break
 			}
 			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-			pr_Path := pathPreview + name + ".jpg"
+			pr_Path := episodeIMG + name + "_S" + records[i][2] + "_E" + records[i][3] + ".jpg"
 			pr_Media := pathMedia + name + "_S" + records[i][2] + "_E" + records[i][3] + ".mp4"
 			duration := 0
 			_, err = db.Exec(sqlEpisode, countEpisode, records[i][0], records[i][23], duration, pr_Path, pr_Media, records[i][3], records[i][2], count)
@@ -319,6 +352,38 @@ func main() {
 	_, err = db.Exec(`UPDATE "cast" SET tsv = setweight(to_tsvector(name), 'A');`)
 	if err != nil {
 		log.Printf("Ошибка при создании вектора для cast.name: %v", err)
+	}
+
+	dbUsr, err := sql.Open("postgres", dbParamsfromEnvUsr())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dbUsr.Close()
+
+	err = dbUsr.Ping()
+	if err != nil {
+		log.Fatalf("Ошибка подключения к базе данных: %v", err)
+	}
+
+	for userID := 30; userID <= 40; userID++ {
+		username := fmt.Sprintf("user%d", userID)
+		email := fmt.Sprintf("user%d@example.com", userID)
+		password := fmt.Sprintf("password%d", userID)
+
+		_, err := dbUsr.Exec(`INSERT INTO "user" (id ,name, email, password) VALUES ($1, $2, $3, $4)`, userID, username, email, password)
+		if err != nil {
+			log.Printf("Ошибка при вставке пользователя: %v", err)
+			continue
+		}
+
+		for videoID := 1; videoID <= 40; videoID++ {
+			rating := generateRandomRating()
+			_, err := db.Exec(`INSERT INTO video_estimation (rate, video_id, user_id) VALUES ($1, $2, $3)`, rating, videoID, userID)
+			if err != nil {
+				log.Printf("Ошибка при вставке оценки: %v", err)
+				continue
+			}
+		}
 	}
 
 	fmt.Println("Данные из CSV-файла успешно вставлены в таблицу films.")

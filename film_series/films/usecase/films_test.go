@@ -65,23 +65,23 @@ func TestGetCastPage(t *testing.T) {
 func TestGetFilmsByGenre(t *testing.T) {
 	tests := []struct {
 		name                     string
-		genre                    string
+		genre                    int
 		setFilmsRepoExpectations func(filmsRepo *mocks.FilmsRepository, films []domain.Video)
 		good                     bool
 	}{
 		{
 			name:  "GoodCase/Common",
-			genre: "action",
+			genre: 1,
 			setFilmsRepoExpectations: func(filmsRepo *mocks.FilmsRepository, films []domain.Video) {
-				filmsRepo.On("GetFilmsByGenre", "action").Return(films, nil)
+				filmsRepo.On("GetFilmsByGenre", 1).Return(films, nil)
 			},
 			good: true,
 		},
 		{
 			name:  "ErrorCase/UsecaseError",
-			genre: "comedy",
+			genre: 2,
 			setFilmsRepoExpectations: func(filmsRepo *mocks.FilmsRepository, films []domain.Video) {
-				filmsRepo.On("GetFilmsByGenre", "comedy").Return(nil, errors.New("Some error"))
+				filmsRepo.On("GetFilmsByGenre", 2).Return(nil, errors.New("Some error"))
 			},
 			good: false,
 		},

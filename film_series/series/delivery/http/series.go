@@ -1,6 +1,9 @@
 package http
 
 import (
+	"2023_2_Holi/domain/grpc/subscription"
+	"context"
+	gorilla_ctx "github.com/gorilla/context"
 	"net/http"
 	"strconv"
 
@@ -12,11 +15,13 @@ import (
 
 type SeriesHandler struct {
 	SeriesUsecase domain.SeriesUsecase
+	SubClient     subscription.SubCheckerClient
 }
 
-func NewSeriesHandler(router *mux.Router, su domain.SeriesUsecase) {
+func NewSeriesHandler(router *mux.Router, su domain.SeriesUsecase, subClient subscription.SubCheckerClient) {
 	handler := &SeriesHandler{
 		SeriesUsecase: su,
+		SubClient:     subClient,
 	}
 
 	router.HandleFunc("/v1/series/genre/{id}", handler.GetSeriesByGenre).Methods(http.MethodGet, http.MethodOptions)
@@ -96,6 +101,32 @@ func (h *SeriesHandler) GetSeriesData(w http.ResponseWriter, r *http.Request) {
 	logs.Logger.Debug("film:", series)
 	logs.Logger.Debug("artists:", artists)
 	logs.Logger.Debug("episodes:", episodes)
+
+	userID, err := strconv.Atoi(gorilla_ctx.Get(r, "userID").(string))
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetFilmData", err, err.Error())
+	}
+
+	isSub, err := h.SubClient.CheckSub(
+		context.Background(),
+		&subscription.UserID{
+			ID: strconv.Itoa(userID),
+		},
+	)
+
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "http", "GetFilmData.checkSub", err, err.Error())
+	}
+
+	if isSub.Status != true {
+		series.MediaPath = ""
+		for i := 0; i < len(episodes); i++ {
+			episodes[i].MediaPath = ""
+		}
+	}
+
 	domain.WriteResponse(
 		w,
 		map[string]interface{}{
