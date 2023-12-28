@@ -268,7 +268,7 @@ func main() {
 	}
 	for {
 		count++
-		if count == 41 {
+		if count == 39 {
 			break
 		}
 		genres := strings.Split(records[i][1], ",")
@@ -278,6 +278,7 @@ func main() {
 		name := strings.Replace(records[i][5], " ", "_", -1)
 		pr_Path := pathPreview + name + ".jpg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
+		fmt.Println(count)
 		release := records[i][19][:4]
 		releaseInt, err := strconv.Atoi(release)
 		if err != nil {
