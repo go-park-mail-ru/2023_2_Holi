@@ -101,7 +101,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for actorID := 1; actorID <= 155; actorID++ {
+	for actorID := 1; actorID <= 157; actorID++ {
 		row, err := readerActors.Read()
 		if err != nil {
 			log.Fatal(err)
@@ -184,7 +184,7 @@ func main() {
 
 	for {
 		count++
-		if count == 40 {
+		if count == 38 {
 			break
 		}
 		row, err := reader.Read()
