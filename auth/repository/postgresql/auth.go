@@ -4,7 +4,6 @@ import (
 	"2023_2_Holi/domain"
 	logs "2023_2_Holi/logger"
 	"context"
-	"fmt"
 )
 
 const getByEmailQuery = `
@@ -43,13 +42,11 @@ func NewAuthPostgresqlRepository(pool domain.PgxPoolIface, ctx context.Context) 
 }
 
 func (r *authPostgresqlRepository) GetByEmail(email string) (domain.User, error) {
-	fmt.Println(21)
 	rows, err := r.db.Query(r.ctx, getByEmailQuery, email)
 	if err != nil {
 		logs.LogError(logs.Logger, "postgresql", "GetByEmail", err, err.Error())
 		return domain.User{}, err
 	}
-	fmt.Println(22)
 	defer rows.Close()
 	logs.Logger.Debug("GetByEmail query result:", rows)
 
