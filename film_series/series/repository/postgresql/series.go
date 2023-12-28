@@ -36,7 +36,7 @@ const getSeriesCastQuery = `
 `
 
 const getSeriesEpisodesQuery = `
-    SELECT e.id, e.name, e.description, e.media_path, e.number, e.season_number
+    SELECT e.id, e.name, e.description, e.media_path, e.number, e.season_number, e.preview_path
     FROM episode AS e
     JOIN video AS v ON e.video_id = v.id
     WHERE v.id = $1 AND v.seasons_count > 0;
@@ -53,7 +53,7 @@ const getCastPageQuery = `
 `
 
 const getCastNameQuery = `
-    SELECT "cast".name, "cast".brithday, "cast".place, "cast".carier, "cast".imgpath
+    SELECT "cast".name, "cast".birthday, "cast".place, "cast".carier, "cast".imgpath
     FROM "cast" 
     WHERE "cast".id = $1;
 `
@@ -193,6 +193,7 @@ func (r *seriesPostgresqlRepository) GetSeriesEpisodes(SeriesId int) ([]domain.E
 			&episode.MediaPath,
 			&episode.Number,
 			&episode.Season,
+			&episode.PreviewPath,
 		)
 		if err != nil {
 			logs.LogError(logs.Logger, "series_postgresql", "GetSeriesEpisodes", err, err.Error())
