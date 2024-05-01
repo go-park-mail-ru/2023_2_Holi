@@ -23,3 +23,5 @@ ansible/*.pem
 coverage.out.tmp
 *.conf
 *.pem
+
+recommendations/__pycache__/
