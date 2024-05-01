@@ -63,7 +63,7 @@ func (u *profileUseCase) UpdateUser(newUser domain.User) (domain.User, error) {
 const (
 	vkCloudHotboxEndpoint = "https://hb.vkcs.cloud"
 	defaultRegion         = "ru-msk"
-	bucketName            = "static_holi"
+	bucketName            = "eyescreen"
 	directory             = "User_Images"
 )
 

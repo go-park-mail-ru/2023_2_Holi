@@ -1,2 +1,2 @@
 [web]
-212.233.73.20 ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=Ubuntu-STD3-1-1-10GB-p5O2WOwO.pem
+83.166.235.244 ansible_user=ubuntu ansible_connection=ssh ansible_ssh_private_key_file=ubuntu-STD3-1-2-14GB-3SXeQmrh.pem

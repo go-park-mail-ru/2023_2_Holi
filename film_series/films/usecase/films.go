@@ -65,12 +65,23 @@ func (u *filmsUsecase) GetTopRate() (domain.Video, error) {
 	return topRate, nil
 }
 
-func (u *filmsUsecase) GetRecommendations(userID int) ([]int, error) {
+func (u *filmsUsecase) GetRecommendations(userID int) ([]domain.Video, error) {
 	recommendations, err := u.recRepo.GetRecommendations(userID)
 	if err != nil {
 		return nil, err
 	}
 	logs.Logger.Debug("films_usecase GetRecommendations:", recommendations)
 
-	return recommendations, nil
+	var films []domain.Video
+	for _, id := range recommendations {
+		film, err := u.filmRepo.GetFilmData(id)
+		if err != nil {
+			logs.LogError(logs.Logger, "films_usecase", "GetFilmData", err, err.Error())
+			return nil, err
+		}
+
+		films = append(films, film)
+	}
+
+	return films, nil
 }

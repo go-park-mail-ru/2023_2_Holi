@@ -17,10 +17,10 @@ import (
 )
 
 const pathPreview = "https://eyescreen.hb.ru-msk.vkcs.cloud/Preview_Film/"
-const pathMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Files/"
-const pathPreviewMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Preview/"
+const pathMedia = "https://eyescreen.hb.ru-msk.vkcs.cloud/Media_Files/"
+const pathPreviewMedia = "https://eyescreen.hb.ru-msk.vkcs.cloud/Media_Preview/"
 const actorsImg = "https://eyescreen.hb.ru-msk.vkcs.cloud/Actors_Image/"
-const episodeIMG = "https://static_holi.hb.ru-msk.vkcs.cloud/Episode_IMG/"
+const episodeIMG = "https://eyescreen.hb.ru-msk.vkcs.cloud/Episode_IMG/"
 
 func ageRes(age string) int {
 	switch age {
@@ -300,7 +300,7 @@ func main() {
 			}
 			fmt.Println(records[i][3])
 			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
-			pr_Path := episodeIMG + name + "_S" + records[i][2] + "_E" + records[i][3] + ".jpg"
+			pr_Path := episodeIMG + name + "_S" + records[i][2] + "_E" + records[i][3] + ".jpeg"
 			pr_Media := pathMedia + name + "_S" + records[i][2] + "_E" + records[i][3] + ".mp4"
 			duration := 0
 			_, err = db.Exec(sqlEpisode, countEpisode, records[i][0], records[i][23], duration, pr_Path, pr_Media, records[i][3], records[i][2], count)

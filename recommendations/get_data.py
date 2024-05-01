@@ -20,12 +20,18 @@ def get_ratings():
 
     # Доступ к таблице video_estimation после загрузки метаданных
     video_estimation = metadata.tables['video_estimation']
+    video = metadata.tables['video']
 
     # Выборка необходимых столбцов
     query = select(
         video_estimation.c.user_id,
         video_estimation.c.video_id,
         video_estimation.c.rate
+    ).join(
+        video,  # указываем таблицу, с которой нужно сделать JOIN
+        video_estimation.c.video_id == video.c.id  # условие для JOIN
+    ).where(
+        video.c.seasons_count == 0  # условие фильтрации
     )
 
     # Выполнение запроса и загрузка результатов в DataFrame

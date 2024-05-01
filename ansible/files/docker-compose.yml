@@ -39,6 +39,22 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_USR_PASSWORD}
       POSTGRES_DB: ${POSTGRES_USR_DB}
 
+
+  postgres_recom:
+    image: postgres:15.3-alpine
+    container_name: postgres_recom
+    restart: always
+    networks:
+      local_area:
+    volumes:
+      - postgres_recom_data:/var/lib/postgresql/data
+      - ./init_recom.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_USER: ${POSTGRES_RECOM_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_RECOM_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_RECOM_DB}
+
+
   auth:
     image: holi2023/auth:latest
     container_name: auth
@@ -138,6 +154,31 @@ services:
     volumes:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
       - redis_data:/var/lib/redis/data
+
+
+  recommendations:
+    container_name: recommendations
+    build:
+      context: ../backend/recommendations
+    networks:
+      local_area:
+    depends_on:
+      postgres:
+        condition: service_started
+      postgres_recom:
+        condition: service_started
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_RECOM_USER: ${POSTGRES_RECOM_USER}
+      POSTGRES_RECOM_PASSWORD: ${POSTGRES_RECOM_PASSWORD}
+      POSTGRES_RECOM_DB: ${POSTGRES_RECOM_DB}
+      POSTGRES_RECOM_HOST: ${POSTGRES_RECOM_HOST}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
 
 
 #  grafana:

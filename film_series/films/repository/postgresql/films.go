@@ -127,6 +127,7 @@ func (r *filmsPostgresqlRepository) GetFilmData(id int) (domain.Video, error) {
 		&film.Rating,
 		&film.AgeRestriction,
 	)
+	film.ID = id
 
 	if err == pgx.ErrNoRows {
 		logs.LogError(logs.Logger, "films_postgresql", "GetFilmData", err, "No rows")
