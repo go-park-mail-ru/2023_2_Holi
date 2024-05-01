@@ -28,7 +28,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase, subClient subsc
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/v1/films/recommendations/{id}", handler.GetRecommendations).Methods(http.MethodGet)
+	router.HandleFunc("/v1/films/recommendations/{id}", handler.GetRecommendations).Methods(http.MethodGet, http.MethodOptions)
 }
 
 // GetFilmsByGenre godoc
