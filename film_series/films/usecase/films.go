@@ -7,11 +7,13 @@ import (
 
 type filmsUsecase struct {
 	filmRepo domain.FilmsRepository
+	recRepo  domain.RecomRepository
 }
 
-func NewFilmsUsecase(fr domain.FilmsRepository) domain.FilmsUsecase {
+func NewFilmsUsecase(fr domain.FilmsRepository, fc domain.RecomRepository) domain.FilmsUsecase {
 	return &filmsUsecase{
 		filmRepo: fr,
+		recRepo:  fc,
 	}
 }
 
@@ -61,4 +63,14 @@ func (u *filmsUsecase) GetTopRate() (domain.Video, error) {
 	logs.Logger.Debug("films_usecase GetTopRate:", topRate)
 
 	return topRate, nil
+}
+
+func (u *filmsUsecase) GetRecommendations(userID int) ([]int, error) {
+	recommendations, err := u.recRepo.GetRecommendations(userID)
+	if err != nil {
+		return nil, err
+	}
+	logs.Logger.Debug("films_usecase GetRecommendations:", recommendations)
+
+	return recommendations, nil
 }

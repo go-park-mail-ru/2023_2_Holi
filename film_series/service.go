@@ -8,6 +8,7 @@ import (
 	g_sub "2023_2_Holi/domain/grpc/subscription"
 	films_http "2023_2_Holi/film_series/films/delivery/http"
 	films_postgres "2023_2_Holi/film_series/films/repository/postgresql"
+	films_redis "2023_2_Holi/film_series/films/repository/redis"
 	films_usecase "2023_2_Holi/film_series/films/usecase"
 	series_http "2023_2_Holi/film_series/series/delivery/http"
 	series_postgres "2023_2_Holi/film_series/series/repository/postgresql"
@@ -40,13 +41,12 @@ func StartService() {
 	authMiddlewareRouter := mainRouter.PathPrefix("/api").Subrouter()
 
 	fr := films_postgres.NewFilmsPostgresqlRepository(pc, ctx)
-	//fc := films_redis.NewRecomRedisRepository(rc)
-	fu := films_usecase.NewFilmsUsecase(fr)
+	fc := films_redis.NewRecomRedisRepository(rc)
+	fu := films_usecase.NewFilmsUsecase(fr, fc)
 	subCli := grpc_connector.Connect(os.Getenv("SUBMS_GRPC_SERVER_HOST") + ":" + os.Getenv("SUBMS_GRPC_SERVER_PORT"))
 	films_http.NewFilmsHandler(authMiddlewareRouter, fu, g_sub.NewSubCheckerClient(subCli))
 
 	serr := series_postgres.NewSeriesPostgresqlRepository(pc, ctx)
-	//serrc := series_redis.NewRecomRedisRepository(rc)
 	seru := series_usecase.NewSeriesUsecase(serr)
 	series_http.NewSeriesHandler(authMiddlewareRouter, seru, g_sub.NewSubCheckerClient(subCli))
 

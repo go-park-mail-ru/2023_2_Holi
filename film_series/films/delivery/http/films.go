@@ -28,6 +28,7 @@ func NewFilmsHandler(router *mux.Router, fu domain.FilmsUsecase, subClient subsc
 	router.HandleFunc("/v1/films/{id}", handler.GetFilmData).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/cast/{id}", handler.GetCastPage).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/v1/films/top/rate", handler.GetTopRate).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/v1/films/recommendations/{id}", handler.GetRecommendations).Methods(http.MethodGet)
 }
 
 // GetFilmsByGenre godoc
@@ -203,6 +204,31 @@ func (h *FilmsHandler) GetTopRate(w http.ResponseWriter, r *http.Request) {
 		w,
 		map[string]interface{}{
 			"film": film,
+		},
+		http.StatusOK,
+	)
+}
+
+func (h *FilmsHandler) GetRecommendations(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	userID, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		domain.WriteError(w, err.Error(), http.StatusBadRequest)
+		logs.LogError(logs.Logger, "films_http", "GetRecommendations", err, err.Error())
+		return
+	}
+
+	rec, err := h.FilmsUsecase.GetRecommendations(userID)
+	if err != nil {
+		domain.WriteError(w, err.Error(), domain.GetHttpStatusCode(err))
+		logs.LogError(logs.Logger, "films_http", "GetRecommendations", err, "Failed to get recommendations")
+		return
+	}
+
+	domain.WriteResponse(
+		w,
+		map[string]interface{}{
+			"recommendations": rec,
 		},
 		http.StatusOK,
 	)
