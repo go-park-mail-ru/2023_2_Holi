@@ -16,10 +16,10 @@ import (
 	_ "github.com/lib/pq"
 )
 
-const pathPreview = "https://static_holi.hb.ru-msk.vkcs.cloud/Preview_Film/"
+const pathPreview = "https://eyescreen.hb.ru-msk.vkcs.cloud/Preview_Film/"
 const pathMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Files/"
 const pathPreviewMedia = "https://static_holi.hb.ru-msk.vkcs.cloud/Media_Preview/"
-const actorsImg = "https://static_holi.hb.ru-msk.vkcs.cloud/Actors_Image/"
+const actorsImg = "https://eyescreen.hb.ru-msk.vkcs.cloud/Actors_Image/"
 const episodeIMG = "https://static_holi.hb.ru-msk.vkcs.cloud/Episode_IMG/"
 
 func ageRes(age string) int {
@@ -111,7 +111,7 @@ func main() {
 		birthday := row[1]
 		place := row[2]
 		career := row[3]
-		img := actorsImg + strconv.Itoa(actorID) + ".jpg"
+		img := actorsImg + strconv.Itoa(actorID) + ".jpeg"
 
 		_, err = db.Exec(`INSERT INTO "cast" (id, name, birthday, place, carier, imgPath) VALUES ($1, $2, $3, $4, $5, $6)`,
 			actorID, name, birthday, place, career, img)
@@ -201,7 +201,7 @@ func main() {
 
 		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 		name := strings.Replace(row[5], " ", "_", -1)
-		pr_Path := pathPreview + name + ".jpg"
+		pr_Path := pathPreview + name + ".jpeg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
 		release := row[19][:4]
 		releaseInt, err := strconv.Atoi(release)
@@ -260,7 +260,7 @@ func main() {
 
 	i := 0
 	count--
-	countEpisode := 40
+	countEpisode := 39
 	records, err := reader.ReadAll()
 	if err != nil {
 		fmt.Println("Error reading CSV:", err)
@@ -276,7 +276,7 @@ func main() {
 
 		sqlVideo := "INSERT INTO video (id, name, description, preview_path ,preview_video_path, release_year, rating, age_restriction, seasons_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 		name := strings.Replace(records[i][5], " ", "_", -1)
-		pr_Path := pathPreview + name + ".jpg"
+		pr_Path := pathPreview + name + ".jpeg"
 		pr_pathMedia := pathPreviewMedia + name + ".mp4"
 		fmt.Println(count)
 		release := records[i][19][:4]
@@ -298,6 +298,7 @@ func main() {
 			if records[i][4] != "Episode" {
 				break
 			}
+			fmt.Println(records[i][3])
 			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 			pr_Path := episodeIMG + name + "_S" + records[i][2] + "_E" + records[i][3] + ".jpg"
 			pr_Media := pathMedia + name + "_S" + records[i][2] + "_E" + records[i][3] + ".mp4"
@@ -376,7 +377,7 @@ func main() {
 			continue
 		}
 
-		for videoID := 1; videoID <= 40; videoID++ {
+		for videoID := 1; videoID <= 38; videoID++ {
 			rating := generateRandomRating()
 			_, err := db.Exec(`INSERT INTO video_estimation (rate, video_id, user_id) VALUES ($1, $2, $3)`, rating, videoID, userID)
 			if err != nil {
