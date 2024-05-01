@@ -260,7 +260,7 @@ func main() {
 
 	i := 0
 	count--
-	countEpisode := 40
+	countEpisode := 39
 	records, err := reader.ReadAll()
 	if err != nil {
 		fmt.Println("Error reading CSV:", err)
@@ -298,6 +298,7 @@ func main() {
 			if records[i][4] != "Episode" {
 				break
 			}
+			fmt.Println(records[i][3])
 			sqlEpisode := "INSERT INTO episode (id, name, description, duration ,preview_path, media_path, number, season_number, video_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)"
 			pr_Path := episodeIMG + name + "_S" + records[i][2] + "_E" + records[i][3] + ".jpg"
 			pr_Media := pathMedia + name + "_S" + records[i][2] + "_E" + records[i][3] + ".mp4"
@@ -376,7 +377,7 @@ func main() {
 			continue
 		}
 
-		for videoID := 1; videoID <= 40; videoID++ {
+		for videoID := 1; videoID <= 38; videoID++ {
 			rating := generateRandomRating()
 			_, err := db.Exec(`INSERT INTO video_estimation (rate, video_id, user_id) VALUES ($1, $2, $3)`, rating, videoID, userID)
 			if err != nil {
