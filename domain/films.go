@@ -24,3 +24,7 @@ type FilmsUsecase interface {
 	GetCastPage(id int) ([]Video, Cast, error)
 	GetTopRate() (Video, error)
 }
+
+type RecomRepository interface {
+	GetRecommendations(userId int) ([]Video, error)
+}
