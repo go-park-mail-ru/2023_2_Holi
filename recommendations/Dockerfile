@@ -11,7 +11,7 @@ COPY recommendations/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Копирование остальных файлов проекта в контейнер
-COPY . .
+COPY /recommendations .
 
 # Команда для запуска приложения
 CMD ["python", "./item_based.py"]
