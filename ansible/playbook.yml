@@ -40,6 +40,10 @@
       copy:
         src: files/init_usr.sql
         dest: /home/ubuntu
+    - name: "Copy postgres rec init"
+      copy:
+        src: files/init_recom.sql
+        dest: /home/ubuntu/init_recom.sql
     - name: "Copy redis conf"
       copy:
         src: files/redis.conf
