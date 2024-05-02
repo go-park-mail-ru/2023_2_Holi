@@ -56,6 +56,11 @@ jobs:
         run: |
             echo "${{ secrets.ENV_FILE }}" > .env
 
+      - name: Build Recoomendations Docker images
+        run:
+          sudo docker build -t holi2023/recommendations:${GITHUB_SHA::8} -f ./recommendations/Dockerfile . &&
+          sudo docker tag holi2023/recommendations:${GITHUB_SHA::8} holi2023/recommendations:latest
+
       - name: Build Auth Docker images
         run:
           sudo docker build -t holi2023/auth:${GITHUB_SHA::8} -f ./cmd/auth_service/Dockerfile . &&
@@ -86,6 +91,11 @@ jobs:
           sudo docker build -t holi2023/fill:${GITHUB_SHA::8} -f ./cmd/fill_db/Dockerfile . &&
           sudo docker tag holi2023/fill:${GITHUB_SHA::8} holi2023/fill:latest
 
+
+      - name: Push Recommendations Docker images
+        run:
+          docker push holi2023/recommendations:latest &&
+          docker push holi2023/recommendations:${GITHUB_SHA::8}
 
       - name: Push Auth Docker images
         run:
@@ -129,6 +139,7 @@ jobs:
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
+            sudo docker pull holi2023/recommendations:latest
             sudo docker pull holi2023/auth:latest
             sudo docker pull holi2023/profile:latest
             sudo docker pull holi2023/films_series:latest

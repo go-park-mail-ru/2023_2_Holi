@@ -5,6 +5,7 @@ volumes:
   redis_data:
   front_bundle:
   postgres_usr_data:
+  postgres_recom_data:
 
 networks:
   local_area:
