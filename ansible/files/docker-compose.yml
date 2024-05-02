@@ -140,26 +140,14 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
-
     depends_on:
       postgres:
         condition: service_started
 
-  redis:
-    image: redis:6.2-alpine
-    container_name: redis
-    networks:
-      local_area:
-    restart: always
-    volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-      - redis_data:/var/lib/redis/data
-
 
   recommendations:
+    image: holi2023/recommendations:latest
     container_name: recommendations
-    build:
-      context: ../backend/recommendations
     networks:
       local_area:
     depends_on:
@@ -179,6 +167,16 @@ services:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
+
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis
+    networks:
+      local_area:
+    restart: always
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+      - redis_data:/var/lib/redis/data
 
 
 #  grafana:
