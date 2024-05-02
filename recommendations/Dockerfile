@@ -5,7 +5,7 @@ FROM python:3.9
 WORKDIR /app
 
 # Копирование файла зависимостей в рабочую директорию
-COPY requirements.txt .
+COPY recommendations/requirements.txt .
 
 # Установка зависимостей
 RUN pip install --no-cache-dir -r requirements.txt
