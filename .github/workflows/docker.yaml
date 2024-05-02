@@ -44,6 +44,7 @@ jobs:
 #          go test -coverpkg=./... -coverprofile=cover ./... && cat cover | grep -v "mock" | grep -v "easyjson" | grep -v "proto" > cover.out &&
 #          go tool cover -func=cover.out
 
+
   build:
     runs-on: ubuntu-latest
     steps:
