@@ -124,7 +124,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           envs: GITHUB_SHA
-          host: 212.233.73.20
+          host: 83.166.235.244
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |
@@ -138,7 +138,7 @@ jobs:
       - name: Run backend
         uses: appleboy/ssh-action@master
         with:
-          host: 212.233.73.20
+          host: 83.166.235.244
           username: ubuntu
           key: ${{ secrets.PRIVATE_KEY }}
           script: |

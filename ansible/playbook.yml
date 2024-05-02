@@ -45,7 +45,6 @@
         src: files/redis.conf
         dest: /home/ubuntu
 
-
 - name: "Provide docker-compose"
   hosts: web
   become: yes
